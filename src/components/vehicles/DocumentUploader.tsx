@@ -97,7 +97,7 @@ const DocumentUploader = ({
                         {expirationDate ? (
                           format(expirationDate, "dd/MM/yyyy")
                         ) : (
-                          <span>Seleccionar fecha</span>
+                          <span>Seleccionar fecha de Vencimiento</span>
                         )}
                         <Calendar className="h-4 w-4" />
                       </Button>
@@ -179,7 +179,7 @@ const DocumentUploader = ({
                       {expirationDate ? (
                         format(expirationDate, "dd/MM/yyyy")
                       ) : (
-                        <span>Seleccionar fecha</span>
+                        <span>Seleccionar fecha de Vencimiento</span>
                       )}
                       <Calendar className="h-3 w-3" />
                     </Button>
