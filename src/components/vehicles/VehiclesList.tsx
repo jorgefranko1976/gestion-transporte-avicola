@@ -1,10 +1,11 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Eye, FileText, Trash2 } from "lucide-react";
+import { Edit, Eye, FileText, Trash2, Search } from "lucide-react";
 import { Vehicle } from "@/lib/types";
-import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
 import VehicleDocumentSummary from "./VehicleDocumentSummary";
 
 // Mock data for the vehicles list
@@ -260,6 +261,7 @@ const mockVehicles: Vehicle[] = [
 
 const VehiclesList = ({ onRegisterClick }: { onRegisterClick?: () => void }) => {
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>(mockVehicles);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [documentsDialogOpen, setDocumentsDialogOpen] = useState(false);
 
@@ -268,6 +270,24 @@ const VehiclesList = ({ onRegisterClick }: { onRegisterClick?: () => void }) => 
     setDocumentsDialogOpen(true);
   };
 
+  // Función para filtrar vehículos según la búsqueda
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredVehicles(mockVehicles);
+    } else {
+      const query = searchQuery.toLowerCase().trim();
+      const filtered = mockVehicles.filter((vehicle) => 
+        vehicle.plate.toLowerCase().includes(query) ||
+        vehicle.brand.toLowerCase().includes(query) ||
+        vehicle.model.toLowerCase().includes(query) ||
+        vehicle.owner.firstName.toLowerCase().includes(query) ||
+        vehicle.owner.lastName.toLowerCase().includes(query) ||
+        `${vehicle.owner.firstName.toLowerCase()} ${vehicle.owner.lastName.toLowerCase()}`.includes(query)
+      );
+      setFilteredVehicles(filtered);
+    }
+  }, [searchQuery]);
+
   return (
     <div className="space-y-4">
       <div className="bg-white p-4 rounded-lg border">
@@ -275,6 +295,20 @@ const VehiclesList = ({ onRegisterClick }: { onRegisterClick?: () => void }) => 
           <h3 className="text-lg font-medium">Vehículos registrados</h3>
           <Button onClick={onRegisterClick}>Registrar Nuevo Vehículo</Button>
         </div>
+      </div>
+
+      {/* Campo de búsqueda */}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <Search className="h-4 w-4 text-gray-400" />
+        </div>
+        <Input
+          type="text"
+          placeholder="Buscar por placa, marca, modelo o propietario..."
+          className="pl-10"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
       <div className="bg-white rounded-lg border overflow-hidden">
@@ -292,72 +326,80 @@ const VehiclesList = ({ onRegisterClick }: { onRegisterClick?: () => void }) => 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredVehicles.map((vehicle) => (
-                <TableRow key={vehicle.id}>
-                  <TableCell className="font-medium">{vehicle.plate}</TableCell>
-                  <TableCell>
-                    {(() => {
-                      switch (vehicle.vehicleType) {
-                        case "camion":
-                          return "Camión";
-                        case "camion liviano":
-                          return "Camión liviano";
-                        case "dobletroque":
-                          return "Dobletroque";
-                        case "camioneta":
-                          return "Camioneta";
-                        case "tracto camion":
-                          return "Tracto camión";
-                        default:
-                          return vehicle.vehicleType;
-                      }
-                    })()}
-                  </TableCell>
-                  <TableCell>{`${vehicle.brand} / ${vehicle.model}`}</TableCell>
-                  <TableCell>{`${vehicle.owner.firstName} ${vehicle.owner.lastName}`}</TableCell>
-                  <TableCell>
-                    <Badge variant={vehicle.active ? "default" : "destructive"}>
-                      {vehicle.active ? "Activo" : "Inactivo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-1"
-                      onClick={() => handleViewDocuments(vehicle)}
-                    >
-                      <FileText className="h-4 w-4" />
-                      <span>Ver</span>
-                    </Button>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+              {filteredVehicles.length > 0 ? (
+                filteredVehicles.map((vehicle) => (
+                  <TableRow key={vehicle.id}>
+                    <TableCell className="font-medium">{vehicle.plate}</TableCell>
+                    <TableCell>
+                      {(() => {
+                        switch (vehicle.vehicleType) {
+                          case "camion":
+                            return "Camión";
+                          case "camion liviano":
+                            return "Camión liviano";
+                          case "dobletroque":
+                            return "Dobletroque";
+                          case "camioneta":
+                            return "Camioneta";
+                          case "tracto camion":
+                            return "Tracto camión";
+                          default:
+                            return vehicle.vehicleType;
+                        }
+                      })()}
+                    </TableCell>
+                    <TableCell>{`${vehicle.brand} / ${vehicle.model}`}</TableCell>
+                    <TableCell>{`${vehicle.owner.firstName} ${vehicle.owner.lastName}`}</TableCell>
+                    <TableCell>
+                      <Badge variant={vehicle.active ? "default" : "destructive"}>
+                        {vehicle.active ? "Activo" : "Inactivo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
                       <Button
                         variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={() => handleViewDocuments(vehicle)}
                       >
-                        <Eye className="h-4 w-4" />
+                        <FileText className="h-4 w-4" />
+                        <span>Ver</span>
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="h-8 w-8"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="h-8 w-8"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                    No se encontraron vehículos que coincidan con la búsqueda
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </div>
