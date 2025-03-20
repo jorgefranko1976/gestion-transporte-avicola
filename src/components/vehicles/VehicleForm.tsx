@@ -72,8 +72,11 @@ const VehicleForm = () => {
   // Documentos del vehículo
   const [documents, setDocuments] = useState({
     soat: null as File | null,
+    soatExpiration: null as Date | null,
     technicalInspection: null as File | null,
+    technicalInspectionExpiration: null as Date | null,
     rcPolicy: null as File | null,
+    rcPolicyExpiration: null as Date | null,
     companyContract: null as File | null,
     propertyCard: null as File | null,
     photos: [] as File[],
@@ -157,6 +160,17 @@ const VehicleForm = () => {
     });
   };
 
+  // Función para manejar cambios en las fechas de vencimiento
+  const handleExpirationDateChange = (
+    type: 'soatExpiration' | 'technicalInspectionExpiration' | 'rcPolicyExpiration',
+    date: Date | null
+  ) => {
+    setDocuments(prev => ({
+      ...prev,
+      [type]: date
+    }));
+  };
+
   // Función para manejar la subida de documentos del propietario
   const handleOwnerDocumentUpload = (
     type: keyof typeof ownerDocuments,
@@ -184,10 +198,31 @@ const VehicleForm = () => {
         photos: prev.photos.filter((_, i) => i !== index)
       }));
     } else {
-      setDocuments(prev => ({
-        ...prev,
-        [type]: null
-      }));
+      // Si se elimina un documento con fecha de vencimiento, también eliminar la fecha
+      if (type === 'soat') {
+        setDocuments(prev => ({
+          ...prev,
+          soat: null,
+          soatExpiration: null
+        }));
+      } else if (type === 'technicalInspection') {
+        setDocuments(prev => ({
+          ...prev,
+          technicalInspection: null,
+          technicalInspectionExpiration: null
+        }));
+      } else if (type === 'rcPolicy') {
+        setDocuments(prev => ({
+          ...prev,
+          rcPolicy: null,
+          rcPolicyExpiration: null
+        }));
+      } else {
+        setDocuments(prev => ({
+          ...prev,
+          [type]: null
+        }));
+      }
     }
 
     toast({
@@ -445,6 +480,9 @@ const VehicleForm = () => {
                     file={documents.soat}
                     onUpload={(file) => handleDocumentUpload('soat', file)}
                     onRemove={() => handleRemoveDocument('soat')}
+                    hasExpiration={true}
+                    expirationDate={documents.soatExpiration}
+                    onExpirationChange={(date) => handleExpirationDateChange('soatExpiration', date)}
                   />
                   
                   <DocumentUploader
@@ -453,6 +491,9 @@ const VehicleForm = () => {
                     file={documents.technicalInspection}
                     onUpload={(file) => handleDocumentUpload('technicalInspection', file)}
                     onRemove={() => handleRemoveDocument('technicalInspection')}
+                    hasExpiration={true}
+                    expirationDate={documents.technicalInspectionExpiration}
+                    onExpirationChange={(date) => handleExpirationDateChange('technicalInspectionExpiration', date)}
                   />
                   
                   <DocumentUploader
@@ -461,6 +502,9 @@ const VehicleForm = () => {
                     file={documents.rcPolicy}
                     onUpload={(file) => handleDocumentUpload('rcPolicy', file)}
                     onRemove={() => handleRemoveDocument('rcPolicy')}
+                    hasExpiration={true}
+                    expirationDate={documents.rcPolicyExpiration}
+                    onExpirationChange={(date) => handleExpirationDateChange('rcPolicyExpiration', date)}
                   />
                   
                   <DocumentUploader
@@ -809,8 +853,11 @@ const VehicleForm = () => {
                   form.reset();
                   setDocuments({
                     soat: null,
+                    soatExpiration: null,
                     technicalInspection: null,
+                    technicalInspectionExpiration: null,
                     rcPolicy: null,
+                    rcPolicyExpiration: null,
                     companyContract: null,
                     propertyCard: null,
                     photos: [],

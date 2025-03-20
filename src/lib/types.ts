@@ -18,8 +18,11 @@ export interface Vehicle {
   chassisNumber: string;
   documents: {
     soat: string | null;
+    soatExpiration: Date | null;
     technicalInspection: string | null;
+    technicalInspectionExpiration: Date | null;
     rcPolicy: string | null;
+    rcPolicyExpiration: Date | null;
     companyContract: string | null;
     propertyCard: string | null;
     photos: string[];

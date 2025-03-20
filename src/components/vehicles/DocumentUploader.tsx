@@ -3,7 +3,12 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FileX, Upload, X } from "lucide-react";
+import { FileX, Upload, X, Calendar } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface DocumentUploaderProps {
   title: string;
@@ -12,6 +17,9 @@ interface DocumentUploaderProps {
   onUpload: (file: File) => void;
   onRemove: () => void;
   isPhoto?: boolean;
+  hasExpiration?: boolean;
+  expirationDate?: Date | null;
+  onExpirationChange?: (date: Date | null) => void;
 }
 
 const DocumentUploader = ({
@@ -21,6 +29,9 @@ const DocumentUploader = ({
   onUpload,
   onRemove,
   isPhoto = false,
+  hasExpiration = false,
+  expirationDate = null,
+  onExpirationChange,
 }: DocumentUploaderProps) => {
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -67,6 +78,44 @@ const DocumentUploader = ({
                   Seleccionar archivo
                 </Button>
               </label>
+              
+              {hasExpiration && onExpirationChange && (
+                <div className="mt-3 w-full">
+                  <div className="text-xs text-muted-foreground mb-1 text-center">
+                    Fecha de vencimiento:
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn(
+                          "w-full flex items-center justify-center gap-2",
+                          !expirationDate && "text-muted-foreground"
+                        )}
+                      >
+                        {expirationDate ? (
+                          format(expirationDate, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="center">
+                      <CalendarComponent
+                        mode="single"
+                        selected={expirationDate || undefined}
+                        onSelect={onExpirationChange}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                        locale={es}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -107,7 +156,48 @@ const DocumentUploader = ({
             
             <div className="bg-muted/50 p-2 border-t">
               <p className="text-xs font-medium truncate">{file.name}</p>
+              
+              {hasExpiration && expirationDate && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Vence: {format(expirationDate, "dd/MM/yyyy")}
+                </p>
+              )}
             </div>
+            
+            {hasExpiration && onExpirationChange && (
+              <div className="p-2 border-t">
+                <div className="text-xs text-muted-foreground mb-1">
+                  Fecha de vencimiento:
+                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full flex items-center justify-center gap-2 h-8"
+                    >
+                      {expirationDate ? (
+                        format(expirationDate, "dd/MM/yyyy")
+                      ) : (
+                        <span>Seleccionar fecha</span>
+                      )}
+                      <Calendar className="h-3 w-3" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="center">
+                    <CalendarComponent
+                      mode="single"
+                      selected={expirationDate || undefined}
+                      onSelect={onExpirationChange}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
