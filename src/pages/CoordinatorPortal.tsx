@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import PageTransition from '@/components/transitions/PageTransition';
@@ -40,6 +41,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 const recentVehicles = [
   { id: '1', plate: 'WHK 426', type: 'camion', brand: 'Chevrolet', model: '2020' },
@@ -80,6 +87,7 @@ const sampleExcelDataType2 = [
     orden: '224230',
     conductor: 'ANDRES SABOGAL',
     placa: 'WHK 426',
+    tipo: 'reproductora'
   },
   {
     id: '2',
@@ -95,6 +103,7 @@ const sampleExcelDataType2 = [
     orden: '224231',
     conductor: 'FERNANDO VANEGAS',
     placa: 'SRD 194',
+    tipo: 'reproductora'
   },
   {
     id: '3',
@@ -110,6 +119,7 @@ const sampleExcelDataType2 = [
     orden: '224234',
     conductor: 'MARTIN CHAVEZ',
     placa: 'WPK 570',
+    tipo: 'engorde'
   },
   {
     id: '4',
@@ -125,6 +135,7 @@ const sampleExcelDataType2 = [
     orden: '1114222',
     conductor: 'HENRY ESGUERRA',
     placa: 'XXB191',
+    tipo: 'engorde'
   },
   {
     id: '5',
@@ -140,6 +151,7 @@ const sampleExcelDataType2 = [
     orden: '1114222',
     conductor: 'HENRY ESGUERRA',
     placa: 'XXB191',
+    tipo: 'engorde'
   },
 ];
 
@@ -152,6 +164,7 @@ const CoordinatorPortal = () => {
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [excelData, setExcelData] = useState<any[]>(sampleExcelDataType2);
   const [activeTab, setActiveTab] = useState<'despachos' | 'excel'>('excel');
+  const [activeDataType, setActiveDataType] = useState<'reproductora' | 'engorde'>('reproductora');
   const [searchTerm, setSearchTerm] = useState('');
   const [lastUpdateDate, setLastUpdateDate] = useState('11/03/2025, 09:40 p. m.');
 
@@ -185,16 +198,23 @@ const CoordinatorPortal = () => {
     }, 2000);
   };
 
+  // Filtrar datos según la búsqueda y el tipo activo (reproductora o engorde)
   const filteredData = excelData.filter(item => {
-    return (
+    const matchesSearchTerm =
       item.ubicacion.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.granja.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.alimento.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.conductor.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.placa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.orden.includes(searchTerm)
-    );
+      item.orden.includes(searchTerm);
+
+    const matchesType = item.tipo === activeDataType;
+
+    return matchesSearchTerm && matchesType;
   });
+
+  const reproductoraCounts = excelData.filter(item => item.tipo === 'reproductora').length;
+  const engordeCounts = excelData.filter(item => item.tipo === 'engorde').length;
 
   const filteredVehicles = recentVehicles.filter(vehicle => 
     vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -393,93 +413,159 @@ const CoordinatorPortal = () => {
                   </div>
                 </div>
                 
-                <div className="flex gap-3 mb-4">
-                  <div className="flex items-center gap-1.5 text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full">
-                    <FileSpreadsheet className="w-3.5 h-3.5" />
-                    <span>Reproductoras (27)</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-sm bg-green-50 text-green-600 px-3 py-1.5 rounded-full">
-                    <FileSpreadsheet className="w-3.5 h-3.5" />
-                    <span>Engorde (38)</span>
-                  </div>
-                </div>
-              
-                <div className="border rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto max-h-[600px]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            UBICACIÓN/GRANJA
-                          </TableHead>
-                          <TableHead>LOTE/PLANTA</TableHead>
-                          <TableHead>ALIMENTO/MEDICACIÓN</TableHead>
-                          <TableHead>DÍA</TableHead>
-                          <TableHead>CANTIDAD/TON</TableHead>
-                          <TableHead>CONDUCTOR</TableHead>
-                          <TableHead>PLACA</TableHead>
-                          <TableHead>ORDEN</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredData.length > 0 ? (
-                          filteredData.map((item) => (
-                            <TableRow key={item.id} className="hover:bg-muted/20">
-                              <TableCell className="font-medium">
-                                <div>{item.ubicacion}</div>
-                                <div className="text-xs text-muted-foreground">{item.granja}</div>
-                              </TableCell>
-                              <TableCell>
-                                <div>{item.lote}</div>
-                                <div className="text-xs text-muted-foreground">{item.planta}</div>
-                              </TableCell>
-                              <TableCell>
-                                <div>{item.alimento}</div>
-                                <div className="text-xs text-muted-foreground">{item.medicacion}</div>
-                              </TableCell>
-                              <TableCell>{item.dia}</TableCell>
-                              <TableCell>
-                                <div>{item.cantidad}</div>
-                                <div className="text-xs text-muted-foreground">{item.ton} ton</div>
-                              </TableCell>
-                              <TableCell className="font-medium">{item.conductor}</TableCell>
-                              <TableCell>{item.placa}</TableCell>
-                              <TableCell>{item.orden}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
-                              No se encontraron resultados
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
+                <Tabs 
+                  value={activeDataType} 
+                  onValueChange={(value) => setActiveDataType(value as 'reproductora' | 'engorde')}
+                  className="mb-4"
+                >
+                  <TabsList>
+                    <TabsTrigger value="reproductora" className="flex items-center gap-1.5">
+                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      <span>Reproductoras ({reproductoraCounts})</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="engorde" className="flex items-center gap-1.5">
+                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      <span>Engorde ({engordeCounts})</span>
+                    </TabsTrigger>
+                  </TabsList>
                   
-                  <div className="p-2 border-t">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious href="#" />
-                        </PaginationItem>
-                        <PaginationItem>
-                          <PaginationLink href="#" isActive>1</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                          <PaginationLink href="#">2</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                          <PaginationLink href="#">3</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                          <PaginationNext href="#" />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
+                  <TabsContent value="reproductora">
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="overflow-x-auto max-h-[600px]">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                UBICACIÓN/GRANJA
+                              </TableHead>
+                              <TableHead>LOTE/PLANTA</TableHead>
+                              <TableHead>ALIMENTO/MEDICACIÓN</TableHead>
+                              <TableHead>DÍA</TableHead>
+                              <TableHead>CANTIDAD/TON</TableHead>
+                              <TableHead>CONDUCTOR</TableHead>
+                              <TableHead>PLACA</TableHead>
+                              <TableHead>ORDEN</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredData.length > 0 ? (
+                              filteredData.map((item) => (
+                                <TableRow key={item.id} className="hover:bg-muted/20">
+                                  <TableCell className="font-medium">
+                                    <div>{item.ubicacion}</div>
+                                    <div className="text-xs text-muted-foreground">{item.granja}</div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div>{item.lote}</div>
+                                    <div className="text-xs text-muted-foreground">{item.planta}</div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div>{item.alimento}</div>
+                                    <div className="text-xs text-muted-foreground">{item.medicacion}</div>
+                                  </TableCell>
+                                  <TableCell>{item.dia}</TableCell>
+                                  <TableCell>
+                                    <div>{item.cantidad}</div>
+                                    <div className="text-xs text-muted-foreground">{item.ton} ton</div>
+                                  </TableCell>
+                                  <TableCell className="font-medium">{item.conductor}</TableCell>
+                                  <TableCell>{item.placa}</TableCell>
+                                  <TableCell>{item.orden}</TableCell>
+                                </TableRow>
+                              ))
+                            ) : (
+                              <TableRow>
+                                <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                                  No se encontraron resultados para Reproductoras
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="engorde">
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="overflow-x-auto max-h-[600px]">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                UBICACIÓN/GRANJA
+                              </TableHead>
+                              <TableHead>LOTE/PLANTA</TableHead>
+                              <TableHead>ALIMENTO/MEDICACIÓN</TableHead>
+                              <TableHead>DÍA</TableHead>
+                              <TableHead>CANTIDAD/TON</TableHead>
+                              <TableHead>CONDUCTOR</TableHead>
+                              <TableHead>PLACA</TableHead>
+                              <TableHead>ORDEN</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredData.length > 0 ? (
+                              filteredData.map((item) => (
+                                <TableRow key={item.id} className="hover:bg-muted/20">
+                                  <TableCell className="font-medium">
+                                    <div>{item.ubicacion}</div>
+                                    <div className="text-xs text-muted-foreground">{item.granja}</div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div>{item.lote}</div>
+                                    <div className="text-xs text-muted-foreground">{item.planta}</div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div>{item.alimento}</div>
+                                    <div className="text-xs text-muted-foreground">{item.medicacion}</div>
+                                  </TableCell>
+                                  <TableCell>{item.dia}</TableCell>
+                                  <TableCell>
+                                    <div>{item.cantidad}</div>
+                                    <div className="text-xs text-muted-foreground">{item.ton} ton</div>
+                                  </TableCell>
+                                  <TableCell className="font-medium">{item.conductor}</TableCell>
+                                  <TableCell>{item.placa}</TableCell>
+                                  <TableCell>{item.orden}</TableCell>
+                                </TableRow>
+                              ))
+                            ) : (
+                              <TableRow>
+                                <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                                  No se encontraron resultados para Engorde
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+                
+                <div className="p-2 border-t border rounded-b-lg">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious href="#" />
+                      </PaginationItem>
+                      <PaginationItem>
+                        <PaginationLink href="#" isActive>1</PaginationLink>
+                      </PaginationItem>
+                      <PaginationItem>
+                        <PaginationLink href="#">2</PaginationLink>
+                      </PaginationItem>
+                      <PaginationItem>
+                        <PaginationLink href="#">3</PaginationLink>
+                      </PaginationItem>
+                      <PaginationItem>
+                        <PaginationNext href="#" />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 </div>
               </div>
             </div>
