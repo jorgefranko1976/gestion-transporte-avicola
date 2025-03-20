@@ -15,23 +15,35 @@ import {
   Clock,
   CheckCircle,
   Calendar,
-  ShieldAlert
+  ShieldAlert,
+  Eye,
+  Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 
 // Mock data for demonstration
 const recentVehicles = [
-  { id: '1', plate: 'ABC123', type: 'camion', brand: 'Chevrolet', model: '2020' },
-  { id: '2', plate: 'XYZ789', type: 'dobletroque', brand: 'Ford', model: '2019' },
-  { id: '3', plate: 'DEF456', type: 'camioneta', brand: 'Toyota', model: '2021' },
-  { id: '4', plate: 'GHI789', type: 'camion liviano', brand: 'Mitsubishi', model: '2018' },
-  { id: '5', plate: 'JKL012', type: 'tracto camion', brand: 'Kenworth', model: '2017' },
+  { id: '1', plate: 'WFP 526', type: 'camion', brand: 'Chevrolet', model: '2020' },
+  { id: '2', plate: 'USB 969', type: 'dobletroque', brand: 'Ford', model: '2019' },
+  { id: '3', plate: 'SRD 193', type: 'camioneta', brand: 'Toyota', model: '2021' },
+  { id: '4', plate: 'XIK 443', type: 'camion liviano', brand: 'Mitsubishi', model: '2018' },
+  { id: '5', plate: 'XXR 556', type: 'tracto camion', brand: 'Kenworth', model: '2017' },
 ];
 
 const recentDrivers = [
-  { id: '1', name: 'Carlos Rodríguez', identification: 'CC 12345678', plate: 'ABC123', phone: '300-123-4567' },
-  { id: '2', name: 'Luis Martínez', identification: 'CC 87654321', plate: 'XYZ789', phone: '315-765-4321' },
-  { id: '3', name: 'Juan Pérez', identification: 'CC 98765432', plate: 'DEF456', phone: '310-987-6543' },
+  { id: '1', name: 'Hugo Vega', identification: 'CC 80311610', plate: 'WFP 526', phone: '300-123-4567' },
+  { id: '2', name: 'Nelson Garavito', identification: 'CC 1003558901', plate: 'USB 969', phone: '315-765-4321' },
+  { id: '3', name: 'Alejandro Martínez', identification: 'CC 19.223.941', plate: 'SRD 193', phone: '310-987-6543' },
 ];
 
 const dispatchStats = {
@@ -43,12 +55,34 @@ const dispatchStats = {
   total: 47,
 };
 
+// Sample Excel data structures based on provided examples
+const sampleExcelDataType1 = [
+  ['GRANJA', 'DÍA', 'PLANTA', 'NOM ALIMENTO', 'CANTIDAD', 'TONELADAS', 'CONFIRMAR', 'UBICACIÓN', 'TÉCNICO', 'ORDEN', 'CONDUCTOR', 'PLACA', 'CÉDULA', 'REMISIÓN'],
+  ['NARANJAL (NARANJAL)', 'MARTES 25', 'ALBATEC-ALBATEC', 'ENGORDE CORRIENTE', '200', '8', '', 'SAN FRANCISCO', 'HILOS CASTIBLANC', '224248', 'OSWALDO RODRIGUEZ', 'WYW 547', '79172559', 'MIÉRCOLES 26'],
+  ['MIREYAS', 'MARTES 25', 'ALBATEC-ALBATEC', 'ENGORDE CORRIENTE', '125', '5', '', 'LA MESA', 'CARLOS CENEN', '224249', 'HUGO VEGA', 'WFP 526', '80311610', 'MIÉRCOLES 26'],
+  ['MIREYAS', 'MARTES 25', 'ALBATEC-ALBATEC', 'ENGORDE PIGMENTADO', '125', '5', '', 'LA MESA', 'CARLOS CENEN', '224249', 'HUGO VEGA', 'WFP 526', '80311610', 'MIÉRCOLES 26'],
+  ['EMANUEL', 'MIÉRCOLES 26', 'ALBATEC-ALBATEC', 'INICIACIÓN CORRIENTE', '250', '10', '', 'LA MESA', 'FELIPE MARTINEZ', '224251', 'SAÚL PATIRROJO', 'WPJ 522', '79064191', 'MIÉRCOLES 26'],
+  ['VILLA LORENA', 'MIÉRCOLES 26', 'ALBATEC-ALBATEC', 'ENGORDE CORRIENTE', '150', '6', '', 'FUSAGASUGA', 'SONIA', '224226', 'NELSON GARAVITO', 'USB 969', '1003558901', 'MIÉRCOLES 26'],
+];
+
+const sampleExcelDataType2 = [
+  ['UBICACIÓN', 'GRANJA', 'LOTE', 'PLANTA', 'TIPO ALIMENTO', 'MEDICACIÓN', 'DÍA', 'CANTIDAD', 'TON', 'ORDEN', 'CONDUCTOR', 'PLACA', 'CÉDULA', 'REMISIÓN PLANTA', 'OBSERVACIONES'],
+  ['GARAGOA', 'BARSAL 1', '630', 'ALBATEC-ALBATEC', 'FASE 2 COBB', 'HEPATOSTAR-OVYMICINA', 'MARTES 25', '275', '11', '224230', 'ANDRES SABOGAL', 'WHK 426', '1,056,688,224', 'MIÉRCOLES 25', ''],
+  ['GARAGOA', 'HERNANDO 2', '653', 'ALBATEC-ALBATEC', 'LEVANTE', 'SIN MEDICAR', 'MIÉRCOLES 26', '375', '15', '224231', 'FERNANDO VANEGAS', 'SRD 154', '1048847154', 'MIÉRCOLES 26', ''],
+  ['GARAGOA', 'SAN MIGUEL', '617', 'ALBATEC-ALBATEC', 'FASE 3 ROSS', 'HEPATOSTAR-OVYMICINA', 'MIÉRCOLES 26', '350', '14', '224234', 'MARTIN CHAVEZ', 'WPk 570', '74335175', 'MIÉRCOLES 26', ''],
+  ['GARAGOA', 'ZONA CENTRAL BAJA', '618', 'ITALCOL-FUNZA', 'FASE 2 COBB', 'FINBIOX-HEPATOSTAR', 'MIÉRCOLES 26', '350', '14', '1114222', 'HENRY ESGUERRA', 'XXB151', '74,335,546', 'MIÉRCOLES 26', '7:00 p.m.'],
+  ['GARAGOA', 'ZONA CENTRAL BAJA', '618', 'ITALCOL-FUNZA', 'MACHOS ROSS', 'SIN MEDICAR', 'MIÉRCOLES 26', '25', '1', '1114222', 'HENRY ESGUERRA', 'XXB151', '74,335,546', 'MIÉRCOLES 26', ''],
+];
+
 const CoordinatorPortal = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewData, setPreviewData] = useState<string[][]>([]);
+  const [fileType, setFileType] = useState<'type1' | 'type2'>('type1');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -56,13 +90,15 @@ const CoordinatorPortal = () => {
       setSelectedFile(file);
       
       // In a real app, this would be server-side parsing
-      // This is just a mock preview
-      setPreviewData([
-        ['Orden', 'Conductor', 'Placa', 'Empresa', 'Destino', 'Bultos'],
-        ['ORD-2023-0542', 'Carlos Rodríguez', 'ABC123', 'Distribuidora Avícola S.A.', 'Medellín', '250'],
-        ['ORD-2023-0543', 'Luis Martínez', 'XYZ789', 'Pollos del Valle S.A.S.', 'Cali', '180'],
-        ['ORD-2023-0544', 'Juan Pérez', 'DEF456', 'Avícola del Este', 'Bogotá', '320'],
-      ]);
+      // This is just a mock preview based on the examples
+      const randomType = Math.random() > 0.5 ? 'type1' : 'type2';
+      setFileType(randomType);
+      
+      if (randomType === 'type1') {
+        setPreviewData(sampleExcelDataType1);
+      } else {
+        setPreviewData(sampleExcelDataType2);
+      }
     }
   };
 
@@ -76,11 +112,28 @@ const CoordinatorPortal = () => {
       setIsUploading(false);
       setShowUploadModal(false);
       setSelectedFile(null);
-      setPreviewData([]);
       
-      // In a real app, this would show a success message via a toast
+      toast({
+        title: "Archivo subido con éxito",
+        description: `Se procesaron ${previewData.length - 1} registros de despacho.`,
+      });
+      
+      // In a real app, this would process the file and update the database
+      setPreviewData([]);
     }, 2000);
   };
+
+  const filteredVehicles = recentVehicles.filter(vehicle => 
+    vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vehicle.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vehicle.type.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredDrivers = recentDrivers.filter(driver => 
+    driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    driver.identification.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    driver.plate.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const QuickNavCard = ({ 
     icon, 
@@ -149,7 +202,7 @@ const CoordinatorPortal = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors btn-hover focus-ring"
               >
                 <Upload className="w-4 h-4" />
-                <span>Subir Excel</span>
+                <span>Subir Excel de Despachos</span>
               </button>
             </div>
             
@@ -212,6 +265,28 @@ const CoordinatorPortal = () => {
               />
             </div>
             
+            <div className="flex flex-col md:flex-row gap-4 mb-4">
+              <div className="flex-1">
+                <Input
+                  type="search"
+                  placeholder="Buscar por placa, conductor o vehículo..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted transition-colors flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  <span>Exportar</span>
+                </button>
+                <button className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted transition-colors flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  <span>Ver todo</span>
+                </button>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="glass-morphism rounded-xl overflow-hidden">
                 <div className="px-6 py-4 border-b border-border">
@@ -227,26 +302,34 @@ const CoordinatorPortal = () => {
                 </div>
                 
                 <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border/50">
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Placa</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Tipo</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Marca</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Modelo</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/50">
-                      {recentVehicles.map((vehicle) => (
-                        <tr key={vehicle.id} className="hover:bg-muted/30 transition-colors">
-                          <td className="px-6 py-4 text-sm font-medium">{vehicle.plate}</td>
-                          <td className="px-6 py-4 text-sm capitalize">{vehicle.type}</td>
-                          <td className="px-6 py-4 text-sm">{vehicle.brand}</td>
-                          <td className="px-6 py-4 text-sm">{vehicle.model}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Placa</TableHead>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead>Marca</TableHead>
+                        <TableHead>Modelo</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredVehicles.length > 0 ? (
+                        filteredVehicles.map((vehicle) => (
+                          <TableRow key={vehicle.id}>
+                            <TableCell className="font-medium">{vehicle.plate}</TableCell>
+                            <TableCell className="capitalize">{vehicle.type}</TableCell>
+                            <TableCell>{vehicle.brand}</TableCell>
+                            <TableCell>{vehicle.model}</TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                            No se encontraron resultados
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
               
@@ -264,26 +347,34 @@ const CoordinatorPortal = () => {
                 </div>
                 
                 <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border/50">
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Nombre</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Identificación</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Vehículo</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Teléfono</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/50">
-                      {recentDrivers.map((driver) => (
-                        <tr key={driver.id} className="hover:bg-muted/30 transition-colors">
-                          <td className="px-6 py-4 text-sm font-medium">{driver.name}</td>
-                          <td className="px-6 py-4 text-sm">{driver.identification}</td>
-                          <td className="px-6 py-4 text-sm">{driver.plate}</td>
-                          <td className="px-6 py-4 text-sm">{driver.phone}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre</TableHead>
+                        <TableHead>Identificación</TableHead>
+                        <TableHead>Vehículo</TableHead>
+                        <TableHead>Teléfono</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredDrivers.length > 0 ? (
+                        filteredDrivers.map((driver) => (
+                          <TableRow key={driver.id}>
+                            <TableCell className="font-medium">{driver.name}</TableCell>
+                            <TableCell>{driver.identification}</TableCell>
+                            <TableCell>{driver.plate}</TableCell>
+                            <TableCell>{driver.phone}</TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                            No se encontraron resultados
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             </div>
@@ -293,7 +384,7 @@ const CoordinatorPortal = () => {
           {showUploadModal && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
               <div 
-                className="glass-morphism rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-lg animate-scale-in"
+                className="glass-morphism rounded-xl max-w-5xl w-full max-h-[80vh] overflow-y-auto shadow-lg animate-scale-in"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-6">
@@ -353,21 +444,21 @@ const CoordinatorPortal = () => {
                         <h3 className="text-sm font-medium">Vista previa</h3>
                         
                         <div className="border border-border rounded-lg overflow-x-auto">
-                          <table className="w-full">
+                          <table className="w-full min-w-max">
                             <thead>
                               <tr className="bg-muted/50 border-b border-border">
                                 {previewData[0].map((header, i) => (
-                                  <th key={i} className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                                  <th key={i} className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">
                                     {header}
                                   </th>
                                 ))}
                               </tr>
                             </thead>
                             <tbody>
-                              {previewData.slice(1).map((row, i) => (
-                                <tr key={i} className="border-b border-border/50 last:border-b-0">
+                              {previewData.slice(1, 6).map((row, i) => (
+                                <tr key={i} className="border-b border-border/50 last:border-b-0 hover:bg-muted/30 transition-colors">
                                   {row.map((cell, j) => (
-                                    <td key={j} className="px-4 py-2 text-sm">
+                                    <td key={j} className="px-3 py-2 text-xs whitespace-nowrap">
                                       {cell}
                                     </td>
                                   ))}
@@ -376,6 +467,10 @@ const CoordinatorPortal = () => {
                             </tbody>
                           </table>
                         </div>
+                        
+                        <p className="text-xs text-muted-foreground">
+                          Mostrando 5 de {previewData.length - 1} registros. {fileType === 'type1' ? 'Formato de despacho estándar' : 'Formato de despacho con observaciones'}
+                        </p>
                       </div>
                     )}
                     
@@ -402,7 +497,7 @@ const CoordinatorPortal = () => {
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span>Subiendo...</span>
+                            <span>Procesando...</span>
                           </>
                         ) : (
                           <>
