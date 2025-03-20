@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				transport: {
+					50: "#f0f9ff",
+					100: "#e0f2fe",
+					200: "#b9e6fe",
+					300: "#7cd4fd",
+					400: "#36bffa",
+					500: "#0da2e7",
+					600: "#0284c7",
+					700: "#036ba1",
+					800: "#075985",
+					900: "#0c4a6e",
+					950: "#082f49"
 				}
 			},
 			borderRadius: {
@@ -84,11 +98,56 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
+				},
+				'fade-out': {
+					'0%': { opacity: '1' },
+					'100%': { opacity: '0' }
+				},
+				'slide-up': {
+					'0%': { transform: 'translateY(10px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
+				},
+				'slide-down': {
+					'0%': { transform: 'translateY(-10px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
+				},
+				'scale-in': {
+					'0%': { transform: 'scale(0.95)', opacity: '0' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
+				},
+				'scale-out': {
+					'0%': { transform: 'scale(1)', opacity: '1' },
+					'100%': { transform: 'scale(0.95)', opacity: '0' }
+				},
+				'pulse-subtle': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.85' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.4s ease-out',
+				'fade-out': 'fade-out 0.4s ease-out',
+				'slide-up': 'slide-up 0.4s ease-out',
+				'slide-down': 'slide-down 0.4s ease-out',
+				'scale-in': 'scale-in 0.4s ease-out',
+				'scale-out': 'scale-out 0.4s ease-out',
+				'pulse-subtle': 'pulse-subtle 3s ease-in-out infinite'
+			},
+			transitionTimingFunction: {
+				'apple': 'cubic-bezier(0.42, 0, 0.58, 1)'
+			},
+			boxShadow: {
+				'subtle': '0 2px 10px rgba(0, 0, 0, 0.03)',
+				'glass': '0 8px 32px rgba(0, 0, 0, 0.06)'
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 			}
 		}
 	},
