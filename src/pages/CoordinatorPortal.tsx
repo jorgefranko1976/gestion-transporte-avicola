@@ -244,7 +244,6 @@ const sampleExcelDataType2 = [
   },
 ];
 
-// Datos para gráficos
 const dispatchesByStatus = [
   { name: 'Pendientes', value: 12, color: '#64748b' },
   { name: 'En Ruta', value: 8, color: '#3b82f6' },
@@ -323,7 +322,6 @@ const CoordinatorPortal = () => {
     }, 2000);
   };
 
-  // Filtrar datos según la búsqueda, el tipo activo y estado
   const filteredData = excelData.filter(item => {
     const matchesSearchTerm =
       item.ubicacion.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -333,7 +331,6 @@ const CoordinatorPortal = () => {
       item.placa.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.orden.includes(searchTerm);
 
-    // Fix the type comparison by making sure we're comparing compatible types
     const matchesType = activeDataType === item.tipo;
     const matchesStatus = activeDispatchStatus === 'todos' || item.estado === activeDispatchStatus;
 
@@ -360,7 +357,6 @@ const CoordinatorPortal = () => {
     driver.plate.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Obtener el color según el estado
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pendiente':
@@ -772,3 +768,18 @@ const CoordinatorPortal = () => {
                       </div>
                       <Button variant="outline" className="flex items-center gap-1">
                         <Filter className="w-4 h-4" />
+                        <span>Filtros</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </PageTransition>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default CoordinatorPortal;
