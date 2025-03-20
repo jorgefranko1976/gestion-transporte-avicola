@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Edit, Eye, FileText, Trash2 } from "lucide-react";
 import { Vehicle } from "@/lib/types";
 import { format } from "date-fns";
+import VehicleDocumentSummary from "./VehicleDocumentSummary";
 
 // Mock data for the vehicles list
 const mockVehicles: Vehicle[] = [
@@ -260,6 +261,13 @@ const mockVehicles: Vehicle[] = [
 
 const VehiclesList = () => {
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>(mockVehicles);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [documentsDialogOpen, setDocumentsDialogOpen] = useState(false);
+
+  const handleViewDocuments = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setDocumentsDialogOpen(true);
+  };
 
   return (
     <div className="space-y-4">
@@ -318,6 +326,7 @@ const VehiclesList = () => {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-1"
+                      onClick={() => handleViewDocuments(vehicle)}
                     >
                       <FileText className="h-4 w-4" />
                       <span>Ver</span>
@@ -354,6 +363,14 @@ const VehiclesList = () => {
           </Table>
         </div>
       </div>
+
+      {selectedVehicle && (
+        <VehicleDocumentSummary
+          vehicle={selectedVehicle}
+          open={documentsDialogOpen}
+          onOpenChange={setDocumentsDialogOpen}
+        />
+      )}
     </div>
   );
 };
