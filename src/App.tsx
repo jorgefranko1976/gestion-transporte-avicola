@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import DriverPortal from "./pages/DriverPortal";
 import CoordinatorPortal from "./pages/CoordinatorPortal";
+import Vehicles from "./pages/Vehicles";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,12 +70,12 @@ const App = () => (
               } 
             />
             
-            {/* Redirect "vehicles", "drivers", and "reports" to coordinator dashboard for now */}
+            {/* Vehículos route */}
             <Route 
               path="/vehicles" 
               element={
                 <ProtectedRoute allowedRole="coordinator">
-                  <CoordinatorPortal />
+                  <Vehicles />
                 </ProtectedRoute>
               } 
             />

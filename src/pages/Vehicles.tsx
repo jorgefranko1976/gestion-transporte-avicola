@@ -1,0 +1,61 @@
+
+import { useAuth } from '@/context/AuthContext';
+import { Navbar } from '@/components/Navbar';
+import PageTransition from '@/components/transitions/PageTransition';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import VehiclesList from '@/components/vehicles/VehiclesList';
+import VehicleForm from '@/components/vehicles/VehicleForm';
+
+const Vehicles = () => {
+  const { user } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <main className="pt-24 pb-16">
+        <div className="container mx-auto px-4">
+          <PageTransition>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold">Gestión de Vehículos</h1>
+                <p className="text-muted-foreground mt-1">
+                  Administra la información y documentación de los vehículos
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">
+              <Tabs defaultValue="lista" className="w-full">
+                <TabsList className="w-full border-b border-border rounded-none bg-card h-auto p-0">
+                  <TabsTrigger 
+                    value="lista" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6"
+                  >
+                    Lista de Vehículos
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="nuevo" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6"
+                  >
+                    Nuevo Vehículo
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="lista" className="p-6">
+                  <VehiclesList />
+                </TabsContent>
+                
+                <TabsContent value="nuevo" className="p-6">
+                  <VehicleForm />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </PageTransition>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Vehicles;
