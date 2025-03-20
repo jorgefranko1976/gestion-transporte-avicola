@@ -1,37 +1,38 @@
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, Edit, FileText, FileClock, Search, Car } from "lucide-react";
-import { Vehicle } from "@/lib/types";
 
-// Datos de ejemplo - En una aplicación real, esto vendría de una API
-const sampleVehicles: Vehicle[] = [
+import { useState } from "react";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Edit, Eye, FileText, Trash2 } from "lucide-react";
+import { Vehicle } from "@/lib/types";
+import { format } from "date-fns";
+
+// Mock data for the vehicles list
+const mockVehicles: Vehicle[] = [
   {
     id: "1",
     plate: "ABC123",
     vehicleType: "camion",
-    brand: "Kenworth",
+    brand: "Ford",
     model: "2020",
-    line: "T800",
-    color: "Rojo",
-    pbvRunt: "35000",
-    emptyWeight: "15000",
+    line: "Cargo",
+    color: "Blanco",
+    pbvRunt: "10000",
+    emptyWeight: "5000",
     cargoLength: "8",
-    power: "450",
-    engineNumber: "KW78954",
-    chassisNumber: "CH45678",
+    power: "300",
+    engineNumber: "MF12345",
+    chassisNumber: "CF67890",
     documents: {
-      soat: "url-soat-1.pdf",
-      soatExpiration: new Date(2024, 9, 15),
-      technicalInspection: "url-tecnica-1.pdf",
-      technicalInspectionExpiration: new Date(2024, 8, 20),
-      rcPolicy: "url-rc-1.pdf",
-      rcPolicyExpiration: new Date(2024, 11, 5),
-      companyContract: "url-contrato-1.pdf",
-      propertyCard: "url-tarjeta-1.pdf",
-      photos: ["url-foto-1.jpg", "url-foto-2.jpg"],
+      soat: "soat-abc123.pdf",
+      soatExpiration: new Date(2023, 11, 31),
+      technicalInspection: "tecnico-abc123.pdf",
+      technicalInspectionExpiration: new Date(2023, 10, 15),
+      rcPolicy: "rc-abc123.pdf",
+      rcPolicyExpiration: new Date(2023, 9, 22),
+      companyContract: "contrato-abc123.pdf",
+      propertyCard: "tarjeta-abc123.pdf",
+      photos: ["photo1.jpg", "photo2.jpg"]
     },
     owner: {
       firstName: "Juan",
@@ -41,314 +42,317 @@ const sampleVehicles: Vehicle[] = [
       address: "Calle 123 #45-67",
       city: "Bogotá",
       phone: "3101234567",
-      hasCredit: false,
+      hasCredit: true,
+      creditAmount: "50000000",
+      creditTerm: "36",
+      creditEndDate: new Date(2024, 5, 15),
+      isPaid: false,
       documents: {
-        identification: "url-cedula-1.pdf",
-        rut: "url-rut-1.pdf",
+        identification: "cc-juan.pdf",
+        rut: "rut-juan.pdf",
         bankCertification: null,
-        dataProcessingConsent: "url-datos-1.pdf",
+        dataProcessingConsent: "datos-juan.pdf",
         settlementCertificate: null,
+        signedPromissoryNote: null,
+        blankPromissoryInstructions: null
       }
     },
     active: true,
-    createdAt: new Date(2023, 5, 10),
+    createdAt: new Date(2022, 5, 10)
   },
   {
     id: "2",
     plate: "DEF456",
     vehicleType: "camioneta",
     brand: "Toyota",
-    model: "2022",
+    model: "2021",
     line: "Hilux",
-    color: "Blanco",
-    pbvRunt: "3500",
-    emptyWeight: "2200",
-    cargoLength: "2.5",
-    power: "175",
-    engineNumber: "TY45678",
-    chassisNumber: "CH98765",
+    color: "Gris",
+    pbvRunt: "5000",
+    emptyWeight: "2500",
+    cargoLength: "5",
+    power: "200",
+    engineNumber: "MT54321",
+    chassisNumber: "CT98765",
     documents: {
-      soat: "url-soat-2.pdf",
-      soatExpiration: new Date(2024, 5, 20),
-      technicalInspection: "url-tecnica-2.pdf",
-      technicalInspectionExpiration: new Date(2024, 4, 15),
-      rcPolicy: "url-rc-2.pdf",
-      rcPolicyExpiration: new Date(2024, 6, 10),
-      companyContract: "url-contrato-2.pdf",
-      propertyCard: "url-tarjeta-2.pdf",
-      photos: ["url-foto-3.jpg"],
+      soat: "soat-def456.pdf",
+      soatExpiration: new Date(2023, 8, 15),
+      technicalInspection: "tecnico-def456.pdf",
+      technicalInspectionExpiration: new Date(2023, 7, 20),
+      rcPolicy: "rc-def456.pdf",
+      rcPolicyExpiration: new Date(2023, 9, 10),
+      companyContract: "contrato-def456.pdf",
+      propertyCard: "tarjeta-def456.pdf",
+      photos: ["photo3.jpg"]
     },
     owner: {
-      firstName: "María",
-      lastName: "Gómez",
-      identificationType: "NIT",
-      identificationNumber: "9876543210",
-      address: "Carrera 45 #12-34",
+      firstName: "Maria",
+      lastName: "González",
+      identificationType: "CC",
+      identificationNumber: "0987654321",
+      address: "Av. Principal #12-34",
       city: "Medellín",
       phone: "3209876543",
-      hasCredit: true,
-      creditAmount: "50000000",
-      creditTerm: "36",
-      creditEndDate: new Date(2025, 3, 15),
-      isPaid: false,
+      hasCredit: false,
       documents: {
-        identification: "url-nit-2.pdf",
-        rut: "url-rut-2.pdf",
-        bankCertification: "url-banco-2.pdf",
-        dataProcessingConsent: "url-datos-2.pdf",
+        identification: "cc-maria.pdf",
+        rut: "rut-maria.pdf",
+        bankCertification: "banco-maria.pdf",
+        dataProcessingConsent: "datos-maria.pdf",
         settlementCertificate: null,
+        signedPromissoryNote: null,
+        blankPromissoryInstructions: null
       }
     },
     active: true,
-    createdAt: new Date(2023, 8, 5),
+    createdAt: new Date(2022, 2, 5)
   },
   {
     id: "3",
     plate: "GHI789",
     vehicleType: "dobletroque",
-    brand: "International",
-    model: "2021",
-    line: "4700",
+    brand: "Chevrolet",
+    model: "2019",
+    line: "NPR",
     color: "Azul",
-    pbvRunt: "25000",
-    emptyWeight: "12000",
-    cargoLength: "6.5",
+    pbvRunt: "15000",
+    emptyWeight: "7000",
+    cargoLength: "9",
     power: "350",
-    engineNumber: "INT12345",
-    chassisNumber: "CH12345",
+    engineNumber: "MG98765",
+    chassisNumber: "CG12345",
     documents: {
-      soat: "url-soat-3.pdf",
-      soatExpiration: new Date(2024, 3, 5),
-      technicalInspection: "url-tecnica-3.pdf",
-      technicalInspectionExpiration: new Date(2024, 2, 20),
-      rcPolicy: "url-rc-3.pdf",
-      rcPolicyExpiration: new Date(2024, 4, 10),
-      companyContract: "url-contrato-3.pdf",
-      propertyCard: "url-tarjeta-3.pdf",
-      photos: ["url-foto-4.jpg", "url-foto-5.jpg", "url-foto-6.jpg"],
+      soat: "soat-ghi789.pdf",
+      soatExpiration: new Date(2024, 1, 25),
+      technicalInspection: "tecnico-ghi789.pdf",
+      technicalInspectionExpiration: new Date(2024, 2, 10),
+      rcPolicy: "rc-ghi789.pdf",
+      rcPolicyExpiration: new Date(2024, 0, 5),
+      companyContract: "contrato-ghi789.pdf",
+      propertyCard: "tarjeta-ghi789.pdf",
+      photos: ["photo4.jpg", "photo5.jpg", "photo6.jpg"]
     },
     owner: {
       firstName: "Carlos",
-      lastName: "Ramírez",
-      identificationType: "CC",
-      identificationNumber: "5678901234",
-      address: "Avenida 67 #89-12",
+      lastName: "Rodríguez",
+      identificationType: "NIT",
+      identificationNumber: "9001234567",
+      address: "Carrera 45 #67-89",
       city: "Cali",
-      phone: "3156789012",
+      phone: "3157894561",
       hasCredit: true,
-      creditAmount: "40000000",
-      creditTerm: "24",
-      creditEndDate: new Date(2023, 11, 20),
-      isPaid: true,
+      creditAmount: "80000000",
+      creditTerm: "48",
+      creditEndDate: new Date(2025, 11, 31),
+      isPaid: false,
       documents: {
-        identification: "url-cedula-3.pdf",
-        rut: "url-rut-3.pdf",
-        bankCertification: "url-banco-3.pdf",
-        dataProcessingConsent: "url-datos-3.pdf",
-        settlementCertificate: "url-paz-3.pdf",
+        identification: "nit-carlos.pdf",
+        rut: "rut-carlos.pdf",
+        bankCertification: "banco-carlos.pdf",
+        dataProcessingConsent: "datos-carlos.pdf",
+        settlementCertificate: "pazysalvo-carlos.pdf",
+        signedPromissoryNote: "pagare-carlos.pdf",
+        blankPromissoryInstructions: "instrucciones-carlos.pdf"
       }
     },
-    active: false,
-    createdAt: new Date(2023, 2, 15),
+    active: true,
+    createdAt: new Date(2022, 0, 15)
   },
   {
     id: "4",
     plate: "JKL012",
-    vehicleType: "tracto camion",
-    brand: "Freightliner",
-    model: "2019",
-    line: "Cascadia",
-    color: "Negro",
-    pbvRunt: "40000",
-    emptyWeight: "18000",
-    cargoLength: "N/A",
-    power: "500",
-    engineNumber: "FL98765",
-    chassisNumber: "CH56789",
+    vehicleType: "camion liviano",
+    brand: "Isuzu",
+    model: "2022",
+    line: "NQR",
+    color: "Rojo",
+    pbvRunt: "8000",
+    emptyWeight: "4000",
+    cargoLength: "7",
+    power: "280",
+    engineNumber: "MI45678",
+    chassisNumber: "CI87654",
     documents: {
-      soat: "url-soat-4.pdf",
-      soatExpiration: new Date(2024, 8, 15),
-      technicalInspection: "url-tecnica-4.pdf",
-      technicalInspectionExpiration: new Date(2024, 7, 10),
-      rcPolicy: "url-rc-4.pdf",
-      rcPolicyExpiration: new Date(2024, 9, 25),
-      companyContract: "url-contrato-4.pdf",
-      propertyCard: "url-tarjeta-4.pdf",
-      photos: ["url-foto-7.jpg", "url-foto-8.jpg"],
+      soat: "soat-jkl012.pdf",
+      soatExpiration: new Date(2023, 11, 5),
+      technicalInspection: "tecnico-jkl012.pdf",
+      technicalInspectionExpiration: new Date(2023, 10, 10),
+      rcPolicy: "rc-jkl012.pdf",
+      rcPolicyExpiration: new Date(2023, 9, 15),
+      companyContract: null,
+      propertyCard: "tarjeta-jkl012.pdf",
+      photos: []
     },
     owner: {
       firstName: "Ana",
       lastName: "Martínez",
-      identificationType: "CE",
-      identificationNumber: "E123456",
-      address: "Calle 78 #90-123",
+      identificationType: "CC",
+      identificationNumber: "3216549870",
+      address: "Calle 78 #90-12",
       city: "Barranquilla",
-      phone: "3187654321",
-      hasCredit: false,
+      phone: "3004567890",
+      hasCredit: true,
+      creditAmount: "40000000",
+      creditTerm: "24",
+      creditEndDate: new Date(2023, 5, 30),
+      isPaid: true,
       documents: {
-        identification: "url-ce-4.pdf",
-        rut: "url-rut-4.pdf",
-        bankCertification: "url-banco-4.pdf",
-        dataProcessingConsent: "url-datos-4.pdf",
+        identification: "cc-ana.pdf",
+        rut: "rut-ana.pdf",
+        bankCertification: "banco-ana.pdf",
+        dataProcessingConsent: "datos-ana.pdf",
         settlementCertificate: null,
+        signedPromissoryNote: "pagare-ana.pdf",
+        blankPromissoryInstructions: "instrucciones-ana.pdf"
       }
     },
-    active: true,
-    createdAt: new Date(2022, 11, 1),
+    active: false,
+    createdAt: new Date(2022, 8, 20)
   },
   {
     id: "5",
     plate: "MNO345",
-    vehicleType: "camion liviano",
-    brand: "Hino",
-    model: "2021",
-    line: "Serie 300",
-    color: "Blanco",
-    pbvRunt: "12000",
-    emptyWeight: "7000",
-    cargoLength: "5",
-    power: "240",
-    engineNumber: "HI54321",
-    chassisNumber: "CH87654",
+    vehicleType: "tracto camion",
+    brand: "Kenworth",
+    model: "2018",
+    line: "T800",
+    color: "Verde",
+    pbvRunt: "20000",
+    emptyWeight: "9000",
+    cargoLength: "12",
+    power: "450",
+    engineNumber: "MK12345",
+    chassisNumber: "CK67890",
     documents: {
-      soat: "url-soat-5.pdf",
-      soatExpiration: new Date(2024, 7, 5),
-      technicalInspection: "url-tecnica-5.pdf",
-      technicalInspectionExpiration: new Date(2024, 6, 20),
-      rcPolicy: "url-rc-5.pdf",
-      rcPolicyExpiration: new Date(2024, 8, 15),
-      companyContract: "url-contrato-5.pdf",
-      propertyCard: "url-tarjeta-5.pdf",
-      photos: ["url-foto-9.jpg"],
+      soat: "soat-mno345.pdf",
+      soatExpiration: new Date(2023, 7, 20),
+      technicalInspection: "tecnico-mno345.pdf",
+      technicalInspectionExpiration: new Date(2023, 6, 15),
+      rcPolicy: "rc-mno345.pdf",
+      rcPolicyExpiration: new Date(2023, 8, 10),
+      companyContract: "contrato-mno345.pdf",
+      propertyCard: "tarjeta-mno345.pdf",
+      photos: ["photo7.jpg"]
     },
     owner: {
-      firstName: "Luis",
-      lastName: "García",
-      identificationType: "CC",
-      identificationNumber: "9012345678",
+      firstName: "Pedro",
+      lastName: "López",
+      identificationType: "CE",
+      identificationNumber: "E123456",
       address: "Carrera 12 #34-56",
       city: "Bucaramanga",
-      phone: "3001234567",
-      hasCredit: true,
-      creditAmount: "25000000",
-      creditTerm: "18",
-      creditEndDate: new Date(2024, 5, 10),
-      isPaid: false,
+      phone: "3183216540",
+      hasCredit: false,
       documents: {
-        identification: "url-cedula-5.pdf",
-        rut: "url-rut-5.pdf",
+        identification: "ce-pedro.pdf",
+        rut: "rut-pedro.pdf",
         bankCertification: null,
-        dataProcessingConsent: "url-datos-5.pdf",
+        dataProcessingConsent: "datos-pedro.pdf",
         settlementCertificate: null,
+        signedPromissoryNote: null,
+        blankPromissoryInstructions: null
       }
     },
     active: true,
-    createdAt: new Date(2023, 3, 20),
+    createdAt: new Date(2021, 11, 5)
   }
 ];
 
 const VehiclesList = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [vehicles, setVehicles] = useState<Vehicle[]>(sampleVehicles);
-  
-  // Filtrar vehículos según término de búsqueda
-  const filteredVehicles = vehicles.filter(vehicle => 
-    vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.owner.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.owner.lastName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  // Función para manejar la eliminación de un vehículo
-  const handleDelete = (id: string) => {
-    setVehicles(prev => prev.filter(vehicle => vehicle.id !== id));
-  };
-  
+  const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>(mockVehicles);
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 w-full max-w-sm">
-          <Input
-            placeholder="Buscar vehículo por placa, marca o propietario..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-9"
-          />
-          <Button variant="outline" size="sm" className="h-9 px-3">
-            <Search className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" className="h-9">
-            <FileText className="h-4 w-4 mr-2" />
-            Exportar
-          </Button>
+      <div className="bg-white p-4 rounded-lg border">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Vehículos registrados</h3>
+          <Button>Registrar Nuevo Vehículo</Button>
         </div>
       </div>
-      
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-1/6">Placa</TableHead>
-              <TableHead className="w-1/6">Tipo</TableHead>
-              <TableHead className="w-1/6">Marca/Modelo</TableHead>
-              <TableHead className="w-1/4">Propietario</TableHead>
-              <TableHead className="w-1/6">Estado</TableHead>
-              <TableHead className="text-right w-[100px]">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredVehicles.length > 0 ? (
-              filteredVehicles.map((vehicle) => (
+
+      <div className="bg-white rounded-lg border overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Placa</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Marca/Modelo</TableHead>
+                <TableHead>Propietario</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Documentos</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredVehicles.map((vehicle) => (
                 <TableRow key={vehicle.id}>
                   <TableCell className="font-medium">{vehicle.plate}</TableCell>
                   <TableCell>
-                    <div className="flex items-center">
-                      <Car className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="capitalize">{vehicle.vehicleType}</span>
-                    </div>
+                    {(() => {
+                      switch (vehicle.vehicleType) {
+                        case "camion":
+                          return "Camión";
+                        case "camion liviano":
+                          return "Camión liviano";
+                        case "dobletroque":
+                          return "Dobletroque";
+                        case "camioneta":
+                          return "Camioneta";
+                        case "tracto camion":
+                          return "Tracto camión";
+                        default:
+                          return vehicle.vehicleType;
+                      }
+                    })()}
                   </TableCell>
-                  <TableCell>{vehicle.brand} {vehicle.model}</TableCell>
+                  <TableCell>{`${vehicle.brand} / ${vehicle.model}`}</TableCell>
+                  <TableCell>{`${vehicle.owner.firstName} ${vehicle.owner.lastName}`}</TableCell>
                   <TableCell>
-                    {vehicle.owner.firstName} {vehicle.owner.lastName}
-                    <div className="text-xs text-muted-foreground">{vehicle.owner.identificationType}: {vehicle.owner.identificationNumber}</div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={vehicle.active ? "default" : "destructive"}
-                      className={vehicle.active ? "bg-green-500" : ""}
-                    >
+                    <Badge variant={vehicle.active ? "default" : "destructive"}>
                       {vehicle.active ? "Activo" : "Inactivo"}
                     </Badge>
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1"
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span>Ver</span>
+                    </Button>
+                  </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button variant="outline" size="icon" className="h-7 w-7">
-                        <FileText className="h-3.5 w-3.5" />
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                      >
+                        <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="icon" className="h-7 w-7">
-                        <Edit className="h-3.5 w-3.5" />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                      >
+                        <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleDelete(vehicle.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="h-8 w-8"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  {searchTerm 
-                    ? "No se encontraron vehículos que coincidan con la búsqueda." 
-                    : "No hay vehículos registrados aún."}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
