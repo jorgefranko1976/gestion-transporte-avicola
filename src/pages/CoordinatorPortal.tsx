@@ -648,33 +648,7 @@ const CoordinatorPortal = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    <Card className="col-span-2">
-                      <CardHeader>
-                        <CardTitle className="text-lg">Despachos por Día</CardTitle>
-                        <CardDescription>Últimos 7 días</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="h-[300px] w-full">
-                          <ChartContainer config={chartConfig}>
-                            <RechartBarChart 
-                              data={weeklyDispatchData} 
-                              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                              <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                              <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                              <Tooltip content={<ChartTooltipContent />} />
-                              <Legend />
-                              <Bar dataKey="pendientes" name="Pendientes" fill="#64748b" radius={[4, 4, 0, 0]} />
-                              <Bar dataKey="enRuta" name="En Ruta" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                              <Bar dataKey="completados" name="Completados" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                            </RechartBarChart>
-                          </ChartContainer>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
+                    <Card className="lg:col-span-3">
                       <CardHeader>
                         <CardTitle className="text-lg">Estado de Despachos</CardTitle>
                         <CardDescription>Distribución actual</CardDescription>
