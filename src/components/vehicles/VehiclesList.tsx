@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -259,7 +258,7 @@ const mockVehicles: Vehicle[] = [
   }
 ];
 
-const VehiclesList = () => {
+const VehiclesList = ({ onRegisterClick }: { onRegisterClick?: () => void }) => {
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>(mockVehicles);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [documentsDialogOpen, setDocumentsDialogOpen] = useState(false);
@@ -274,7 +273,7 @@ const VehiclesList = () => {
       <div className="bg-white p-4 rounded-lg border">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">Vehículos registrados</h3>
-          <Button>Registrar Nuevo Vehículo</Button>
+          <Button onClick={onRegisterClick}>Registrar Nuevo Vehículo</Button>
         </div>
       </div>
 

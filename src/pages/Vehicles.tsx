@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import PageTransition from '@/components/transitions/PageTransition';
@@ -8,6 +9,11 @@ import VehicleForm from '@/components/vehicles/VehicleForm';
 
 const Vehicles = () => {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("lista");
+
+  const handleRegisterClick = () => {
+    setActiveTab("nuevo");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,7 +32,7 @@ const Vehicles = () => {
             </div>
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">
-              <Tabs defaultValue="lista" className="w-full">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="w-full border-b border-border rounded-none bg-card h-auto p-0">
                   <TabsTrigger 
                     value="lista" 
@@ -43,7 +49,7 @@ const Vehicles = () => {
                 </TabsList>
                 
                 <TabsContent value="lista" className="p-6">
-                  <VehiclesList />
+                  <VehiclesList onRegisterClick={handleRegisterClick} />
                 </TabsContent>
                 
                 <TabsContent value="nuevo" className="p-6">
