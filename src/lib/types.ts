@@ -24,13 +24,39 @@ export interface Vehicle {
     propertyCard: string | null;
     photos: string[];
   };
-  ownerInfo: string;
+  owner: VehicleOwner;
   active: boolean;
   createdAt: Date;
 }
 
+// Tipos de identificación
+export type IdentificationType = 'CC' | 'NIT' | 'CE';
+
+// Información del propietario del vehículo
+export interface VehicleOwner {
+  firstName: string;
+  lastName: string;
+  identificationType: IdentificationType;
+  identificationNumber: string;
+  address: string;
+  city: string;
+  phone: string;
+  hasCredit: boolean;
+  creditAmount?: string;
+  creditTerm?: string;
+  creditEndDate?: Date;
+  isPaid?: boolean;
+  documents: {
+    identification: string | null;
+    rut: string | null;
+    bankCertification: string | null;
+    dataProcessingConsent: string | null;
+    settlementCertificate: string | null;
+  };
+}
+
 // Driver types
-export type IdentificationType = 'CC' | 'CE' | 'NIT' | 'TI' | 'OTRO';
+export type DriverIdentificationType = 'CC' | 'CE' | 'NIT' | 'TI' | 'OTRO';
 
 export interface Driver {
   id: string;
