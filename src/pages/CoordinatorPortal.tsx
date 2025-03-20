@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import PageTransition from '@/components/transitions/PageTransition';
@@ -17,7 +16,10 @@ import {
   Calendar,
   ShieldAlert,
   Eye,
-  Download
+  Download,
+  Search,
+  List,
+  MapPin,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -30,20 +32,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
-// Mock data for demonstration
 const recentVehicles = [
-  { id: '1', plate: 'WFP 526', type: 'camion', brand: 'Chevrolet', model: '2020' },
-  { id: '2', plate: 'USB 969', type: 'dobletroque', brand: 'Ford', model: '2019' },
-  { id: '3', plate: 'SRD 193', type: 'camioneta', brand: 'Toyota', model: '2021' },
-  { id: '4', plate: 'XIK 443', type: 'camion liviano', brand: 'Mitsubishi', model: '2018' },
+  { id: '1', plate: 'WHK 426', type: 'camion', brand: 'Chevrolet', model: '2020' },
+  { id: '2', plate: 'SRD 194', type: 'dobletroque', brand: 'Ford', model: '2019' },
+  { id: '3', plate: 'WPK 570', type: 'camioneta', brand: 'Toyota', model: '2021' },
+  { id: '4', plate: 'XXB 191', type: 'camion liviano', brand: 'Mitsubishi', model: '2018' },
   { id: '5', plate: 'XXR 556', type: 'tracto camion', brand: 'Kenworth', model: '2017' },
 ];
 
 const recentDrivers = [
-  { id: '1', name: 'Hugo Vega', identification: 'CC 80311610', plate: 'WFP 526', phone: '300-123-4567' },
-  { id: '2', name: 'Nelson Garavito', identification: 'CC 1003558901', plate: 'USB 969', phone: '315-765-4321' },
-  { id: '3', name: 'Alejandro Martínez', identification: 'CC 19.223.941', plate: 'SRD 193', phone: '310-987-6543' },
+  { id: '1', name: 'ANDRES SABOGAL', identification: 'CC 80311610', plate: 'WHK 426', phone: '300-123-4567' },
+  { id: '2', name: 'FERNANDO VANEGAS', identification: 'CC 1003558901', plate: 'SRD 194', phone: '315-765-4321' },
+  { id: '3', name: 'MARTIN CHAVEZ', identification: 'CC 19.223.941', plate: 'WPK 570', phone: '310-987-6543' },
+  { id: '4', name: 'HENRY ESGUERRA', identification: 'CC 74335546', plate: 'XXB 191', phone: '301-234-5678' },
 ];
 
 const dispatchStats = {
@@ -55,23 +65,82 @@ const dispatchStats = {
   total: 47,
 };
 
-// Sample Excel data structures based on provided examples
-const sampleExcelDataType1 = [
-  ['GRANJA', 'DÍA', 'PLANTA', 'NOM ALIMENTO', 'CANTIDAD', 'TONELADAS', 'CONFIRMAR', 'UBICACIÓN', 'TÉCNICO', 'ORDEN', 'CONDUCTOR', 'PLACA', 'CÉDULA', 'REMISIÓN'],
-  ['NARANJAL (NARANJAL)', 'MARTES 25', 'ALBATEC-ALBATEC', 'ENGORDE CORRIENTE', '200', '8', '', 'SAN FRANCISCO', 'HILOS CASTIBLANC', '224248', 'OSWALDO RODRIGUEZ', 'WYW 547', '79172559', 'MIÉRCOLES 26'],
-  ['MIREYAS', 'MARTES 25', 'ALBATEC-ALBATEC', 'ENGORDE CORRIENTE', '125', '5', '', 'LA MESA', 'CARLOS CENEN', '224249', 'HUGO VEGA', 'WFP 526', '80311610', 'MIÉRCOLES 26'],
-  ['MIREYAS', 'MARTES 25', 'ALBATEC-ALBATEC', 'ENGORDE PIGMENTADO', '125', '5', '', 'LA MESA', 'CARLOS CENEN', '224249', 'HUGO VEGA', 'WFP 526', '80311610', 'MIÉRCOLES 26'],
-  ['EMANUEL', 'MIÉRCOLES 26', 'ALBATEC-ALBATEC', 'INICIACIÓN CORRIENTE', '250', '10', '', 'LA MESA', 'FELIPE MARTINEZ', '224251', 'SAÚL PATIRROJO', 'WPJ 522', '79064191', 'MIÉRCOLES 26'],
-  ['VILLA LORENA', 'MIÉRCOLES 26', 'ALBATEC-ALBATEC', 'ENGORDE CORRIENTE', '150', '6', '', 'FUSAGASUGA', 'SONIA', '224226', 'NELSON GARAVITO', 'USB 969', '1003558901', 'MIÉRCOLES 26'],
-];
-
 const sampleExcelDataType2 = [
-  ['UBICACIÓN', 'GRANJA', 'LOTE', 'PLANTA', 'TIPO ALIMENTO', 'MEDICACIÓN', 'DÍA', 'CANTIDAD', 'TON', 'ORDEN', 'CONDUCTOR', 'PLACA', 'CÉDULA', 'REMISIÓN PLANTA', 'OBSERVACIONES'],
-  ['GARAGOA', 'BARSAL 1', '630', 'ALBATEC-ALBATEC', 'FASE 2 COBB', 'HEPATOSTAR-OVYMICINA', 'MARTES 25', '275', '11', '224230', 'ANDRES SABOGAL', 'WHK 426', '1,056,688,224', 'MIÉRCOLES 25', ''],
-  ['GARAGOA', 'HERNANDO 2', '653', 'ALBATEC-ALBATEC', 'LEVANTE', 'SIN MEDICAR', 'MIÉRCOLES 26', '375', '15', '224231', 'FERNANDO VANEGAS', 'SRD 154', '1048847154', 'MIÉRCOLES 26', ''],
-  ['GARAGOA', 'SAN MIGUEL', '617', 'ALBATEC-ALBATEC', 'FASE 3 ROSS', 'HEPATOSTAR-OVYMICINA', 'MIÉRCOLES 26', '350', '14', '224234', 'MARTIN CHAVEZ', 'WPk 570', '74335175', 'MIÉRCOLES 26', ''],
-  ['GARAGOA', 'ZONA CENTRAL BAJA', '618', 'ITALCOL-FUNZA', 'FASE 2 COBB', 'FINBIOX-HEPATOSTAR', 'MIÉRCOLES 26', '350', '14', '1114222', 'HENRY ESGUERRA', 'XXB151', '74,335,546', 'MIÉRCOLES 26', '7:00 p.m.'],
-  ['GARAGOA', 'ZONA CENTRAL BAJA', '618', 'ITALCOL-FUNZA', 'MACHOS ROSS', 'SIN MEDICAR', 'MIÉRCOLES 26', '25', '1', '1114222', 'HENRY ESGUERRA', 'XXB151', '74,335,546', 'MIÉRCOLES 26', ''],
+  {
+    id: '1',
+    ubicacion: 'GARAGOA',
+    granja: 'BARSAL 1',
+    lote: '630',
+    planta: 'ALBATEQ-ALBATEQ',
+    alimento: 'FASE 2 COBB',
+    medicacion: 'FINBIOX-HEPATOSTAR-OVOCLEAN',
+    dia: 'MARTES 25',
+    cantidad: '275',
+    ton: '11',
+    orden: '224230',
+    conductor: 'ANDRES SABOGAL',
+    placa: 'WHK 426',
+  },
+  {
+    id: '2',
+    ubicacion: 'GARAGOA',
+    granja: 'SAN ESTEBAN 2',
+    lote: '652',
+    planta: 'ALBATEQ-ALBATEQ',
+    alimento: 'LEVANTE',
+    medicacion: 'SIN MEDICAR',
+    dia: 'MIERCOLES 26',
+    cantidad: '375',
+    ton: '15',
+    orden: '224231',
+    conductor: 'FERNANDO VANEGAS',
+    placa: 'SRD 194',
+  },
+  {
+    id: '3',
+    ubicacion: 'GARAGOA',
+    granja: 'SAN MIGUEL',
+    lote: '617',
+    planta: 'ALBATEQ-ALBATEQ',
+    alimento: 'FASE 3 ROSS',
+    medicacion: 'FINBIOX-HEPATOSTAR-OVOCLEAN',
+    dia: 'MIERCOLES 26',
+    cantidad: '350',
+    ton: '14',
+    orden: '224234',
+    conductor: 'MARTIN CHAVEZ',
+    placa: 'WPK 570',
+  },
+  {
+    id: '4',
+    ubicacion: 'GARAGOA',
+    granja: 'ZONA CENTRAL BAJA',
+    lote: '618',
+    planta: 'ITALCOL-FUNZA',
+    alimento: 'FASE 2 COBB',
+    medicacion: 'PX CYROMICINA-FINBIOX-HEPATOSTAR-OVOCLEAN',
+    dia: 'MIERCOLES 26',
+    cantidad: '350',
+    ton: '14',
+    orden: '1114222',
+    conductor: 'HENRY ESGUERRA',
+    placa: 'XXB191',
+  },
+  {
+    id: '5',
+    ubicacion: 'GARAGOA',
+    granja: 'ZONA CENTRAL BAJA',
+    lote: '618',
+    planta: 'ITALCOL-FUNZA',
+    alimento: 'MACHOS COBB',
+    medicacion: 'SIN MEDICAR',
+    dia: 'MIERCOLES 26',
+    cantidad: '25',
+    ton: '1',
+    orden: '1114222',
+    conductor: 'HENRY ESGUERRA',
+    placa: 'XXB191',
+  },
 ];
 
 const CoordinatorPortal = () => {
@@ -80,25 +149,18 @@ const CoordinatorPortal = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [previewData, setPreviewData] = useState<string[][]>([]);
-  const [fileType, setFileType] = useState<'type1' | 'type2'>('type1');
+  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [excelData, setExcelData] = useState<any[]>(sampleExcelDataType2);
+  const [activeTab, setActiveTab] = useState<'despachos' | 'excel'>('excel');
   const [searchTerm, setSearchTerm] = useState('');
+  const [lastUpdateDate, setLastUpdateDate] = useState('11/03/2025, 09:40 p. m.');
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setSelectedFile(file);
       
-      // In a real app, this would be server-side parsing
-      // This is just a mock preview based on the examples
-      const randomType = Math.random() > 0.5 ? 'type1' : 'type2';
-      setFileType(randomType);
-      
-      if (randomType === 'type1') {
-        setPreviewData(sampleExcelDataType1);
-      } else {
-        setPreviewData(sampleExcelDataType2);
-      }
+      setPreviewData(sampleExcelDataType2);
     }
   };
 
@@ -107,21 +169,32 @@ const CoordinatorPortal = () => {
     
     setIsUploading(true);
     
-    // Simulate upload process
     setTimeout(() => {
       setIsUploading(false);
       setShowUploadModal(false);
       setSelectedFile(null);
+      setExcelData(previewData);
+      setLastUpdateDate(new Date().toLocaleString());
       
       toast({
         title: "Archivo subido con éxito",
-        description: `Se procesaron ${previewData.length - 1} registros de despacho.`,
+        description: `Se procesaron ${previewData.length} registros de despacho.`,
       });
       
-      // In a real app, this would process the file and update the database
       setPreviewData([]);
     }, 2000);
   };
+
+  const filteredData = excelData.filter(item => {
+    return (
+      item.ubicacion.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.granja.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.alimento.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.conductor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.placa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.orden.includes(searchTerm)
+    );
+  });
 
   const filteredVehicles = recentVehicles.filter(vehicle => 
     vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -191,7 +264,7 @@ const CoordinatorPortal = () => {
           <PageTransition>
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold">Panel de Coordinador</h1>
+                <h1 className="text-2xl md:text-3xl font-bold">Sistema de Gestión Logística</h1>
                 <p className="text-muted-foreground mt-1">
                   Gestiona vehículos, conductores y despachos de manera eficiente
                 </p>
@@ -202,7 +275,7 @@ const CoordinatorPortal = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors btn-hover focus-ring"
               >
                 <Upload className="w-4 h-4" />
-                <span>Subir Excel de Despachos</span>
+                <span>Cargar Excel</span>
               </button>
             </div>
             
@@ -265,25 +338,149 @@ const CoordinatorPortal = () => {
               />
             </div>
             
-            <div className="flex flex-col md:flex-row gap-4 mb-4">
-              <div className="flex-1">
-                <Input
-                  type="search"
-                  placeholder="Buscar por placa, conductor o vehículo..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
-                />
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">
+              <div className="flex border-b border-border">
+                <button
+                  onClick={() => setActiveTab('despachos')}
+                  className={cn(
+                    "px-6 py-4 flex items-center gap-2 text-sm font-medium transition-colors",
+                    activeTab === 'despachos' 
+                      ? "border-b-2 border-primary text-primary" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <List className="w-4 h-4" />
+                  <span>Despachos</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('excel')}
+                  className={cn(
+                    "px-6 py-4 flex items-center gap-2 text-sm font-medium transition-colors",
+                    activeTab === 'excel' 
+                      ? "border-b-2 border-primary text-primary" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span>Datos Excel</span>
+                </button>
               </div>
-              <div className="flex gap-2">
-                <button className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted transition-colors flex items-center gap-2">
-                  <Download className="w-4 h-4" />
-                  <span>Exportar</span>
-                </button>
-                <button className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted transition-colors flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
-                  <span>Ver todo</span>
-                </button>
+              
+              <div className="p-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Datos del Excel</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Última actualización: {lastUpdateDate}
+                    </p>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        type="search"
+                        placeholder="Buscar en los datos..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9 w-[300px]"
+                      />
+                    </div>
+                    <button className="flex items-center gap-1 px-3 py-2 border rounded-md text-sm hover:bg-muted transition-colors">
+                      <Download className="w-4 h-4" />
+                      <span>Exportar</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 mb-4">
+                  <div className="flex items-center gap-1.5 text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full">
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                    <span>Reproductoras (27)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-sm bg-green-50 text-green-600 px-3 py-1.5 rounded-full">
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                    <span>Engorde (38)</span>
+                  </div>
+                </div>
+              
+                <div className="border rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto max-h-[600px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="flex items-center gap-1">
+                            <MapPin className="w-4 h-4" />
+                            UBICACIÓN/GRANJA
+                          </TableHead>
+                          <TableHead>LOTE/PLANTA</TableHead>
+                          <TableHead>ALIMENTO/MEDICACIÓN</TableHead>
+                          <TableHead>DÍA</TableHead>
+                          <TableHead>CANTIDAD/TON</TableHead>
+                          <TableHead>CONDUCTOR</TableHead>
+                          <TableHead>PLACA</TableHead>
+                          <TableHead>ORDEN</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredData.length > 0 ? (
+                          filteredData.map((item) => (
+                            <TableRow key={item.id} className="hover:bg-muted/20">
+                              <TableCell className="font-medium">
+                                <div>{item.ubicacion}</div>
+                                <div className="text-xs text-muted-foreground">{item.granja}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div>{item.lote}</div>
+                                <div className="text-xs text-muted-foreground">{item.planta}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div>{item.alimento}</div>
+                                <div className="text-xs text-muted-foreground">{item.medicacion}</div>
+                              </TableCell>
+                              <TableCell>{item.dia}</TableCell>
+                              <TableCell>
+                                <div>{item.cantidad}</div>
+                                <div className="text-xs text-muted-foreground">{item.ton} ton</div>
+                              </TableCell>
+                              <TableCell className="font-medium">{item.conductor}</TableCell>
+                              <TableCell>{item.placa}</TableCell>
+                              <TableCell>{item.orden}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                              No se encontraron resultados
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  
+                  <div className="p-2 border-t">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious href="#" />
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationLink href="#" isActive>1</PaginationLink>
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationLink href="#">2</PaginationLink>
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationLink href="#">3</PaginationLink>
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationNext href="#" />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -380,7 +577,6 @@ const CoordinatorPortal = () => {
             </div>
           </PageTransition>
           
-          {/* Upload Modal */}
           {showUploadModal && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
               <div 
@@ -447,21 +643,29 @@ const CoordinatorPortal = () => {
                           <table className="w-full min-w-max">
                             <thead>
                               <tr className="bg-muted/50 border-b border-border">
-                                {previewData[0].map((header, i) => (
-                                  <th key={i} className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">
-                                    {header}
-                                  </th>
-                                ))}
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">UBICACIÓN</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">GRANJA</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">LOTE</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">ALIMENTO</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">MEDICACIÓN</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">DÍA</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">CANTIDAD</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">CONDUCTOR</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">PLACA</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {previewData.slice(1, 6).map((row, i) => (
+                              {previewData.slice(0, 5).map((item, i) => (
                                 <tr key={i} className="border-b border-border/50 last:border-b-0 hover:bg-muted/30 transition-colors">
-                                  {row.map((cell, j) => (
-                                    <td key={j} className="px-3 py-2 text-xs whitespace-nowrap">
-                                      {cell}
-                                    </td>
-                                  ))}
+                                  <td className="px-3 py-2 text-xs whitespace-nowrap">{item.ubicacion}</td>
+                                  <td className="px-3 py-2 text-xs whitespace-nowrap">{item.granja}</td>
+                                  <td className="px-3 py-2 text-xs whitespace-nowrap">{item.lote}</td>
+                                  <td className="px-3 py-2 text-xs whitespace-nowrap">{item.alimento}</td>
+                                  <td className="px-3 py-2 text-xs whitespace-nowrap">{item.medicacion}</td>
+                                  <td className="px-3 py-2 text-xs whitespace-nowrap">{item.dia}</td>
+                                  <td className="px-3 py-2 text-xs whitespace-nowrap">{item.cantidad}</td>
+                                  <td className="px-3 py-2 text-xs whitespace-nowrap">{item.conductor}</td>
+                                  <td className="px-3 py-2 text-xs whitespace-nowrap">{item.placa}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -469,7 +673,7 @@ const CoordinatorPortal = () => {
                         </div>
                         
                         <p className="text-xs text-muted-foreground">
-                          Mostrando 5 de {previewData.length - 1} registros. {fileType === 'type1' ? 'Formato de despacho estándar' : 'Formato de despacho con observaciones'}
+                          Mostrando 5 de {previewData.length} registros
                         </p>
                       </div>
                     )}
