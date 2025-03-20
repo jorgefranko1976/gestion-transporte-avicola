@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -317,7 +316,10 @@ const VehiclesList = () => {
                     <div className="text-xs text-muted-foreground">{vehicle.owner.identificationType}: {vehicle.owner.identificationNumber}</div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={vehicle.active ? "success" : "destructive"} className="capitalize">
+                    <Badge 
+                      variant={vehicle.active ? "default" : "destructive"}
+                      className={vehicle.active ? "bg-green-500" : ""}
+                    >
                       {vehicle.active ? "Activo" : "Inactivo"}
                     </Badge>
                   </TableCell>

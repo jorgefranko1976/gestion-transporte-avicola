@@ -55,6 +55,8 @@ export interface VehicleOwner {
     bankCertification: string | null;
     dataProcessingConsent: string | null;
     settlementCertificate: string | null;
+    signedPromissoryNote: string | null;  // Nuevo: Pagaré firmado
+    blankPromissoryInstructions: string | null;  // Nuevo: Carta de instrucciones pagaré en blanco
   };
 }
 

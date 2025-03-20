@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -35,7 +34,6 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-// Esquema de validación para el formulario de vehículo
 const vehicleFormSchema = z.object({
   plate: z.string().min(6, "La placa debe tener al menos 6 caracteres"),
   vehicleType: z.enum(["camion", "camion liviano", "dobletroque", "camioneta", "tracto camion"] as const),
@@ -50,7 +48,6 @@ const vehicleFormSchema = z.object({
   engineNumber: z.string().min(1, "El número de motor es requerido"),
   chassisNumber: z.string().min(1, "El número de chasis es requerido"),
   
-  // Campos del propietario
   ownerFirstName: z.string().min(2, "El nombre del propietario es requerido"),
   ownerLastName: z.string().min(2, "Los apellidos del propietario son requeridos"),
   ownerIdentificationType: z.enum(["CC", "NIT", "CE"] as const),
@@ -69,7 +66,6 @@ const VehicleForm = () => {
   const [activeTab, setActiveTab] = useState<"info" | "documents" | "owner">("info");
   const [creditIsPaid, setCreditIsPaid] = useState<boolean | null>(null);
   
-  // Documentos del vehículo
   const [documents, setDocuments] = useState({
     soat: null as File | null,
     soatExpiration: null as Date | null,
@@ -82,16 +78,16 @@ const VehicleForm = () => {
     photos: [] as File[],
   });
 
-  // Documentos del propietario
   const [ownerDocuments, setOwnerDocuments] = useState({
     identification: null as File | null,
     rut: null as File | null,
     bankCertification: null as File | null,
     dataProcessingConsent: null as File | null,
     settlementCertificate: null as File | null,
+    signedPromissoryNote: null as File | null,
+    blankPromissoryInstructions: null as File | null,
   });
 
-  // Configuración del formulario con react-hook-form
   const form = useForm<z.infer<typeof vehicleFormSchema>>({
     resolver: zodResolver(vehicleFormSchema),
     defaultValues: {
@@ -108,7 +104,6 @@ const VehicleForm = () => {
       engineNumber: "",
       chassisNumber: "",
       
-      // Valores por defecto para propietario
       ownerFirstName: "",
       ownerLastName: "",
       ownerIdentificationType: "CC",
@@ -122,11 +117,9 @@ const VehicleForm = () => {
     },
   });
 
-  // Observar cambios en campos de crédito
   const hasCredit = form.watch("ownerHasCredit");
   const creditEndDate = form.watch("ownerCreditEndDate");
 
-  // Verificar si el crédito está pagado basado en la fecha de finalización
   useEffect(() => {
     if (hasCredit === "si" && creditEndDate) {
       const isPaid = isAfter(new Date(), creditEndDate);
@@ -136,7 +129,6 @@ const VehicleForm = () => {
     }
   }, [hasCredit, creditEndDate]);
 
-  // Función para manejar la subida de documentos del vehículo
   const handleDocumentUpload = (
     type: keyof typeof documents, 
     file: File | null, 
@@ -160,7 +152,6 @@ const VehicleForm = () => {
     });
   };
 
-  // Función para manejar cambios en las fechas de vencimiento
   const handleExpirationDateChange = (
     type: 'soatExpiration' | 'technicalInspectionExpiration' | 'rcPolicyExpiration',
     date: Date | null
@@ -171,7 +162,6 @@ const VehicleForm = () => {
     }));
   };
 
-  // Función para manejar la subida de documentos del propietario
   const handleOwnerDocumentUpload = (
     type: keyof typeof ownerDocuments,
     file: File | null
@@ -187,7 +177,6 @@ const VehicleForm = () => {
     });
   };
 
-  // Función para eliminar un documento del vehículo
   const handleRemoveDocument = (
     type: keyof typeof documents, 
     index: number = -1
@@ -198,7 +187,6 @@ const VehicleForm = () => {
         photos: prev.photos.filter((_, i) => i !== index)
       }));
     } else {
-      // Si se elimina un documento con fecha de vencimiento, también eliminar la fecha
       if (type === 'soat') {
         setDocuments(prev => ({
           ...prev,
@@ -231,7 +219,6 @@ const VehicleForm = () => {
     });
   };
 
-  // Función para eliminar un documento del propietario
   const handleRemoveOwnerDocument = (
     type: keyof typeof ownerDocuments
   ) => {
@@ -246,9 +233,7 @@ const VehicleForm = () => {
     });
   };
 
-  // Función para enviar el formulario
   const onSubmit = (data: z.infer<typeof vehicleFormSchema>) => {
-    // Aquí se manejaría la lógica para guardar el vehículo
     console.log("Datos del vehículo:", data);
     console.log("Documentos del vehículo:", documents);
     console.log("Documentos del propietario:", ownerDocuments);
@@ -801,6 +786,26 @@ const VehicleForm = () => {
                           onRemove={() => handleRemoveOwnerDocument('settlementCertificate')}
                         />
                       </div>
+
+                      <div className="col-span-1">
+                        <DocumentUploader
+                          title="Pagaré Firmado"
+                          description="Sube el pagaré firmado"
+                          file={ownerDocuments.signedPromissoryNote}
+                          onUpload={(file) => handleOwnerDocumentUpload('signedPromissoryNote', file)}
+                          onRemove={() => handleRemoveOwnerDocument('signedPromissoryNote')}
+                        />
+                      </div>
+
+                      <div className="col-span-1">
+                        <DocumentUploader
+                          title="Carta Instrucciones Pagaré"
+                          description="Sube la carta de instrucciones pagaré en blanco"
+                          file={ownerDocuments.blankPromissoryInstructions}
+                          onUpload={(file) => handleOwnerDocumentUpload('blankPromissoryInstructions', file)}
+                          onRemove={() => handleRemoveOwnerDocument('blankPromissoryInstructions')}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -868,6 +873,8 @@ const VehicleForm = () => {
                     bankCertification: null,
                     dataProcessingConsent: null,
                     settlementCertificate: null,
+                    signedPromissoryNote: null,
+                    blankPromissoryInstructions: null,
                   });
                   setCreditIsPaid(null);
                 }}
