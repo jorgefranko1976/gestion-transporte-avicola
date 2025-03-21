@@ -11,6 +11,7 @@ import DriverPortal from "./pages/DriverPortal";
 import CoordinatorPortal from "./pages/CoordinatorPortal";
 import Vehicles from "./pages/Vehicles";
 import Farms from "./pages/Farms";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -87,6 +88,16 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRole="coordinator">
                   <Farms />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Settings route */}
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute allowedRole="coordinator">
+                  <Settings />
                 </ProtectedRoute>
               } 
             />

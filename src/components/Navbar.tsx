@@ -1,7 +1,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { LogOut, Menu, Truck, User, X, Wheat } from 'lucide-react';
+import { LogOut, Menu, Truck, User, X, Wheat, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -81,6 +81,7 @@ export const Navbar = ({ className }: NavbarProps) => {
                   <NavLink to="/farms">Granjas</NavLink>
                   <NavLink to="/drivers">Conductores</NavLink>
                   <NavLink to="/reports">Reportes</NavLink>
+                  <NavLink to="/settings">Configuración</NavLink>
                 </>
               )}
               
@@ -200,6 +201,13 @@ export const Navbar = ({ className }: NavbarProps) => {
                         className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors"
                       >
                         Reportes
+                      </Link>
+                      <Link 
+                        to="/settings" 
+                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span>Configuración</span>
                       </Link>
                     </>
                   )}

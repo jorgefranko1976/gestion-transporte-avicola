@@ -3,7 +3,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { productionCycleFormSchema, ProductionCycleFormValues } from "./farmFormSchema";
-import { Farm, ChickenBreed, ChickenSex } from "@/lib/types";
+import { Farm, ChickenBreedType, ChickenSex } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/ui/form";
 import { growthProfiles } from "./production-cycle/mock-data";
@@ -44,7 +44,7 @@ const ProductionCycleForm = ({ farms, onSuccess }: ProductionCycleFormProps) => 
   });
   
   // Filtra los perfiles de crecimiento según la raza y sexo seleccionados
-  const filterProfiles = (breed: ChickenBreed, sex: ChickenSex) => {
+  const filterProfiles = (breed: ChickenBreedType, sex: ChickenSex) => {
     return growthProfiles.filter(profile => 
       (profile.breed === breed || profile.breed === "otras") && 
       (profile.sex === sex || profile.sex === "mixto")
@@ -53,7 +53,7 @@ const ProductionCycleForm = ({ farms, onSuccess }: ProductionCycleFormProps) => 
   
   // Actualiza los perfiles cuando cambia la raza o el sexo
   const handleBreedOrSexChange = () => {
-    const breed = form.getValues("breed") as ChickenBreed;
+    const breed = form.getValues("breed") as ChickenBreedType;
     const sex = form.getValues("sex") as ChickenSex;
     
     const filtered = filterProfiles(breed, sex);

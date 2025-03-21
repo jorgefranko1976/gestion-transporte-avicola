@@ -11,4 +11,6 @@ export interface VehicleOwner {
   address?: string;
   city?: string;
   isCompany: boolean;
+  firstName?: string; // Añadido para compatibilidad
+  lastName?: string; // Añadido para compatibilidad
 }
