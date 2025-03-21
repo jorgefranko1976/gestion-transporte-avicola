@@ -19,8 +19,6 @@ interface FileReport {
   uploadedBy: string;
   records: number | null;
   status: string;
-  reproCount: number | null;
-  engordeCount: number | null;
 }
 
 const FileReportsTab = () => {
@@ -53,14 +51,12 @@ const FileReportsTab = () => {
       
       const formattedFiles = data.map(file => ({
         id: file.id,
-        name: file.name,
-        type: file.type,
+        name: file.name || 'Sin nombre',
+        type: file.type || 'Desconocido',
         uploadedAt: new Date(file.uploaded_at),
-        uploadedBy: file.uploaded_by,
+        uploadedBy: file.uploaded_by || 'Usuario desconocido',
         records: file.records,
-        status: file.status,
-        reproCount: file.repro_count,
-        engordeCount: file.engorde_count
+        status: file.status || 'unknown'
       }));
       
       setFiles(formattedFiles);
@@ -79,9 +75,9 @@ const FileReportsTab = () => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
       const filtered = files.filter(f => 
-        f.name.toLowerCase().includes(lowercaseSearch) || 
-        f.type.toLowerCase().includes(lowercaseSearch) ||
-        f.uploadedBy.toLowerCase().includes(lowercaseSearch)
+        (f.name && f.name.toLowerCase().includes(lowercaseSearch)) || 
+        (f.type && f.type.toLowerCase().includes(lowercaseSearch)) ||
+        (f.uploadedBy && f.uploadedBy.toLowerCase().includes(lowercaseSearch))
       );
       setFilteredFiles(filtered);
     } else {
@@ -103,9 +99,7 @@ const FileReportsTab = () => {
       'Fecha de Subida', 
       'Subido Por', 
       'Registros', 
-      'Estado',
-      'Registros REPRO',
-      'Registros ENGORDE'
+      'Estado'
     ].join(',');
     
     const csvRows = filteredFiles.map(f => [
@@ -114,9 +108,7 @@ const FileReportsTab = () => {
       format(f.uploadedAt, 'dd/MM/yyyy HH:mm', { locale: es }),
       f.uploadedBy,
       f.records || 0,
-      f.status,
-      f.reproCount || 0,
-      f.engordeCount || 0
+      f.status
     ].join(','));
     
     const csvContent = [headers, ...csvRows].join('\n');
@@ -135,7 +127,7 @@ const FileReportsTab = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Reporte de Archivos Subidos</h2>
+      <h2 className="text-xl font-semibold mb-4">Archivos Subidos al Sistema</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="space-y-2">
@@ -153,7 +145,7 @@ const FileReportsTab = () => {
                 {startDate ? format(startDate, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
               <Calendar
                 mode="single"
                 selected={startDate}
@@ -179,7 +171,7 @@ const FileReportsTab = () => {
                 {endDate ? format(endDate, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
               <Calendar
                 mode="single"
                 selected={endDate}
@@ -234,8 +226,7 @@ const FileReportsTab = () => {
                   <th className="px-4 py-3 text-left font-medium">Tipo</th>
                   <th className="px-4 py-3 text-left font-medium">Fecha de Subida</th>
                   <th className="px-4 py-3 text-left font-medium">Subido Por</th>
-                  <th className="px-4 py-3 text-left font-medium">REPRO</th>
-                  <th className="px-4 py-3 text-left font-medium">ENGORDE</th>
+                  <th className="px-4 py-3 text-left font-medium">Registros</th>
                   <th className="px-4 py-3 text-left font-medium">Estado</th>
                 </tr>
               </thead>
@@ -248,8 +239,7 @@ const FileReportsTab = () => {
                       {format(file.uploadedAt, "dd MMM yyyy, HH:mm", { locale: es })}
                     </td>
                     <td className="px-4 py-3">{file.uploadedBy}</td>
-                    <td className="px-4 py-3">{file.reproCount || 0}</td>
-                    <td className="px-4 py-3">{file.engordeCount || 0}</td>
+                    <td className="px-4 py-3">{file.records || 0}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         file.status === 'completed' 

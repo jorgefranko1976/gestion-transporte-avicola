@@ -51,8 +51,8 @@ const StatusReportsTab = () => {
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
       } else {
-        // Si es "todos", excluir los completados
-        query = query.not('status', 'eq', 'completed');
+        // Si es "todos", excluir los completados y pendientes
+        query = query.not('status', 'in', '("completed","pending")');
       }
       
       // Ejecutar la consulta
@@ -65,48 +65,46 @@ const StatusReportsTab = () => {
       
       // Formatear los datos y obtener información del conductor
       const formattedDispatches = await Promise.all(
-        dispatchesData
-          .filter(d => d.status !== 'pending') // Excluir los pendientes
-          .map(async (dispatch) => {
-            // Obtener información del conductor si tiene driver_id
-            let driverName = null;
-            if (dispatch.driver_id) {
-              const { data: driverData, error: driverError } = await supabase
-                .from('drivers')
-                .select('first_name, last_name')
-                .eq('id', dispatch.driver_id)
-                .single();
-                
-              if (!driverError && driverData) {
-                driverName = `${driverData.first_name} ${driverData.last_name}`;
-              }
-            }
-            
-            // Calcular horas restantes y si está demorado
-            let hoursRemaining = null;
-            let isDelayed = false;
-            
-            if (dispatch.accepted_at) {
-              const acceptedDate = new Date(dispatch.accepted_at);
-              const expectedEnd = addHours(acceptedDate, 24); // 24 horas después de aceptado
+        dispatchesData.map(async (dispatch) => {
+          // Obtener información del conductor si tiene driver_id
+          let driverName = null;
+          if (dispatch.driver_id) {
+            const { data: driverData, error: driverError } = await supabase
+              .from('drivers')
+              .select('first_name, last_name')
+              .eq('id', dispatch.driver_id)
+              .single();
               
-              hoursRemaining = differenceInHours(expectedEnd, now);
-              isDelayed = hoursRemaining < 0;
+            if (!driverError && driverData) {
+              driverName = `${driverData.first_name || ''} ${driverData.last_name || ''}`.trim() || 'Sin nombre';
             }
+          }
+          
+          // Calcular horas restantes y si está demorado
+          let hoursRemaining = null;
+          let isDelayed = false;
+          
+          if (dispatch.accepted_at) {
+            const acceptedDate = new Date(dispatch.accepted_at);
+            const expectedEnd = addHours(acceptedDate, 24); // 24 horas después de aceptado
             
-            return {
-              id: dispatch.id,
-              orderId: dispatch.order_id,
-              vehiclePlate: dispatch.vehicle_plate || 'No asignado',
-              driverName,
-              destination: dispatch.destination,
-              acceptedAt: dispatch.accepted_at ? new Date(dispatch.accepted_at) : null,
-              eta: dispatch.eta ? new Date(dispatch.eta) : null,
-              status: dispatch.status,
-              hoursRemaining,
-              isDelayed
-            };
-          })
+            hoursRemaining = differenceInHours(expectedEnd, now);
+            isDelayed = hoursRemaining < 0;
+          }
+          
+          return {
+            id: dispatch.id,
+            orderId: dispatch.order_id || 'Sin ID',
+            vehiclePlate: dispatch.vehicle_plate || 'No asignado',
+            driverName,
+            destination: dispatch.destination || 'Sin destino',
+            acceptedAt: dispatch.accepted_at ? new Date(dispatch.accepted_at) : null,
+            eta: dispatch.eta ? new Date(dispatch.eta) : null,
+            status: dispatch.status || 'unknown',
+            hoursRemaining,
+            isDelayed
+          };
+        })
       );
       
       setDispatches(formattedDispatches);
@@ -125,9 +123,9 @@ const StatusReportsTab = () => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
       const filtered = dispatches.filter(d => 
-        d.orderId.toLowerCase().includes(lowercaseSearch) ||
-        d.vehiclePlate.toLowerCase().includes(lowercaseSearch) ||
-        d.destination.toLowerCase().includes(lowercaseSearch) ||
+        (d.orderId && d.orderId.toLowerCase().includes(lowercaseSearch)) ||
+        (d.vehiclePlate && d.vehiclePlate.toLowerCase().includes(lowercaseSearch)) ||
+        (d.destination && d.destination.toLowerCase().includes(lowercaseSearch)) ||
         (d.driverName && d.driverName.toLowerCase().includes(lowercaseSearch))
       );
       setFilteredDispatches(filtered);
@@ -182,7 +180,7 @@ const StatusReportsTab = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Reporte de Estado de Despachos</h2>
+      <h2 className="text-xl font-semibold mb-4">Reporte de Estado de Viajes</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="space-y-2">
@@ -207,7 +205,7 @@ const StatusReportsTab = () => {
           className="w-full md:w-auto"
           disabled={isLoading}
         >
-          {isLoading ? 'Buscando...' : 'Buscar Despachos'}
+          {isLoading ? 'Buscando...' : 'Buscar Viajes'}
         </Button>
         
         <div className="relative flex-grow">
@@ -284,12 +282,12 @@ const StatusReportsTab = () => {
         </div>
       ) : isLoading ? (
         <div className="text-center py-8 border rounded-md">
-          <p className="text-muted-foreground">Buscando despachos...</p>
+          <p className="text-muted-foreground">Buscando viajes...</p>
         </div>
       ) : (
         <div className="text-center py-8 border rounded-md">
           <TruckIcon className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-muted-foreground mb-1">No se han encontrado despachos en progreso</p>
+          <p className="text-muted-foreground mb-1">No se han encontrado viajes en progreso</p>
           <p className="text-sm text-muted-foreground">
             Intenta cambiar los criterios de búsqueda
           </p>

@@ -32,7 +32,10 @@ export const useReceiptSearch = () => {
         if (vehiclesError) throw vehiclesError;
         
         // Filtrar valores nulos o vacíos
-        const filteredVehicles = vehiclesData.filter(v => v.plate && v.plate.trim() !== '');
+        const filteredVehicles = vehiclesData
+          .filter(v => v.plate && v.plate.trim() !== '')
+          .map(v => ({ plate: v.plate }));
+        
         setVehicles(filteredVehicles);
         
         // Obtener conductores
@@ -83,7 +86,8 @@ export const useReceiptSearch = () => {
         `)
         .eq('status', 'completed')
         .gte('completed_at', startDate.toISOString())
-        .lte('completed_at', new Date(endDate.setHours(23, 59, 59)).toISOString());
+        .lte('completed_at', new Date(endDate.setHours(23, 59, 59)).toISOString())
+        .not('receipt_image_url', 'is', null);
       
       // Aplicar filtros adicionales
       if (vehiclePlate && vehiclePlate !== 'all_vehicles') {
@@ -111,18 +115,18 @@ export const useReceiptSearch = () => {
             .maybeSingle();
             
           if (!driverError && driverData) {
-            driverName = `${driverData.first_name || ''} ${driverData.last_name || ''}`.trim();
+            driverName = `${driverData.first_name || ''} ${driverData.last_name || ''}`.trim() || 'Sin nombre';
           }
         }
         
         return {
           id: receipt.id,
           orderId: receipt.order_id || 'Sin ID',
-          completedAt: new Date(receipt.completed_at),
+          completedAt: receipt.completed_at ? new Date(receipt.completed_at) : new Date(),
           vehiclePlate: receipt.vehicle_plate || 'No asignado',
           driverName: driverName || 'No asignado',
           destination: receipt.destination || 'No especificado',
-          receiptImageUrl: receipt.receipt_image_url
+          receiptImageUrl: receipt.receipt_image_url || null
         };
       }));
       

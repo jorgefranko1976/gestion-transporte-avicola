@@ -51,7 +51,7 @@ export const ReceiptFilters = ({
               {startDate ? format(startDate, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
             <Calendar
               mode="single"
               selected={startDate}
@@ -77,7 +77,7 @@ export const ReceiptFilters = ({
               {endDate ? format(endDate, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
             <Calendar
               mode="single"
               selected={endDate}

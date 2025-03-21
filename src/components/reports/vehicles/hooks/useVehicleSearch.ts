@@ -77,7 +77,8 @@ export const useVehicleSearch = () => {
           status,
           owner_id
         `)
-        .order('plate');
+        .order('plate')
+        .limit(50); // Limitado a 50 registros según la solicitud
       
       if (vehiclesError) throw vehiclesError;
       

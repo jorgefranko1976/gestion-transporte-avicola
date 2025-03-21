@@ -4,17 +4,17 @@ import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import PageTransition from '@/components/transitions/PageTransition';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DispatchReportsTab from '@/components/reports/DispatchReportsTab';
+import { Calendar, FileText, Truck, Users, Clock, Receipt } from 'lucide-react';
+import DateRangeReportsTab from '@/components/reports/DateRangeReportsTab';
 import FileReportsTab from '@/components/reports/FileReportsTab';
 import VehicleReportsTab from '@/components/reports/vehicles/VehicleReportsTab';
 import DriverReportsTab from '@/components/reports/DriverReportsTab';
 import StatusReportsTab from '@/components/reports/StatusReportsTab';
 import ReceiptReportsTab from '@/components/reports/receipts/ReceiptReportsTab';
-import { BarChart3, Users, FileText, Truck, ClipboardCheck, Receipt } from 'lucide-react';
 
 const Reports = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("dispatches");
+  const [activeTab, setActiveTab] = useState("date_range");
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,11 +37,11 @@ const Reports = () => {
                 <div className="overflow-x-auto">
                   <TabsList className="w-full border-b border-border rounded-none bg-card h-auto p-0 flex-nowrap min-w-max">
                     <TabsTrigger 
-                      value="dispatches" 
+                      value="date_range" 
                       className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6 flex items-center gap-2"
                     >
-                      <BarChart3 className="w-4 h-4" />
-                      <span>Despachos</span>
+                      <Calendar className="w-4 h-4" />
+                      <span>Reportes por Fecha</span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="files" 
@@ -68,8 +68,8 @@ const Reports = () => {
                       value="status" 
                       className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6 flex items-center gap-2"
                     >
-                      <ClipboardCheck className="w-4 h-4" />
-                      <span>Estado</span>
+                      <Clock className="w-4 h-4" />
+                      <span>Estado de Viajes</span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="receipts" 
@@ -81,8 +81,8 @@ const Reports = () => {
                   </TabsList>
                 </div>
                 
-                <TabsContent value="dispatches" className="p-6">
-                  <DispatchReportsTab />
+                <TabsContent value="date_range" className="p-6">
+                  <DateRangeReportsTab />
                 </TabsContent>
                 
                 <TabsContent value="files" className="p-6">

@@ -16,7 +16,6 @@ interface DriverReport {
   identificationNumber: string;
   phone: string;
   vehiclePlate: string | null;
-  licenseExpiration: Date | null;
   hireDate: Date;
   terminationDate: Date | null;
   active: boolean;
@@ -44,7 +43,6 @@ const DriverReportsTab = () => {
           identification_number,
           phone,
           assigned_vehicle_id,
-          license_expiration,
           hire_date,
           termination_date,
           active,
@@ -65,12 +63,11 @@ const DriverReportsTab = () => {
       // Formatear los datos
       const formattedDrivers = data.map(driver => ({
         id: driver.id,
-        fullName: `${driver.first_name} ${driver.last_name}`,
-        identificationType: driver.identification_type,
-        identificationNumber: driver.identification_number,
-        phone: driver.phone,
+        fullName: `${driver.first_name || ''} ${driver.last_name || ''}`.trim() || 'Sin nombre',
+        identificationType: driver.identification_type || 'Sin tipo',
+        identificationNumber: driver.identification_number || 'Sin número',
+        phone: driver.phone || 'Sin teléfono',
         vehiclePlate: driver.vehicles?.plate || null,
-        licenseExpiration: driver.license_expiration ? new Date(driver.license_expiration) : null,
         hireDate: new Date(driver.hire_date),
         terminationDate: driver.termination_date ? new Date(driver.termination_date) : null,
         active: driver.active
@@ -92,9 +89,9 @@ const DriverReportsTab = () => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
       const filtered = drivers.filter(d => 
-        d.fullName.toLowerCase().includes(lowercaseSearch) ||
-        d.identificationNumber.toLowerCase().includes(lowercaseSearch) ||
-        d.phone.toLowerCase().includes(lowercaseSearch) ||
+        (d.fullName && d.fullName.toLowerCase().includes(lowercaseSearch)) ||
+        (d.identificationNumber && d.identificationNumber.toLowerCase().includes(lowercaseSearch)) ||
+        (d.phone && d.phone.toLowerCase().includes(lowercaseSearch)) ||
         (d.vehiclePlate && d.vehiclePlate.toLowerCase().includes(lowercaseSearch))
       );
       setFilteredDrivers(filtered);
@@ -116,7 +113,6 @@ const DriverReportsTab = () => {
       'Identificación', 
       'Teléfono', 
       'Vehículo Asignado', 
-      'Venc. Licencia', 
       'Fecha Contratación',
       'Fecha Retiro',
       'Estado'
@@ -127,7 +123,6 @@ const DriverReportsTab = () => {
       `${d.identificationType}: ${d.identificationNumber}`,
       d.phone,
       d.vehiclePlate || 'No asignado',
-      d.licenseExpiration ? format(d.licenseExpiration, 'dd/MM/yyyy', { locale: es }) : 'No registrado',
       format(d.hireDate, 'dd/MM/yyyy', { locale: es }),
       d.terminationDate ? format(d.terminationDate, 'dd/MM/yyyy', { locale: es }) : 'N/A',
       d.active ? 'Activo' : 'Inactivo'
@@ -154,7 +149,7 @@ const DriverReportsTab = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="space-y-2">
           <label className="text-sm font-medium">Estado</label>
-          <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+          <Select value={statusFilter} onValueChange={(value: 'all' | 'active' | 'inactive') => setStatusFilter(value)}>
             <SelectTrigger>
               <SelectValue placeholder="Todos los estados" />
             </SelectTrigger>
@@ -211,7 +206,7 @@ const DriverReportsTab = () => {
                   <th className="px-4 py-3 text-left font-medium">Teléfono</th>
                   <th className="px-4 py-3 text-left font-medium">Vehículo</th>
                   <th className="px-4 py-3 text-left font-medium">Fecha Contratación</th>
-                  <th className="px-4 py-3 text-left font-medium">Venc. Licencia</th>
+                  <th className="px-4 py-3 text-left font-medium">Fecha Retiro</th>
                   <th className="px-4 py-3 text-left font-medium">Estado</th>
                 </tr>
               </thead>
@@ -226,9 +221,9 @@ const DriverReportsTab = () => {
                       {format(driver.hireDate, "dd MMM yyyy", { locale: es })}
                     </td>
                     <td className="px-4 py-3">
-                      {driver.licenseExpiration 
-                        ? format(driver.licenseExpiration, "dd MMM yyyy", { locale: es })
-                        : 'No registrado'}
+                      {driver.terminationDate 
+                        ? format(driver.terminationDate, "dd MMM yyyy", { locale: es })
+                        : 'N/A'}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
