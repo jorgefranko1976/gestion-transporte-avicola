@@ -1,7 +1,5 @@
 
 import { useAuth } from '@/context/AuthContext';
-import { Navbar } from '@/components/Navbar';
-import PageTransition from '@/components/transitions/PageTransition';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +11,7 @@ import ExcelUploadModal from '@/components/excel/ExcelUploadModal';
 import CoordinatorHeader from '@/components/coordinator/CoordinatorHeader';
 import CoordinatorTabs from '@/components/coordinator/CoordinatorTabs';
 import { useExcelUpload } from '@/components/excel/useExcelUpload';
+import { PortalLayout } from '@/components/layout/PortalLayout';
 
 const CoordinatorPortal = () => {
   const { user } = useAuth();
@@ -39,55 +38,49 @@ const CoordinatorPortal = () => {
     // This would show the detailed preview modal
   };
 
+  const coordinatorHeader = (
+    <CoordinatorHeader 
+      onViewExcel={() => setActiveTab('excel')}
+      onShowUploadModal={() => setShowUploadModal(true)}
+    />
+  );
+
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <PortalLayout title="Panel de Coordinador">
+      <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">
+        <CoordinatorTabs
+          activeTab={activeTab}
+          onChangeTab={setActiveTab}
+        />
+        
+        {activeTab === 'dashboard' && (
+          <DashboardContent 
+            setActiveTab={setActiveTab} 
+            setActiveDispatchStatus={setActiveDispatchStatus} 
+          />
+        )}
+        
+        {activeTab === 'despachos' && (
+          <DispatchesContent 
+            searchTerm={searchTerm} 
+            setSearchTerm={setSearchTerm} 
+          />
+        )}
+
+        {activeTab === 'excel' && (
+          <ExcelContent 
+            excelData={excelData}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            activeDataType={activeDataType}
+            setActiveDataType={setActiveDataType}
+            activeDispatchStatus={activeDispatchStatus}
+            setActiveDispatchStatus={setActiveDispatchStatus}
+            lastUpdateDate={lastUpdateDate}
+          />
+        )}
+      </div>
       
-      <main className="pt-24 pb-16">
-        <div className="container mx-auto px-4">
-          <PageTransition>
-            <CoordinatorHeader 
-              onViewExcel={() => setActiveTab('excel')}
-              onShowUploadModal={() => setShowUploadModal(true)}
-            />
-            
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">
-              <CoordinatorTabs
-                activeTab={activeTab}
-                onChangeTab={setActiveTab}
-              />
-              
-              {activeTab === 'dashboard' && (
-                <DashboardContent 
-                  setActiveTab={setActiveTab} 
-                  setActiveDispatchStatus={setActiveDispatchStatus} 
-                />
-              )}
-              
-              {activeTab === 'despachos' && (
-                <DispatchesContent 
-                  searchTerm={searchTerm} 
-                  setSearchTerm={setSearchTerm} 
-                />
-              )}
-
-              {activeTab === 'excel' && (
-                <ExcelContent 
-                  excelData={excelData}
-                  searchTerm={searchTerm}
-                  setSearchTerm={setSearchTerm}
-                  activeDataType={activeDataType}
-                  setActiveDataType={setActiveDataType}
-                  activeDispatchStatus={activeDispatchStatus}
-                  setActiveDispatchStatus={setActiveDispatchStatus}
-                  lastUpdateDate={lastUpdateDate}
-                />
-              )}
-            </div>
-          </PageTransition>
-        </div>
-      </main>
-
       {/* Upload Modal */}
       {showUploadModal && (
         <ExcelUploadModal
@@ -121,7 +114,7 @@ const CoordinatorPortal = () => {
           onRemoveFile={handleRemoveFile}
         />
       )}
-    </div>
+    </PortalLayout>
   );
 };
 
