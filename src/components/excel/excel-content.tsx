@@ -1,4 +1,4 @@
-import { sampleExcelDataType2 } from "@/data/mockData";
+
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Filter, Search, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
