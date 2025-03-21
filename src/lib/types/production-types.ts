@@ -43,6 +43,9 @@ export interface ProductionCycle {
   // Despachos asociados
   dispatches?: Dispatch[];
   
+  // Registros de entrada de aves
+  birdEntries?: BirdEntry[];
+  
   status: 'active' | 'completed' | 'cancelled';
   notes?: string;
 }
@@ -64,3 +67,16 @@ export interface DailyRecord {
   notes?: string;
 }
 
+// Ingreso de aves a galpón
+export interface BirdEntry {
+  id: string;
+  cycleId: string;
+  farmId: string;
+  entryDate: Date;
+  quantity: number;
+  shedNumber: number; // Número del galpón
+  breed: ChickenBreedType;
+  notes?: string;
+  createdAt: Date;
+  createdBy: string;
+}
