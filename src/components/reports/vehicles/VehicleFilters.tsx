@@ -44,7 +44,7 @@ export const VehicleFilters = ({
           <SelectContent>
             <SelectItem value="all_types">Todos los tipos</SelectItem>
             {vehicleTypes.map(type => (
-              <SelectItem key={type} value={type}>{type}</SelectItem>
+              <SelectItem key={type} value={type || "unknown_type"}>{type || "Tipo desconocido"}</SelectItem>
             ))}
           </SelectContent>
         </Select>

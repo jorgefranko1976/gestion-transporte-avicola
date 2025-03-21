@@ -156,7 +156,7 @@ const BirdEntryForm = ({ onSuccess }: BirdEntryFormProps) => {
                 <FormLabel>Ciclo de Producción</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  value={field.value}
+                  value={field.value || "pending_selection"}
                   disabled={!selectedFarmId}
                 >
                   <FormControl>
@@ -165,11 +165,15 @@ const BirdEntryForm = ({ onSuccess }: BirdEntryFormProps) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {availableCycles.map((cycle) => (
-                      <SelectItem key={cycle.id} value={cycle.id}>
-                        {cycle.name}
-                      </SelectItem>
-                    ))}
+                    {availableCycles.length > 0 ? (
+                      availableCycles.map((cycle) => (
+                        <SelectItem key={cycle.id} value={cycle.id}>
+                          {cycle.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no_cycles_available">No hay ciclos disponibles</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
                 {!selectedFarmId && (
@@ -229,7 +233,7 @@ const BirdEntryForm = ({ onSuccess }: BirdEntryFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Raza</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || "pending_selection"}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una raza" />

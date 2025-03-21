@@ -41,7 +41,7 @@ const ChickenSexSelector = ({ form, onSexChange }: ChickenSexSelectorProps) => {
               field.onChange(value);
               onSexChange();
             }} 
-            defaultValue={field.value}
+            defaultValue={field.value || "pending_selection"}
           >
             <FormControl>
               <SelectTrigger>

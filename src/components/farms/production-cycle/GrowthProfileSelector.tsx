@@ -34,18 +34,22 @@ const GrowthProfileSelector = ({ form, profiles }: GrowthProfileSelectorProps) =
       render={({ field }) => (
         <FormItem>
           <FormLabel>Perfil de Crecimiento</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select onValueChange={field.onChange} defaultValue={field.value || "pending_selection"}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar perfil" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {profiles.map((profile) => (
-                <SelectItem key={profile.id} value={profile.id}>
-                  {profile.name}
-                </SelectItem>
-              ))}
+              {profiles.length > 0 ? (
+                profiles.map((profile) => (
+                  <SelectItem key={profile.id} value={profile.id}>
+                    {profile.name}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="no_profiles">No hay perfiles disponibles</SelectItem>
+              )}
             </SelectContent>
           </Select>
           <FormMessage />

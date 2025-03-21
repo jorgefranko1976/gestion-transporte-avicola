@@ -43,7 +43,7 @@ const ChickenBreedSelector = ({ form, onBreedChange }: ChickenBreedSelectorProps
               field.onChange(value);
               onBreedChange();
             }} 
-            defaultValue={field.value}
+            defaultValue={field.value || "pending_selection"}
           >
             <FormControl>
               <SelectTrigger>

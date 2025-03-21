@@ -36,7 +36,7 @@ const FarmResourcesSection = ({ form }: FarmResourcesSectionProps) => {
             <FormLabel>Fuente de Agua</FormLabel>
             <Select 
               onValueChange={field.onChange} 
-              defaultValue={field.value}
+              defaultValue={field.value || "pending_selection"}
             >
               <FormControl>
                 <SelectTrigger>
