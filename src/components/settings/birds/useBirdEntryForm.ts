@@ -4,11 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { birdEntryFormSchema, BirdEntryFormValues } from "./schema";
-
-const mockCycles = [
-  { id: "1", farmId: "1", name: "Ciclo Junio-Julio 2023" },
-  { id: "2", farmId: "2", name: "Ciclo Mayo-Junio 2023" },
-];
+import { mockCycles } from "./mock-data";
 
 interface UseBirdEntryFormProps {
   onSuccess?: () => void;

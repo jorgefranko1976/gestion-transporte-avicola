@@ -4,17 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescripti
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import { BirdEntryFormValues } from "./schema";
-
-// Datos de muestra para testing - in a real app, these would come from props or API
-const mockFarms = [
-  { id: "1", name: "Granja El Encanto" },
-  { id: "2", name: "Granja Los Pinos" },
-];
-
-const mockCycles = [
-  { id: "1", farmId: "1", name: "Ciclo Junio-Julio 2023" },
-  { id: "2", farmId: "2", name: "Ciclo Mayo-Junio 2023" },
-];
+import { mockFarms, mockCycles } from "./mock-data";
 
 interface FarmCycleSelectorProps {
   form: UseFormReturn<BirdEntryFormValues>;
@@ -100,7 +90,9 @@ const FarmCycleSelector = ({
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="no_cycles_available">No hay ciclos disponibles</SelectItem>
+                  <SelectItem value="no_cycles_available" disabled>
+                    No hay ciclos disponibles
+                  </SelectItem>
                 )}
               </SelectContent>
             </Select>
