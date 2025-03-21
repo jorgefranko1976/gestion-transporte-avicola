@@ -75,9 +75,18 @@ const ExcelUploadModal = ({
               
               <Button 
                 onClick={onShowDetailedPreview}
-                className="w-full"
+                variant="outline"
+                className="w-full mb-2"
               >
                 Ver vista previa detallada
+              </Button>
+              
+              <Button 
+                onClick={onUpload} 
+                disabled={isUploading}
+                className="w-full"
+              >
+                {isUploading ? 'Procesando...' : 'Subir archivo'}
               </Button>
             </div>
           )}
@@ -89,12 +98,13 @@ const ExcelUploadModal = ({
           >
             Cancelar
           </Button>
-          <Button 
-            onClick={onUpload} 
-            disabled={!selectedFile || isUploading}
-          >
-            {isUploading ? 'Procesando...' : 'Subir archivo'}
-          </Button>
+          {selectedFile && !isUploading && (
+            <Button 
+              onClick={onUpload}
+            >
+              Subir archivo
+            </Button>
+          )}
         </div>
       </div>
     </div>
