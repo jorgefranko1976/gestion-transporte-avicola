@@ -4,13 +4,14 @@ import { Navbar } from '@/components/Navbar';
 import PageTransition from '@/components/transitions/PageTransition';
 import { Button } from "@/components/ui/button";
 import { Farm, ProductionCycle } from '@/lib/types';
-import { Plus, House, Filter, LineChart } from 'lucide-react';
+import { Plus, House, Filter, LineChart, Package } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import FarmForm from '@/components/farms/FarmForm';
 import FarmList from '@/components/farms/FarmList';
 import QuickNavCard from '@/components/dashboard/quick-nav-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductionCycleForm from '@/components/farms/ProductionCycleForm';
+import { Badge } from "@/components/ui/badge";
 
 const mockFarms: Farm[] = [
   {

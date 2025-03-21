@@ -1,4 +1,3 @@
-
 // Vehicle types
 export type VehicleType = 'camion' | 'camion liviano' | 'dobletroque' | 'camioneta' | 'tracto camion';
 
@@ -132,7 +131,7 @@ export interface UploadedFile {
 }
 
 // Tipos para el módulo de Granjas
-export type WaterSource = 'acueducto' | 'carrotanque' | 'pozo' | 'nacedero' | 'rio' | 'caño';
+export type WaterSource = "acueducto" | "carrotanque" | "pozo" | "nacedero" | "rio" | "caño";
 
 export interface Farm {
   id: string;
@@ -144,12 +143,11 @@ export interface Farm {
   contactPerson: string;
   contactPhone: string;
   chickenCapacity: number;
-  concentrateCapacity: number; // En toneladas
+  concentrateCapacity: number;
   shedsCount: number;
-  currentCycle?: ProductionCycle | null; // Ciclo actual
-  cycles?: ProductionCycle[]; // Historial de ciclos
   active: boolean;
   createdAt: Date;
+  minConcentrateReserve?: number;
 }
 
 // Perfil de crecimiento diario
@@ -206,3 +204,7 @@ export interface DailyRecord {
   concentrateReceived: number; // En kg
   notes?: string;
 }
+
+export const getFullName = (person: { firstName: string; lastName: string }) => {
+  return `${person.firstName} ${person.lastName}`;
+};
