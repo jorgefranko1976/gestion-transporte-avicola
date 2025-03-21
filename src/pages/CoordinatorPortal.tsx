@@ -10,10 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from "@/components/ui/button";
 import { BarChart3, FileSpreadsheet, List } from 'lucide-react';
 import { toast } from 'sonner';
+import { ExcelPreviewData } from '@/lib/types';
 
 import DashboardContent from '@/components/dashboard/dashboard-content';
 import DispatchesContent from '@/components/dispatches/dispatches-content';
 import ExcelContent from '@/components/excel/excel-content';
+import ExcelPreviewModal from '@/components/excel/ExcelPreviewModal';
 
 const CoordinatorPortal = () => {
   const { user } = useAuth();
@@ -21,7 +23,11 @@ const CoordinatorPortal = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [previewData, setPreviewData] = useState<ExcelPreviewData>({
+    reproductora: [],
+    engorde: [],
+    totalRecords: 0
+  });
   const [excelData, setExcelData] = useState<any[]>(sampleExcelDataType2);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'despachos' | 'excel'>('dashboard');
   const [activeDataType, setActiveDataType] = useState<'reproductora' | 'engorde'>('reproductora');
@@ -34,7 +40,18 @@ const CoordinatorPortal = () => {
       const file = e.target.files[0];
       setSelectedFile(file);
       
-      setPreviewData(sampleExcelDataType2);
+      // In a real application, you would parse the Excel file here
+      // For this example, we'll simulate it with mock data
+      
+      // Split the sample data into reproductora and engorde
+      const reproData = sampleExcelDataType2.filter(item => item.tipo === 'reproductora');
+      const engordeData = sampleExcelDataType2.filter(item => item.tipo === 'engorde');
+      
+      setPreviewData({
+        reproductora: reproData,
+        engorde: engordeData,
+        totalRecords: sampleExcelDataType2.length
+      });
     }
   };
 
@@ -47,14 +64,21 @@ const CoordinatorPortal = () => {
       setIsUploading(false);
       setShowUploadModal(false);
       setSelectedFile(null);
-      setExcelData(previewData);
+      
+      // Combine both sheets into one excelData array
+      const allData = [...previewData.reproductora, ...previewData.engorde];
+      setExcelData(allData);
       setLastUpdateDate(new Date().toLocaleString());
       
       toast.success("Archivo subido con éxito", {
-        description: `Se procesaron ${previewData.length} registros de despacho.`,
+        description: `Se procesaron ${previewData.totalRecords} registros de despacho.`,
       });
       
-      setPreviewData([]);
+      setPreviewData({
+        reproductora: [],
+        engorde: [],
+        totalRecords: 0
+      });
     }, 2000);
   };
 
@@ -164,7 +188,7 @@ const CoordinatorPortal = () => {
         </div>
       </main>
 
-      {/* Modal de carga de Excel */}
+      {/* Excel Preview Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
@@ -199,30 +223,17 @@ const CoordinatorPortal = () => {
                   </Button>
                 </div>
               ) : (
-                <div>
-                  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg mb-4">
-                    <FileSpreadsheet className="w-8 h-8 text-green-600" />
-                    <div className="flex-1 truncate">
-                      <p className="font-medium truncate">{selectedFile.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(selectedFile.size / 1024).toFixed(1)} KB
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => setSelectedFile(null)}
-                      className="text-gray-400 hover:text-gray-500"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="bg-muted/50 rounded-lg p-3 mb-4">
-                    <p className="text-sm font-medium mb-1">Vista previa:</p>
-                    <p className="text-xs text-muted-foreground">
-                      Se encontraron {previewData.length} registros de despacho
-                    </p>
-                  </div>
-                </div>
+                <Button 
+                  onClick={() => {
+                    // Show the detailed preview modal
+                    setShowUploadModal(false);
+                    // Show the new modal
+                    document.getElementById('excel-preview-modal')?.click();
+                  }}
+                  className="w-full"
+                >
+                  Ver vista previa detallada
+                </Button>
               )}
             </div>
             <div className="border-t p-4 flex justify-end gap-3">
@@ -241,6 +252,35 @@ const CoordinatorPortal = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Detailed Excel Preview Modal */}
+      {selectedFile && (
+        <button 
+          id="excel-preview-modal" 
+          className="hidden"
+          onClick={() => {
+            /* This is a hidden button that triggers the modal */
+          }}
+        />
+      )}
+      
+      {selectedFile && (
+        <ExcelPreviewModal
+          selectedFile={selectedFile}
+          previewData={previewData}
+          isUploading={isUploading}
+          onClose={() => setShowUploadModal(true)}
+          onUpload={handleUpload}
+          onRemoveFile={() => {
+            setSelectedFile(null);
+            setPreviewData({
+              reproductora: [],
+              engorde: [],
+              totalRecords: 0
+            });
+          }}
+        />
       )}
     </div>
   );
