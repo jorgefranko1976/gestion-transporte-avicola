@@ -1,7 +1,7 @@
 
 import { FileText } from "lucide-react";
 
-export const NoDisptachesFound = () => {
+export const NoDispatchesFound = () => {
   return (
     <div className="text-center py-8 border rounded-md">
       <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" />

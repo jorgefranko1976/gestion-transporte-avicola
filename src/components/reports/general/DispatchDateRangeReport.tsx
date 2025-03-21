@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Download } from "lucide-react";
@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { NoDisptachesFound } from "./NoDispatchesFound";
+import { NoDispatchesFound } from "./NoDispatchesFound";
 
 interface Dispatch {
   id: string;
@@ -36,7 +36,7 @@ const DispatchDateRangeReport = () => {
   const [destinations, setDestinations] = useState<string[]>([]);
 
   // Cargar orígenes y destinos al montar el componente
-  useState(() => {
+  useEffect(() => {
     const fetchOptions = async () => {
       try {
         // Obtener orígenes (empresas de cargue)
@@ -311,7 +311,7 @@ const DispatchDateRangeReport = () => {
           <p className="text-muted-foreground">Buscando despachos...</p>
         </div>
       ) : (
-        <NoDisptachesFound />
+        <NoDispatchesFound />
       )}
     </div>
   );
