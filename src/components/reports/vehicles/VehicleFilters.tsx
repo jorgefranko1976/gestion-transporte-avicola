@@ -13,14 +13,17 @@ export const VehicleFilters = ({
   statusFilter, 
   setStatusFilter, 
   typeFilter, 
-  setTypeFilter, 
-  vehicleTypes 
+  setTypeFilter,
+  vehicleTypes
 }: VehicleFiltersProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div className="space-y-2">
         <label className="text-sm font-medium">Estado</label>
-        <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+        <Select 
+          value={statusFilter} 
+          onValueChange={(value: any) => setStatusFilter(value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Todos los estados" />
           </SelectTrigger>
@@ -33,13 +36,13 @@ export const VehicleFilters = ({
       </div>
       
       <div className="space-y-2">
-        <label className="text-sm font-medium">Tipo de vehículo</label>
+        <label className="text-sm font-medium">Tipo de Vehículo</label>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger>
             <SelectValue placeholder="Todos los tipos" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos los tipos</SelectItem>
+            <SelectItem value="all_types">Todos los tipos</SelectItem>
             {vehicleTypes.map(type => (
               <SelectItem key={type} value={type}>{type}</SelectItem>
             ))}

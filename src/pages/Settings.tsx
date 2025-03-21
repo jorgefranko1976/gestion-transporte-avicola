@@ -1,21 +1,15 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Folder, LineChart, Tags, Settings as SettingsIcon, Users, BarChart3 } from "lucide-react";
+import { Folder, LineChart, Tags, Settings as SettingsIcon, Users } from "lucide-react";
 import GrowthProfilesSettings from "@/components/settings/GrowthProfilesSettings";
 import BreedsSettings from "@/components/settings/BreedsSettings";
 import GeneralSettings from "@/components/settings/GeneralSettings";
 import UsersSettings from "@/components/settings/user-management/UsersSettings";
 import { PortalLayout } from "@/components/layout/PortalLayout";
-import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("growth-profiles");
-
-  const handleReportsClick = () => {
-    navigate("/reports");
-  };
 
   return (
     <PortalLayout 
@@ -27,7 +21,7 @@ const Settings = () => {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="mb-8 grid w-full grid-cols-5 lg:w-auto">
+        <TabsList className="mb-8 grid w-full grid-cols-4 lg:w-auto">
           <TabsTrigger value="growth-profiles" className="flex items-center gap-2">
             <LineChart className="h-4 w-4" />
             <span>Perfiles de Crecimiento</span>
@@ -39,10 +33,6 @@ const Settings = () => {
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span>Usuarios</span>
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="flex items-center gap-2" onClick={handleReportsClick}>
-            <BarChart3 className="h-4 w-4" />
-            <span>Informes</span>
           </TabsTrigger>
           <TabsTrigger value="general" className="flex items-center gap-2">
             <SettingsIcon className="h-4 w-4" />
