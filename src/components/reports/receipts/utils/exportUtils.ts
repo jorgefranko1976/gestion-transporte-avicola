@@ -3,8 +3,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ReceiptReport } from '../types';
 
-export const exportToCSV = (data: ReceiptReport[], filename: string) => {
-  // Crear contenido CSV
+export const exportToCSV = (receipts: ReceiptReport[], filename: string) => {
   const headers = [
     'Orden', 
     'Fecha', 
@@ -14,13 +13,13 @@ export const exportToCSV = (data: ReceiptReport[], filename: string) => {
     'Remisión'
   ].join(',');
   
-  const csvRows = data.map(r => [
-    r.orderId,
-    format(r.completedAt, 'dd/MM/yyyy HH:mm', { locale: es }),
-    r.vehiclePlate,
-    r.driverName || 'No asignado',
-    r.destination,
-    r.receiptImageUrl ? 'Sí' : 'No'
+  const csvRows = receipts.map(receipt => [
+    receipt.orderId,
+    format(receipt.completedAt, 'dd/MM/yyyy HH:mm', { locale: es }),
+    receipt.vehiclePlate,
+    receipt.driverName || 'No asignado',
+    receipt.destination,
+    receipt.receiptImageUrl ? 'Disponible' : 'No disponible'
   ].join(','));
   
   const csvContent = [headers, ...csvRows].join('\n');

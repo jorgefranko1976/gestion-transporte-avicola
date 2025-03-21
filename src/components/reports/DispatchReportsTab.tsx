@@ -1,26 +1,25 @@
 
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { Calendar as CalendarIcon, Search, Download, FileText } from 'lucide-react';
+import { Search, Download, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface DispatchReport {
   id: string;
   orderId: string;
   date: Date;
+  vehiclePlate: string | null;
+  driverName: string | null;
   origin: string;
   destination: string;
-  vehiclePlate: string;
-  driverName: string | null;
   status: string;
+  packages: number;
 }
 
 const DispatchReportsTab = () => {
@@ -28,8 +27,8 @@ const DispatchReportsTab = () => {
     new Date(new Date().setDate(new Date().getDate() - 30))
   );
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
-  const [origin, setOrigin] = useState<string>('');
-  const [destination, setDestination] = useState<string>('');
+  const [originFilter, setOriginFilter] = useState('');
+  const [destinationFilter, setDestinationFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [dispatches, setDispatches] = useState<DispatchReport[]>([]);
   const [filteredDispatches, setFilteredDispatches] = useState<DispatchReport[]>([]);
@@ -37,11 +36,11 @@ const DispatchReportsTab = () => {
   const [origins, setOrigins] = useState<string[]>([]);
   const [destinations, setDestinations] = useState<string[]>([]);
 
-  // Cargar datos iniciales
+  // Cargar orígenes y destinos
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchLocations = async () => {
       try {
-        // Obtener orígenes (empresas de cargue)
+        // Obtener orígenes (loading_company)
         const { data: originsData, error: originsError } = await supabase
           .from('dispatches')
           .select('loading_company')
@@ -49,11 +48,7 @@ const DispatchReportsTab = () => {
           
         if (originsError) throw originsError;
         
-        // Filtrar empresas únicas
-        const uniqueOrigins = [...new Set(originsData.map(item => item.loading_company))];
-        setOrigins(uniqueOrigins);
-        
-        // Obtener destinos (granjas)
+        // Obtener destinos
         const { data: destinationsData, error: destinationsError } = await supabase
           .from('dispatches')
           .select('destination')
@@ -61,17 +56,19 @@ const DispatchReportsTab = () => {
           
         if (destinationsError) throw destinationsError;
         
-        // Filtrar destinos únicos
+        // Filtrar valores únicos
+        const uniqueOrigins = [...new Set(originsData.map(item => item.loading_company))];
         const uniqueDestinations = [...new Set(destinationsData.map(item => item.destination))];
+        
+        setOrigins(uniqueOrigins);
         setDestinations(uniqueDestinations);
         
       } catch (error) {
-        console.error('Error fetching initial data:', error);
-        toast.error('Error al cargar datos iniciales');
+        console.error('Error fetching locations:', error);
       }
     };
     
-    fetchInitialData();
+    fetchLocations();
   }, []);
 
   // Buscar despachos
@@ -90,22 +87,24 @@ const DispatchReportsTab = () => {
           id, 
           order_id,
           created_at,
+          vehicle_plate,
+          driver_id,
           loading_company,
           destination,
-          vehicle_plate,
-          drivers(first_name, last_name),
-          status
+          status,
+          packages,
+          drivers(first_name, last_name)
         `)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', new Date(endDate.setHours(23, 59, 59)).toISOString());
       
       // Aplicar filtros adicionales
-      if (origin) {
-        query = query.eq('loading_company', origin);
+      if (originFilter) {
+        query = query.eq('loading_company', originFilter);
       }
       
-      if (destination) {
-        query = query.eq('destination', destination);
+      if (destinationFilter) {
+        query = query.eq('destination', destinationFilter);
       }
       
       // Ejecutar la consulta
@@ -114,17 +113,16 @@ const DispatchReportsTab = () => {
       if (error) throw error;
       
       // Formatear los datos
-      const formattedDispatches = data.map(item => ({
-        id: item.id,
-        orderId: item.order_id,
-        date: new Date(item.created_at),
-        origin: item.loading_company,
-        destination: item.destination,
-        vehiclePlate: item.vehicle_plate || 'No asignado',
-        driverName: item.drivers 
-          ? `${item.drivers.first_name} ${item.drivers.last_name}`
-          : null,
-        status: item.status
+      const formattedDispatches = data.map(dispatch => ({
+        id: dispatch.id,
+        orderId: dispatch.order_id,
+        date: new Date(dispatch.created_at),
+        vehiclePlate: dispatch.vehicle_plate,
+        driverName: dispatch.drivers ? `${dispatch.drivers.first_name} ${dispatch.drivers.last_name}` : null,
+        origin: dispatch.loading_company,
+        destination: dispatch.destination,
+        status: dispatch.status,
+        packages: dispatch.packages
       }));
       
       setDispatches(formattedDispatches);
@@ -144,9 +142,9 @@ const DispatchReportsTab = () => {
       const lowercaseSearch = searchTerm.toLowerCase();
       const filtered = dispatches.filter(d => 
         d.orderId.toLowerCase().includes(lowercaseSearch) ||
+        (d.vehiclePlate && d.vehiclePlate.toLowerCase().includes(lowercaseSearch)) ||
         d.origin.toLowerCase().includes(lowercaseSearch) ||
         d.destination.toLowerCase().includes(lowercaseSearch) ||
-        d.vehiclePlate.toLowerCase().includes(lowercaseSearch) ||
         (d.driverName && d.driverName.toLowerCase().includes(lowercaseSearch))
       );
       setFilteredDispatches(filtered);
@@ -166,21 +164,23 @@ const DispatchReportsTab = () => {
     const headers = [
       'Orden', 
       'Fecha', 
+      'Vehículo', 
+      'Conductor', 
       'Origen', 
       'Destino', 
-      'Placa', 
-      'Conductor', 
-      'Estado'
+      'Estado',
+      'Bultos'
     ].join(',');
     
     const csvRows = filteredDispatches.map(d => [
       d.orderId,
-      format(d.date, 'dd/MM/yyyy HH:mm', { locale: es }),
+      format(d.date, 'dd/MM/yyyy', { locale: es }),
+      d.vehiclePlate || 'No asignado',
+      d.driverName || 'No asignado',
       d.origin,
       d.destination,
-      d.vehiclePlate,
-      d.driverName || 'No asignado',
-      d.status
+      d.status,
+      d.packages
     ].join(','));
     
     const csvContent = [headers, ...csvRows].join('\n');
@@ -201,69 +201,27 @@ const DispatchReportsTab = () => {
     <div>
       <h2 className="text-xl font-semibold mb-4">Reporte de Despachos</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Fecha Inicio</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !startDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {startDate ? format(startDate, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={startDate}
-                onSelect={setStartDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <label className="text-sm font-medium">Desde</label>
+          <DatePicker date={startDate} setDate={setStartDate} />
         </div>
         
         <div className="space-y-2">
-          <label className="text-sm font-medium">Fecha Fin</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !endDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {endDate ? format(endDate, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={endDate}
-                onSelect={setEndDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <label className="text-sm font-medium">Hasta</label>
+          <DatePicker date={endDate} setDate={setEndDate} />
         </div>
         
         <div className="space-y-2">
           <label className="text-sm font-medium">Origen</label>
-          <Select value={origin} onValueChange={setOrigin}>
+          <Select value={originFilter} onValueChange={setOriginFilter}>
             <SelectTrigger>
-              <SelectValue placeholder="Todas las empresas" />
+              <SelectValue placeholder="Todos los orígenes" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas las empresas</SelectItem>
-              {origins.map(o => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
+              <SelectItem value="">Todos los orígenes</SelectItem>
+              {origins.map(origin => (
+                <SelectItem key={origin} value={origin}>{origin}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -271,14 +229,14 @@ const DispatchReportsTab = () => {
         
         <div className="space-y-2">
           <label className="text-sm font-medium">Destino</label>
-          <Select value={destination} onValueChange={setDestination}>
+          <Select value={destinationFilter} onValueChange={setDestinationFilter}>
             <SelectTrigger>
               <SelectValue placeholder="Todos los destinos" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Todos los destinos</SelectItem>
-              {destinations.map(d => (
-                <SelectItem key={d} value={d}>{d}</SelectItem>
+              {destinations.map(destination => (
+                <SelectItem key={destination} value={destination}>{destination}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -326,10 +284,11 @@ const DispatchReportsTab = () => {
                 <tr>
                   <th className="px-4 py-3 text-left font-medium">Orden</th>
                   <th className="px-4 py-3 text-left font-medium">Fecha</th>
+                  <th className="px-4 py-3 text-left font-medium">Vehículo</th>
+                  <th className="px-4 py-3 text-left font-medium">Conductor</th>
                   <th className="px-4 py-3 text-left font-medium">Origen</th>
                   <th className="px-4 py-3 text-left font-medium">Destino</th>
-                  <th className="px-4 py-3 text-left font-medium">Placa</th>
-                  <th className="px-4 py-3 text-left font-medium">Conductor</th>
+                  <th className="px-4 py-3 text-left font-medium">Bultos</th>
                   <th className="px-4 py-3 text-left font-medium">Estado</th>
                 </tr>
               </thead>
@@ -338,28 +297,31 @@ const DispatchReportsTab = () => {
                   <tr key={dispatch.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3 font-medium">{dispatch.orderId}</td>
                     <td className="px-4 py-3">
-                      {format(dispatch.date, "dd MMM yyyy, HH:mm", { locale: es })}
+                      {format(dispatch.date, "dd MMM yyyy", { locale: es })}
                     </td>
+                    <td className="px-4 py-3">{dispatch.vehiclePlate || 'No asignado'}</td>
+                    <td className="px-4 py-3">{dispatch.driverName || 'No asignado'}</td>
                     <td className="px-4 py-3">{dispatch.origin}</td>
                     <td className="px-4 py-3">{dispatch.destination}</td>
-                    <td className="px-4 py-3">{dispatch.vehiclePlate}</td>
-                    <td className="px-4 py-3">{dispatch.driverName || 'No asignado'}</td>
+                    <td className="px-4 py-3">{dispatch.packages}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         dispatch.status === 'completed' 
                           ? "bg-green-100 text-green-800" 
-                          : dispatch.status === 'pending'
+                          : dispatch.status === 'in_progress'
+                          ? "bg-blue-100 text-blue-800"
+                          : dispatch.status === 'delayed'
                           ? "bg-yellow-100 text-yellow-800"
                           : dispatch.status === 'cancelled'
                           ? "bg-red-100 text-red-800"
-                          : "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
                       }`}>
-                        {dispatch.status === 'completed' ? 'Completado' :
-                         dispatch.status === 'pending' ? 'Pendiente' :
-                         dispatch.status === 'cancelled' ? 'Cancelado' :
-                         dispatch.status === 'accepted' ? 'Aceptado' :
-                         dispatch.status === 'in_progress' ? 'En Progreso' :
+                        {dispatch.status === 'completed' ? 'Completado' : 
+                         dispatch.status === 'in_progress' ? 'En Progreso' : 
                          dispatch.status === 'delayed' ? 'Demorado' : 
+                         dispatch.status === 'cancelled' ? 'Cancelado' : 
+                         dispatch.status === 'accepted' ? 'Aceptado' : 
+                         dispatch.status === 'pending' ? 'Pendiente' : 
                          dispatch.status}
                       </span>
                     </td>
@@ -375,10 +337,10 @@ const DispatchReportsTab = () => {
         </div>
       ) : (
         <div className="text-center py-8 border rounded-md">
-          <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+          <Calendar className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-muted-foreground mb-1">No se han encontrado despachos</p>
           <p className="text-sm text-muted-foreground">
-            Intenta cambiar los criterios de búsqueda
+            Intenta cambiar el rango de fechas o los filtros
           </p>
         </div>
       )}

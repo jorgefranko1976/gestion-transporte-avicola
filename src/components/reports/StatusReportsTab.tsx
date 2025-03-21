@@ -1,102 +1,96 @@
 
 import { useState, useEffect } from 'react';
-import { Search, Download, TruckIcon, Clock, AlertTriangle } from 'lucide-react';
+import { Search, Download, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { format, addHours, differenceInHours } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface StatusReport {
   id: string;
   orderId: string;
-  vehiclePlate: string;
+  date: Date;
+  vehiclePlate: string | null;
   driverName: string | null;
   destination: string;
-  acceptedAt: Date | null;
-  eta: Date | null;
   status: string;
-  hoursRemaining: number | null;
-  isDelayed: boolean;
+  acceptedAt: Date | null;
+  completedAt: Date | null;
+  daysDelayed: number | null;
 }
 
 const StatusReportsTab = () => {
-  const [statusFilter, setStatusFilter] = useState<'all' | 'in_progress' | 'delayed' | 'cancelled'>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    new Date(new Date().setDate(new Date().getDate() - 30))
+  );
+  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [searchTerm, setSearchTerm] = useState('');
   const [dispatches, setDispatches] = useState<StatusReport[]>([]);
   const [filteredDispatches, setFilteredDispatches] = useState<StatusReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Buscar despachos
+  // Buscar despachos por estado
   const handleSearch = async () => {
+    if (!startDate || !endDate) {
+      toast.error('Debes seleccionar un rango de fechas');
+      return;
+    }
+    
     setIsLoading(true);
     try {
-      // Construir la consulta base
+      // Construir la consulta
       let query = supabase
         .from('dispatches')
         .select(`
           id, 
           order_id,
+          created_at,
           vehicle_plate,
+          driver_id,
           destination,
-          accepted_at,
-          eta,
           status,
+          accepted_at,
+          completed_at,
+          days_delayed,
           drivers(first_name, last_name)
-        `);
+        `)
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', new Date(endDate.setHours(23, 59, 59)).toISOString());
       
-      // Filtrar por estado
+      // Aplicar filtro de estado
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
-      } else {
-        // Si es "todos", excluir los completados
-        query = query.not('status', 'eq', 'completed');
       }
       
       // Ejecutar la consulta
-      const { data, error } = await query.order('accepted_at', { ascending: false });
+      const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
       
-      const now = new Date();
-      
       // Formatear los datos
-      const formattedDispatches = data
-        .filter(d => d.status !== 'pending') // Excluir los pendientes
-        .map(dispatch => {
-          // Calcular horas restantes y si está demorado
-          let hoursRemaining = null;
-          let isDelayed = false;
-          
-          if (dispatch.accepted_at) {
-            const acceptedDate = new Date(dispatch.accepted_at);
-            const expectedEnd = addHours(acceptedDate, 24); // 24 horas después de aceptado
-            
-            hoursRemaining = differenceInHours(expectedEnd, now);
-            isDelayed = hoursRemaining < 0;
-          }
-          
-          return {
-            id: dispatch.id,
-            orderId: dispatch.order_id,
-            vehiclePlate: dispatch.vehicle_plate || 'No asignado',
-            driverName: dispatch.drivers ? `${dispatch.drivers.first_name} ${dispatch.drivers.last_name}` : null,
-            destination: dispatch.destination,
-            acceptedAt: dispatch.accepted_at ? new Date(dispatch.accepted_at) : null,
-            eta: dispatch.eta ? new Date(dispatch.eta) : null,
-            status: dispatch.status,
-            hoursRemaining,
-            isDelayed
-          };
-        });
+      const formattedDispatches = data.map(dispatch => ({
+        id: dispatch.id,
+        orderId: dispatch.order_id,
+        date: new Date(dispatch.created_at),
+        vehiclePlate: dispatch.vehicle_plate,
+        driverName: dispatch.drivers ? `${dispatch.drivers.first_name} ${dispatch.drivers.last_name}` : null,
+        destination: dispatch.destination,
+        status: dispatch.status,
+        acceptedAt: dispatch.accepted_at ? new Date(dispatch.accepted_at) : null,
+        completedAt: dispatch.completed_at ? new Date(dispatch.completed_at) : null,
+        daysDelayed: dispatch.days_delayed
+      }));
       
       setDispatches(formattedDispatches);
       setFilteredDispatches(formattedDispatches);
       
     } catch (error) {
-      console.error('Error searching dispatches:', error);
+      console.error('Error searching dispatches by status:', error);
       toast.error('Error al buscar despachos');
     } finally {
       setIsLoading(false);
@@ -109,7 +103,7 @@ const StatusReportsTab = () => {
       const lowercaseSearch = searchTerm.toLowerCase();
       const filtered = dispatches.filter(d => 
         d.orderId.toLowerCase().includes(lowercaseSearch) ||
-        d.vehiclePlate.toLowerCase().includes(lowercaseSearch) ||
+        (d.vehiclePlate && d.vehiclePlate.toLowerCase().includes(lowercaseSearch)) ||
         d.destination.toLowerCase().includes(lowercaseSearch) ||
         (d.driverName && d.driverName.toLowerCase().includes(lowercaseSearch))
       );
@@ -129,24 +123,31 @@ const StatusReportsTab = () => {
     // Crear contenido CSV
     const headers = [
       'Orden', 
+      'Fecha', 
       'Vehículo', 
       'Conductor', 
       'Destino', 
-      'Aceptado', 
       'Estado',
-      'Horas Restantes',
-      'Demorado'
+      'Fecha aceptación',
+      'Fecha finalización',
+      'Días de demora'
     ].join(',');
     
     const csvRows = filteredDispatches.map(d => [
       d.orderId,
-      d.vehiclePlate,
+      format(d.date, 'dd/MM/yyyy', { locale: es }),
+      d.vehiclePlate || 'No asignado',
       d.driverName || 'No asignado',
       d.destination,
-      d.acceptedAt ? format(d.acceptedAt, 'dd/MM/yyyy HH:mm', { locale: es }) : 'No aceptado',
-      d.status,
-      d.hoursRemaining !== null ? d.hoursRemaining : 'N/A',
-      d.isDelayed ? 'Sí' : 'No'
+      d.status === 'completed' ? 'Completado' : 
+      d.status === 'in_progress' ? 'En Progreso' : 
+      d.status === 'delayed' ? 'Demorado' : 
+      d.status === 'cancelled' ? 'Cancelado' : 
+      d.status === 'accepted' ? 'Aceptado' : 
+      d.status === 'pending' ? 'Pendiente' : d.status,
+      d.acceptedAt ? format(d.acceptedAt, 'dd/MM/yyyy HH:mm', { locale: es }) : 'N/A',
+      d.completedAt ? format(d.completedAt, 'dd/MM/yyyy HH:mm', { locale: es }) : 'N/A',
+      d.daysDelayed || 0
     ].join(','));
     
     const csvContent = [headers, ...csvRows].join('\n');
@@ -169,16 +170,29 @@ const StatusReportsTab = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="space-y-2">
+          <label className="text-sm font-medium">Desde</label>
+          <DatePicker date={startDate} setDate={setStartDate} />
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Hasta</label>
+          <DatePicker date={endDate} setDate={setEndDate} />
+        </div>
+        
+        <div className="space-y-2">
           <label className="text-sm font-medium">Estado</label>
-          <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger>
               <SelectValue placeholder="Todos los estados" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos (activos)</SelectItem>
+              <SelectItem value="all">Todos los estados</SelectItem>
               <SelectItem value="in_progress">En Ruta</SelectItem>
               <SelectItem value="delayed">Demorados</SelectItem>
               <SelectItem value="cancelled">Cancelados</SelectItem>
+              <SelectItem value="completed">Completados</SelectItem>
+              <SelectItem value="pending">Pendientes</SelectItem>
+              <SelectItem value="accepted">Aceptados</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -188,7 +202,7 @@ const StatusReportsTab = () => {
         <Button 
           onClick={handleSearch} 
           className="w-full md:w-auto"
-          disabled={isLoading}
+          disabled={!startDate || !endDate || isLoading}
         >
           {isLoading ? 'Buscando...' : 'Buscar Despachos'}
         </Button>
@@ -224,40 +238,51 @@ const StatusReportsTab = () => {
               <thead className="bg-muted/50">
                 <tr>
                   <th className="px-4 py-3 text-left font-medium">Orden</th>
+                  <th className="px-4 py-3 text-left font-medium">Fecha</th>
                   <th className="px-4 py-3 text-left font-medium">Vehículo</th>
                   <th className="px-4 py-3 text-left font-medium">Conductor</th>
                   <th className="px-4 py-3 text-left font-medium">Destino</th>
-                  <th className="px-4 py-3 text-left font-medium">Aceptado</th>
-                  <th className="px-4 py-3 text-left font-medium">Tiempo</th>
                   <th className="px-4 py-3 text-left font-medium">Estado</th>
+                  <th className="px-4 py-3 text-left font-medium">Días de demora</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {filteredDispatches.map((dispatch) => (
                   <tr key={dispatch.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3 font-medium">{dispatch.orderId}</td>
-                    <td className="px-4 py-3">{dispatch.vehiclePlate}</td>
+                    <td className="px-4 py-3">
+                      {format(dispatch.date, "dd MMM yyyy", { locale: es })}
+                    </td>
+                    <td className="px-4 py-3">{dispatch.vehiclePlate || 'No asignado'}</td>
                     <td className="px-4 py-3">{dispatch.driverName || 'No asignado'}</td>
                     <td className="px-4 py-3">{dispatch.destination}</td>
                     <td className="px-4 py-3">
-                      {dispatch.acceptedAt ? format(dispatch.acceptedAt, "dd MMM yyyy, HH:mm", { locale: es }) : 'No aceptado'}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        dispatch.status === 'completed' 
+                          ? "bg-green-100 text-green-800" 
+                          : dispatch.status === 'in_progress'
+                          ? "bg-blue-100 text-blue-800"
+                          : dispatch.status === 'delayed'
+                          ? "bg-yellow-100 text-yellow-800"
+                          : dispatch.status === 'cancelled'
+                          ? "bg-red-100 text-red-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}>
+                        {dispatch.status === 'completed' ? 'Completado' : 
+                         dispatch.status === 'in_progress' ? 'En Progreso' : 
+                         dispatch.status === 'delayed' ? 'Demorado' : 
+                         dispatch.status === 'cancelled' ? 'Cancelado' : 
+                         dispatch.status === 'accepted' ? 'Aceptado' : 
+                         dispatch.status === 'pending' ? 'Pendiente' : 
+                         dispatch.status}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
-                      {dispatch.hoursRemaining !== null ? (
-                        <div className="flex items-center gap-1">
-                          <Clock className={`w-4 h-4 ${dispatch.isDelayed ? 'text-red-500' : 'text-green-500'}`} />
-                          <span className={dispatch.isDelayed ? 'text-red-600' : 'text-green-600'}>
-                            {dispatch.isDelayed 
-                              ? `${Math.abs(dispatch.hoursRemaining)} h demorado` 
-                              : `${dispatch.hoursRemaining} h restantes`}
-                          </span>
-                        </div>
+                      {dispatch.daysDelayed ? (
+                        <span className="text-yellow-600 font-medium">{dispatch.daysDelayed} días</span>
                       ) : (
-                        'N/A'
+                        <span className="text-muted-foreground">0 días</span>
                       )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={dispatch.status} isDelayed={dispatch.isDelayed} />
                     </td>
                   </tr>
                 ))}
@@ -271,42 +296,14 @@ const StatusReportsTab = () => {
         </div>
       ) : (
         <div className="text-center py-8 border rounded-md">
-          <TruckIcon className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-muted-foreground mb-1">No se han encontrado despachos en progreso</p>
+          <Truck className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-muted-foreground mb-1">No se han encontrado despachos</p>
           <p className="text-sm text-muted-foreground">
-            Intenta cambiar los criterios de búsqueda
+            Intenta cambiar el rango de fechas o el estado
           </p>
         </div>
       )}
     </div>
-  );
-};
-
-const StatusBadge = ({ status, isDelayed }: { status: string, isDelayed: boolean }) => {
-  let badgeClass = '';
-  let label = '';
-  
-  if (status === 'cancelled') {
-    badgeClass = 'bg-red-100 text-red-800';
-    label = 'Cancelado';
-  } else if (status === 'completed') {
-    badgeClass = 'bg-green-100 text-green-800';
-    label = 'Completado';
-  } else if (isDelayed) {
-    badgeClass = 'bg-orange-100 text-orange-800';
-    label = 'Demorado';
-  } else if (status === 'accepted' || status === 'in_progress') {
-    badgeClass = 'bg-blue-100 text-blue-800';
-    label = 'En Ruta';
-  } else {
-    badgeClass = 'bg-yellow-100 text-yellow-800';
-    label = status;
-  }
-  
-  return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${badgeClass}`}>
-      {label}
-    </span>
   );
 };
 
