@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TableRow, TableCell } from "@/components/ui/table"
 import { Vehicle } from '@/lib/types';
@@ -6,7 +7,8 @@ import { getFullName } from '@/lib/utils';
 
 interface VehicleRowProps {
   vehicle: Vehicle;
-  onClick: () => void;
+  onViewDocuments: (vehicle: Vehicle) => void;
+  vehicleCount?: number;
 }
 
 const TypeBadge: React.FC<{ type: Vehicle['vehicleType'] }> = ({ type }) => {
@@ -29,13 +31,13 @@ const TypeBadge: React.FC<{ type: Vehicle['vehicleType'] }> = ({ type }) => {
   );
 };
 
-export const VehicleRow: React.FC<VehicleRowProps> = ({ vehicle, onClick }) => {
+export const VehicleRow: React.FC<VehicleRowProps> = ({ vehicle, onViewDocuments, vehicleCount }) => {
   const hasValidDocuments =
     vehicle.documents.soatExpiration !== null && vehicle.documents.technicalInspectionExpiration !== null && vehicle.documents.rcPolicyExpiration !== null &&
     vehicle.documents.soatExpiration > new Date() && vehicle.documents.technicalInspectionExpiration > new Date() && vehicle.documents.rcPolicyExpiration > new Date();
 
   return (
-    <TableRow onClick={onClick} className="cursor-pointer hover:bg-muted/50">
+    <TableRow onClick={() => onViewDocuments(vehicle)} className="cursor-pointer hover:bg-muted/50">
       <TableCell className="font-medium">
         <div className="flex flex-col">
           <span>{vehicle.plate}</span>
@@ -77,3 +79,5 @@ export const VehicleRow: React.FC<VehicleRowProps> = ({ vehicle, onClick }) => {
     </TableRow>
   );
 };
+
+export default VehicleRow;

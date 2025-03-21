@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Vehicle } from "@/lib/types";
 import VehicleDocumentSummary from "./VehicleDocumentSummary";
@@ -33,7 +34,9 @@ const mockVehicles: Vehicle[] = [
       propertyCard: "tarjeta-abc123.pdf",
       photos: ["photo1.jpg", "photo2.jpg"]
     },
+    ownerId: "owner1",
     owner: {
+      id: "owner1",
       firstName: "Juan",
       lastName: "Pérez",
       identificationType: "CC",
@@ -84,7 +87,9 @@ const mockVehicles: Vehicle[] = [
       propertyCard: "tarjeta-def456.pdf",
       photos: ["photo3.jpg"]
     },
+    ownerId: "owner2",
     owner: {
+      id: "owner2",
       firstName: "Maria",
       lastName: "González",
       identificationType: "CC",
@@ -131,7 +136,9 @@ const mockVehicles: Vehicle[] = [
       propertyCard: "tarjeta-ghi789.pdf",
       photos: ["photo4.jpg", "photo5.jpg", "photo6.jpg"]
     },
+    ownerId: "owner3",
     owner: {
+      id: "owner3",
       firstName: "Carlos",
       lastName: "Rodríguez",
       identificationType: "NIT",
@@ -182,7 +189,9 @@ const mockVehicles: Vehicle[] = [
       propertyCard: "tarjeta-jkl012.pdf",
       photos: []
     },
+    ownerId: "owner4",
     owner: {
+      id: "owner4",
       firstName: "Ana",
       lastName: "Martínez",
       identificationType: "CC",
@@ -233,7 +242,9 @@ const mockVehicles: Vehicle[] = [
       propertyCard: "tarjeta-mno345.pdf",
       photos: ["photo7.jpg"]
     },
+    ownerId: "owner5",
     owner: {
+      id: "owner5",
       firstName: "Pedro",
       lastName: "López",
       identificationType: "CE",
