@@ -16,4 +16,3 @@ export interface ChickenBreed extends ConfigurationItem {
     feedEfficiency?: number; // Eficiencia en conversión de alimento
   };
 }
-
