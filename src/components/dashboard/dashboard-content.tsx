@@ -142,15 +142,6 @@ export const DashboardContent = ({
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="col-span-2">
-          <h3 className="text-lg font-semibold mb-4">Documentos por Vencer</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {documentsToExpire.map(doc => (
-              <DocumentCard key={doc.id} {...doc} />
-            ))}
-          </div>
-        </div>
-        
         <div>
           <h3 className="text-lg font-semibold mb-4">Acceso Rápido</h3>
           <div className="grid grid-cols-1 gap-4">
@@ -174,6 +165,15 @@ export const DashboardContent = ({
               description="Gestionar PESV y documentación"
               onClick={() => navigateToSection('pesv')}
             />
+          </div>
+        </div>
+        
+        <div className="col-span-2">
+          <h3 className="text-lg font-semibold mb-4">Documentos por Vencer</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {documentsToExpire.map(doc => (
+              <DocumentCard key={doc.id} {...doc} />
+            ))}
           </div>
         </div>
       </div>
