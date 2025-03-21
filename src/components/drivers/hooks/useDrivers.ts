@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Driver } from '@/lib/types';
+import { Driver, IdentificationType } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -35,7 +35,7 @@ export const useDrivers = () => {
           id: driver.id,
           firstName: driver.first_name,
           lastName: driver.last_name,
-          identificationType: driver.identification_type,
+          identificationType: driver.identification_type as IdentificationType,
           identificationNumber: driver.identification_number,
           birthDate: new Date(driver.birth_date),
           address: driver.address,
