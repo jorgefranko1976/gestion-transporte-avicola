@@ -6,6 +6,8 @@ import PageTransition from '@/components/transitions/PageTransition';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DriverList from '@/components/drivers/DriverList';
 import DriverForm from '@/components/drivers/DriverForm';
+import { Button } from '@/components/ui/button';
+import { UserPlus } from 'lucide-react';
 
 const Drivers = () => {
   const { user } = useAuth();
@@ -29,6 +31,13 @@ const Drivers = () => {
                   Administra la información y documentación de los conductores
                 </p>
               </div>
+              
+              {activeTab === "lista" && (
+                <Button onClick={handleRegisterClick} className="flex items-center gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  <span>Registrar Conductor</span>
+                </Button>
+              )}
             </div>
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">

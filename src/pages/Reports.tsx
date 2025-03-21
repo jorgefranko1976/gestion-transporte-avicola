@@ -10,6 +10,7 @@ import VehicleReportsTab from '@/components/reports/VehicleReportsTab';
 import DriverReportsTab from '@/components/reports/DriverReportsTab';
 import StatusReportsTab from '@/components/reports/StatusReportsTab';
 import ReceiptReportsTab from '@/components/reports/ReceiptReportsTab';
+import { BarChart3, Users, FileText, Truck, ClipboardCheck, Receipt } from 'lucide-react';
 
 const Reports = () => {
   const { user } = useAuth();
@@ -32,45 +33,53 @@ const Reports = () => {
             </div>
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full border-b border-border rounded-none bg-card h-auto p-0 overflow-x-auto flex-nowrap">
-                  <TabsTrigger 
-                    value="dispatches" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6"
-                  >
-                    Despachos
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="files" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6"
-                  >
-                    Archivos Subidos
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="vehicles" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6"
-                  >
-                    Vehículos
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="drivers" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6"
-                  >
-                    Conductores
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="status" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6"
-                  >
-                    Estado
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="receipts" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6"
-                  >
-                    Remisiones
-                  </TabsTrigger>
-                </TabsList>
+              <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div className="overflow-x-auto">
+                  <TabsList className="w-full border-b border-border rounded-none bg-card h-auto p-0 flex-nowrap min-w-max">
+                    <TabsTrigger 
+                      value="dispatches" 
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6 flex items-center gap-2"
+                    >
+                      <BarChart3 className="w-4 h-4" />
+                      <span>Despachos</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="files" 
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6 flex items-center gap-2"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Archivos Subidos</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="vehicles" 
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6 flex items-center gap-2"
+                    >
+                      <Truck className="w-4 h-4" />
+                      <span>Vehículos</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="drivers" 
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6 flex items-center gap-2"
+                    >
+                      <Users className="w-4 h-4" />
+                      <span>Conductores</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="status" 
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6 flex items-center gap-2"
+                    >
+                      <ClipboardCheck className="w-4 h-4" />
+                      <span>Estado</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="receipts" 
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none h-12 px-6 flex items-center gap-2"
+                    >
+                      <Receipt className="w-4 h-4" />
+                      <span>Remisiones</span>
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
                 
                 <TabsContent value="dispatches" className="p-6">
                   <DispatchReportsTab />

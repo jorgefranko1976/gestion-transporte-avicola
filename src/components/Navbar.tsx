@@ -1,9 +1,9 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { LogOut, Menu, Truck, User, X, Wheat, Settings } from 'lucide-react';
+import { LogOut, Menu, Truck, User, X, Wheat, Settings, FileText, ClipboardList, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   className?: string;
@@ -12,6 +12,7 @@ interface NavbarProps {
 export const Navbar = ({ className }: NavbarProps) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -28,17 +29,24 @@ export const Navbar = ({ className }: NavbarProps) => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
+  const NavLink = ({ to, children, icon }: { to: string; children: React.ReactNode; icon?: React.ReactNode }) => {
     const isActive = location.pathname === to;
+
+    const handleClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      navigate(to);
+    };
 
     return (
       <Link
         to={to}
+        onClick={handleClick}
         className={cn(
-          'relative px-3 py-2 text-sm rounded-lg transition-all duration-300 ease-apple hover:bg-muted',
+          'relative px-3 py-2 text-sm rounded-lg transition-all duration-300 ease-apple hover:bg-muted flex items-center gap-2',
           isActive ? 'text-primary font-medium' : 'text-muted-foreground'
         )}
       >
+        {icon}
         {children}
         {isActive && (
           <span className="absolute bottom-0 left-1/2 w-1/2 h-0.5 bg-primary transform -translate-x-1/2 rounded-full" />
@@ -61,6 +69,10 @@ export const Navbar = ({ className }: NavbarProps) => {
         <Link 
           to="/" 
           className="flex items-center gap-2 font-semibold text-xl"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate('/');
+          }}
         >
           <Truck className="w-6 h-6 text-primary" />
           <span className="animate-slide-up">Transport App</span>
@@ -71,17 +83,18 @@ export const Navbar = ({ className }: NavbarProps) => {
           {user ? (
             <>
               {user.role === 'driver' && (
-                <NavLink to="/driver">Panel de Conductor</NavLink>
+                <NavLink to="/driver" icon={<User className="w-4 h-4" />}>Panel de Conductor</NavLink>
               )}
               
               {user.role === 'coordinator' && (
                 <>
-                  <NavLink to="/coordinator">Panel de Coordinador</NavLink>
-                  <NavLink to="/vehicles">Vehículos</NavLink>
-                  <NavLink to="/farms">Granjas</NavLink>
-                  <NavLink to="/drivers">Conductores</NavLink>
-                  <NavLink to="/reports">Reportes</NavLink>
-                  <NavLink to="/settings">Configuración</NavLink>
+                  <NavLink to="/coordinator" icon={<User className="w-4 h-4" />}>Panel de Coordinador</NavLink>
+                  <NavLink to="/vehicles" icon={<Truck className="w-4 h-4" />}>Vehículos</NavLink>
+                  <NavLink to="/farms" icon={<Wheat className="w-4 h-4" />}>Granjas</NavLink>
+                  <NavLink to="/drivers" icon={<User className="w-4 h-4" />}>Conductores</NavLink>
+                  <NavLink to="/reports" icon={<FileText className="w-4 h-4" />}>Reportes</NavLink>
+                  <NavLink to="/pesv" icon={<AlertTriangle className="w-4 h-4" />}>PESV</NavLink>
+                  <NavLink to="/settings" icon={<Settings className="w-4 h-4" />}>Configuración</NavLink>
                 </>
               )}
               
@@ -99,6 +112,10 @@ export const Navbar = ({ className }: NavbarProps) => {
               <Link 
                 to="/login" 
                 className="ml-2 px-4 py-2 text-sm bg-primary text-white rounded-lg transition-all duration-300 ease-apple hover:bg-primary/90 btn-hover focus-ring"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/login');
+                }}
               >
                 Comenzar
               </Link>
@@ -133,7 +150,13 @@ export const Navbar = ({ className }: NavbarProps) => {
             )}
           >
             <div className="flex justify-between items-center mb-8">
-              <Link to="/" className="flex items-center gap-2 font-semibold text-xl">
+              <Link to="/" className="flex items-center gap-2 font-semibold text-xl"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/');
+                  setMobileMenuOpen(false);
+                }}
+              >
                 <Truck className="w-6 h-6 text-primary" />
                 <span>Transport App</span>
               </Link>
@@ -163,9 +186,15 @@ export const Navbar = ({ className }: NavbarProps) => {
                   {user.role === 'driver' && (
                     <Link 
                       to="/driver" 
-                      className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors"
+                      className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate('/driver');
+                        setMobileMenuOpen(false);
+                      }}
                     >
-                      Panel de Conductor
+                      <User className="w-4 h-4" />
+                      <span>Panel de Conductor</span>
                     </Link>
                   )}
                   
@@ -173,38 +202,84 @@ export const Navbar = ({ className }: NavbarProps) => {
                     <>
                       <Link 
                         to="/coordinator" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors"
+                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate('/coordinator');
+                          setMobileMenuOpen(false);
+                        }}
                       >
-                        Panel de Coordinador
+                        <User className="w-4 h-4" />
+                        <span>Panel de Coordinador</span>
                       </Link>
                       <Link 
                         to="/vehicles" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors"
+                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate('/vehicles');
+                          setMobileMenuOpen(false);
+                        }}
                       >
-                        Vehículos
+                        <Truck className="w-4 h-4" />
+                        <span>Vehículos</span>
                       </Link>
                       <Link 
                         to="/farms" 
                         className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate('/farms');
+                          setMobileMenuOpen(false);
+                        }}
                       >
                         <Wheat className="w-4 h-4" />
                         <span>Granjas</span>
                       </Link>
                       <Link 
                         to="/drivers" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors"
+                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate('/drivers');
+                          setMobileMenuOpen(false);
+                        }}
                       >
-                        Conductores
+                        <User className="w-4 h-4" />
+                        <span>Conductores</span>
                       </Link>
                       <Link 
                         to="/reports" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors"
+                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate('/reports');
+                          setMobileMenuOpen(false);
+                        }}
                       >
-                        Reportes
+                        <FileText className="w-4 h-4" />
+                        <span>Reportes</span>
+                      </Link>
+                      <Link 
+                        to="/pesv" 
+                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate('/pesv');
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>PESV</span>
                       </Link>
                       <Link 
                         to="/settings" 
                         className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate('/settings');
+                          setMobileMenuOpen(false);
+                        }}
                       >
                         <Settings className="w-4 h-4" />
                         <span>Configuración</span>
@@ -213,7 +288,10 @@ export const Navbar = ({ className }: NavbarProps) => {
                   )}
                   
                   <button
-                    onClick={logout}
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                    }}
                     className="mt-2 px-3 py-2.5 text-sm rounded-lg text-muted-foreground hover:bg-muted transition-colors flex items-center gap-2"
                   >
                     <LogOut className="w-4 h-4" />
@@ -225,12 +303,22 @@ export const Navbar = ({ className }: NavbarProps) => {
                   <Link 
                     to="/login" 
                     className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate('/login');
+                      setMobileMenuOpen(false);
+                    }}
                   >
                     Iniciar Sesión
                   </Link>
                   <Link 
                     to="/login" 
                     className="px-3 py-2.5 text-sm bg-primary text-white rounded-lg transition-colors hover:bg-primary/90"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate('/login');
+                      setMobileMenuOpen(false);
+                    }}
                   >
                     Comenzar
                   </Link>
