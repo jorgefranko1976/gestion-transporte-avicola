@@ -111,7 +111,7 @@ const DriverForm = () => {
           emergency_contact: values.emergencyContact,
           hire_date: values.hireDate.toISOString(),
           assigned_vehicle_id: selectedVehicleId,
-          license_expiration: values.licenseExpiration?.toISOString(),
+          license_expiration: values.licenseExpiration?.toISOString() || null,
           active: true
         })
         .select()
@@ -500,9 +500,6 @@ const DriverForm = () => {
                             mode="single"
                             selected={field.value || undefined}
                             onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date()
-                            }
                             initialFocus
                           />
                         </PopoverContent>
