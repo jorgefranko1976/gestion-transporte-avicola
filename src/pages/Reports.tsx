@@ -9,7 +9,7 @@ import FileReportsTab from '@/components/reports/FileReportsTab';
 import VehicleReportsTab from '@/components/reports/VehicleReportsTab';
 import DriverReportsTab from '@/components/reports/DriverReportsTab';
 import StatusReportsTab from '@/components/reports/StatusReportsTab';
-import ReceiptReportsTab from '@/components/reports/ReceiptReportsTab';
+import ReceiptReportsTab from '@/components/reports/receipts/ReceiptReportsTab';
 import { BarChart3, Users, FileText, Truck, ClipboardCheck, Receipt } from 'lucide-react';
 
 const Reports = () => {
