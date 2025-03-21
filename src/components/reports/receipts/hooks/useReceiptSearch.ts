@@ -9,8 +9,8 @@ export const useReceiptSearch = () => {
     new Date(new Date().setDate(new Date().getDate() - 30))
   );
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
-  const [vehiclePlate, setVehiclePlate] = useState('');
-  const [driverId, setDriverId] = useState('');
+  const [vehiclePlate, setVehiclePlate] = useState('all_vehicles'); // Changed from empty string to 'all_vehicles'
+  const [driverId, setDriverId] = useState('all_drivers'); // Changed from empty string to 'all_drivers'
   const [searchTerm, setSearchTerm] = useState('');
   const [receipts, setReceipts] = useState<ReceiptReport[]>([]);
   const [filteredReceipts, setFilteredReceipts] = useState<ReceiptReport[]>([]);

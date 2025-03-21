@@ -6,7 +6,7 @@ import { VehicleReport } from '../types';
 
 export const useVehicleSearch = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<string>('all_types');  // Changed the default value to 'all_types' instead of empty string
   const [searchTerm, setSearchTerm] = useState('');
   const [vehicles, setVehicles] = useState<VehicleReport[]>([]);
   const [filteredVehicles, setFilteredVehicles] = useState<VehicleReport[]>([]);
