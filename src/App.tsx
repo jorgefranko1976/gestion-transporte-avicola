@@ -1,147 +1,107 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import DriverPortal from "./pages/DriverPortal";
-import CoordinatorPortal from "./pages/CoordinatorPortal";
-import Vehicles from "./pages/Vehicles";
-import Farms from "./pages/Farms";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
-import Drivers from "./pages/Drivers";
-import PESV from "./pages/PESV";
-import Reports from "./pages/Reports";
-
-const queryClient = new QueryClient();
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Vehicles from './pages/Vehicles';
+import Drivers from './pages/Drivers';
+import OwnerList from './pages/OwnerList';
+import Orders from './pages/Orders';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
+import NewDispatch from './pages/NewDispatch';
+import Dispatches from './pages/Dispatches';
+import DispatchDetails from './pages/DispatchDetails';
+import MonitorVehicles from './pages/MonitorVehicles';
 
 // Protected route component
-const ProtectedRoute = ({ 
-  children, 
-  allowedRole 
-}: { 
-  children: JSX.Element, 
-  allowedRole?: 'driver' | 'coordinator' 
-}) => {
-  const { user, isLoading } = useAuth();
-  
-  if (isLoading) {
-    // Could add a loading spinner here
-    return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
-  
+
+  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  
-  if (allowedRole && user.role !== allowedRole) {
-    return <Navigate to={user.role === 'driver' ? '/driver' : '/coordinator'} replace />;
-  }
-  
-  return children;
+
+  // Render children if authenticated
+  return <>{children}</>;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            
-            {/* Protected routes */}
-            <Route 
-              path="/driver" 
-              element={
-                <ProtectedRoute allowedRole="driver">
-                  <DriverPortal />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/coordinator" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <CoordinatorPortal />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Vehículos route */}
-            <Route 
-              path="/vehicles" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Vehicles />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Granjas route */}
-            <Route 
-              path="/farms" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Farms />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Settings route */}
-            <Route 
-              path="/settings" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Settings />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Drivers route */}
-            <Route 
-              path="/drivers" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Drivers />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Reports route */}
-            <Route 
-              path="/reports" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Reports />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* PESV route */}
-            <Route 
-              path="/pesv" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <PESV />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Catch-all route - must be last */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/vehicles" element={
+          <ProtectedRoute>
+            <Vehicles />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/drivers" element={
+          <ProtectedRoute>
+            <Drivers />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/owners" element={
+          <ProtectedRoute>
+            <OwnerList />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/orders" element={
+          <ProtectedRoute>
+            <Orders />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/new-dispatch/:orderId?" element={
+          <ProtectedRoute>
+            <NewDispatch />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dispatches" element={
+          <ProtectedRoute>
+            <Dispatches />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dispatch/:id" element={
+          <ProtectedRoute>
+            <DispatchDetails />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/monitor" element={
+          <ProtectedRoute>
+            <MonitorVehicles />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/settings/*" element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  );
+}
 
 export default App;
