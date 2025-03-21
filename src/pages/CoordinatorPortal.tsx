@@ -19,6 +19,7 @@ const CoordinatorPortal = () => {
   const [activeDataType, setActiveDataType] = useState<'reproductora' | 'engorde'>('reproductora');
   const [activeDispatchStatus, setActiveDispatchStatus] = useState<'todos' | 'pendiente' | 'en ruta' | 'completado' | 'demorado'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   
   const {
     showUploadModal,
@@ -35,15 +36,8 @@ const CoordinatorPortal = () => {
 
   const handleShowDetailedPreview = () => {
     setShowUploadModal(false);
-    // This would show the detailed preview modal
+    setShowPreviewModal(true);
   };
-
-  const coordinatorHeader = (
-    <CoordinatorHeader 
-      onViewExcel={() => setActiveTab('excel')}
-      onShowUploadModal={() => setShowUploadModal(true)}
-    />
-  );
 
   return (
     <PortalLayout title="Panel de Coordinador">
@@ -77,6 +71,7 @@ const CoordinatorPortal = () => {
             activeDispatchStatus={activeDispatchStatus}
             setActiveDispatchStatus={setActiveDispatchStatus}
             lastUpdateDate={lastUpdateDate}
+            onUploadClick={() => setShowUploadModal(true)}
           />
         )}
       </div>
@@ -94,22 +89,15 @@ const CoordinatorPortal = () => {
       )}
       
       {/* Detailed Excel Preview Modal */}
-      {selectedFile && (
-        <button 
-          id="excel-preview-modal" 
-          className="hidden"
-          onClick={() => {
-            /* This is a hidden button that triggers the modal */
-          }}
-        />
-      )}
-      
-      {selectedFile && (
+      {showPreviewModal && selectedFile && (
         <ExcelPreviewModal
           selectedFile={selectedFile}
           previewData={previewData}
           isUploading={isUploading}
-          onClose={() => setShowUploadModal(true)}
+          onClose={() => {
+            setShowPreviewModal(false);
+            setShowUploadModal(true);
+          }}
           onUpload={handleUpload}
           onRemoveFile={handleRemoveFile}
         />

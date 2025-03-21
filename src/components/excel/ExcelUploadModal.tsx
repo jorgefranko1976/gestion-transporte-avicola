@@ -1,5 +1,5 @@
 
-import { X, Upload } from 'lucide-react';
+import { X, Upload, FileSpreadsheet } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface ExcelUploadModalProps {
@@ -38,6 +38,9 @@ const ExcelUploadModal = ({
               <p className="text-sm text-gray-600 mb-4">
                 Arrastra tu archivo Excel aquí o haz clic para seleccionarlo
               </p>
+              <p className="text-xs text-muted-foreground mb-4">
+                El archivo debe contener las hojas REPRO y ENGORDE con el formato adecuado
+              </p>
               <input
                 type="file"
                 id="excel-upload"
@@ -53,12 +56,30 @@ const ExcelUploadModal = ({
               </Button>
             </div>
           ) : (
-            <Button 
-              onClick={onShowDetailedPreview}
-              className="w-full"
-            >
-              Ver vista previa detallada
-            </Button>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <FileSpreadsheet className="w-8 h-8 text-green-600" />
+                <div className="flex-1 truncate">
+                  <p className="font-medium truncate">{selectedFile.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(selectedFile.size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+                <button 
+                  onClick={() => document.getElementById('excel-upload')?.click()}
+                  className="text-primary hover:text-primary/80 text-sm"
+                >
+                  Cambiar
+                </button>
+              </div>
+              
+              <Button 
+                onClick={onShowDetailedPreview}
+                className="w-full"
+              >
+                Ver vista previa detallada
+              </Button>
+            </div>
           )}
         </div>
         <div className="border-t p-4 flex justify-end gap-3">

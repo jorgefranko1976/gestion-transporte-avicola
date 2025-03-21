@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { X, FileSpreadsheet, FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { ExcelPreviewData } from '@/lib/types';
+import { ExcelPreviewData, ReproductoraDespatch, EngordeDespatch } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -107,7 +107,7 @@ const ExcelPreviewModal = ({
                   <div className="flex-1 overflow-auto border rounded-md">
                     <TabsContent value="reproductora" className="m-0 h-full">
                       {previewData.reproductora.length > 0 ? (
-                        <SheetPreview data={previewData.reproductora} />
+                        <ReproductoraSheetPreview data={previewData.reproductora} />
                       ) : (
                         <div className="flex items-center justify-center h-full">
                           <p className="text-muted-foreground">No hay datos de tipo REPRODUCTORA</p>
@@ -117,7 +117,7 @@ const ExcelPreviewModal = ({
                     
                     <TabsContent value="engorde" className="m-0 h-full">
                       {previewData.engorde.length > 0 ? (
-                        <SheetPreview data={previewData.engorde} />
+                        <EngordeSheetPreview data={previewData.engorde} />
                       ) : (
                         <div className="flex items-center justify-center h-full">
                           <p className="text-muted-foreground">No hay datos de tipo ENGORDE</p>
@@ -150,24 +150,27 @@ const ExcelPreviewModal = ({
   );
 };
 
-interface SheetPreviewProps {
-  data: any[];
+interface ReproductoraSheetPreviewProps {
+  data: ReproductoraDespatch[];
 }
 
-const SheetPreview = ({ data }: SheetPreviewProps) => {
+const ReproductoraSheetPreview = ({ data }: ReproductoraSheetPreviewProps) => {
   if (!data.length) return null;
   
-  // Get column names from the first item's keys
-  const columns = Object.keys(data[0]);
+  // Define key columns for readability - not showing all columns to save space
+  const keyColumns = [
+    'ubicacion', 'granja', 'lote', 'planta', 'tipoAlimento', 
+    'dia', 'cantidad', 'ton', 'orden', 'conductor', 'placa'
+  ];
   
   return (
     <div className="h-full overflow-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            {columns.map((column) => (
-              <TableHead key={column}>
-                {column.charAt(0).toUpperCase() + column.slice(1)}
+            {keyColumns.map((column) => (
+              <TableHead key={column} className="text-xs whitespace-nowrap">
+                {formatColumnName(column)}
               </TableHead>
             ))}
           </TableRow>
@@ -175,8 +178,10 @@ const SheetPreview = ({ data }: SheetPreviewProps) => {
         <TableBody>
           {data.map((row, idx) => (
             <TableRow key={idx}>
-              {columns.map((column) => (
-                <TableCell key={`${idx}-${column}`}>{row[column]}</TableCell>
+              {keyColumns.map((column) => (
+                <TableCell key={`${idx}-${column}`} className="text-xs">
+                  {formatCellValue(row[column as keyof ReproductoraDespatch])}
+                </TableCell>
               ))}
             </TableRow>
           ))}
@@ -184,6 +189,64 @@ const SheetPreview = ({ data }: SheetPreviewProps) => {
       </Table>
     </div>
   );
+};
+
+interface EngordeSheetPreviewProps {
+  data: EngordeDespatch[];
+}
+
+const EngordeSheetPreview = ({ data }: EngordeSheetPreviewProps) => {
+  if (!data.length) return null;
+  
+  // Define key columns for readability - not showing all columns to save space
+  const keyColumns = [
+    'granja', 'dia', 'planta', 'nomAlimento', 'cantidad', 
+    'toneladas', 'ubicacion', 'tecnico', 'orden', 'conductor', 'placa'
+  ];
+  
+  return (
+    <div className="h-full overflow-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {keyColumns.map((column) => (
+              <TableHead key={column} className="text-xs whitespace-nowrap">
+                {formatColumnName(column)}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((row, idx) => (
+            <TableRow key={idx}>
+              {keyColumns.map((column) => (
+                <TableCell key={`${idx}-${column}`} className="text-xs">
+                  {formatCellValue(row[column as keyof EngordeDespatch])}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
+// Helper function to format column names for display
+const formatColumnName = (name: string): string => {
+  // Convert camelCase to Title Case with spaces
+  const formatted = name
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, str => str.toUpperCase());
+  
+  return formatted;
+};
+
+// Helper function to format cell values
+const formatCellValue = (value: any): string => {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'number') return value.toString();
+  return value;
 };
 
 export default ExcelPreviewModal;
