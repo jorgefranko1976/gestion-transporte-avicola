@@ -5,7 +5,7 @@ import FarmCycleSelector from "./FarmCycleSelector";
 import DateBreedSelector from "./DateBreedSelector";
 import QuantityShedInputs from "./QuantityShedInputs";
 import NotesInput from "./NotesInput";
-import FormActions from "./FormActions";
+import BirdEntryFormActions from "./BirdEntryFormActions";
 
 interface BirdEntryFormProps {
   onSuccess?: () => void;
@@ -18,7 +18,8 @@ const BirdEntryForm = ({ onSuccess }: BirdEntryFormProps) => {
     setSelectedFarmId,
     availableCycles,
     setAvailableCycles,
-    onSubmit
+    onSubmit,
+    isSubmitting
   } = useBirdEntryForm({ onSuccess });
   
   return (
@@ -38,7 +39,10 @@ const BirdEntryForm = ({ onSuccess }: BirdEntryFormProps) => {
         
         <NotesInput form={form} />
         
-        <FormActions onCancel={onSuccess || (() => {})} />
+        <BirdEntryFormActions 
+          onCancel={onSuccess || (() => {})} 
+          isSubmitting={isSubmitting}
+        />
       </form>
     </Form>
   );

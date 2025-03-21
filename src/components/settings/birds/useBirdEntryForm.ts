@@ -14,6 +14,7 @@ export const useBirdEntryForm = ({ onSuccess }: UseBirdEntryFormProps) => {
   const { toast } = useToast();
   const [selectedFarmId, setSelectedFarmId] = useState<string | null>(null);
   const [availableCycles, setAvailableCycles] = useState(mockCycles);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<BirdEntryFormValues>({
     resolver: zodResolver(birdEntryFormSchema),
@@ -25,17 +26,32 @@ export const useBirdEntryForm = ({ onSuccess }: UseBirdEntryFormProps) => {
     },
   });
   
-  const onSubmit = (data: BirdEntryFormValues) => {
-    console.log("Datos del ingreso de aves:", data);
+  const onSubmit = async (data: BirdEntryFormValues) => {
+    setIsSubmitting(true);
     
-    // Mostrar notificación de éxito
-    toast({
-      title: "Ingreso registrado",
-      description: `Se han registrado ${data.quantity} aves en el galpón ${data.shedNumber}.`,
-    });
-    
-    if (onSuccess) {
-      onSuccess();
+    try {
+      console.log("Datos del ingreso de aves:", data);
+      
+      // Simulate API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mostrar notificación de éxito
+      toast({
+        title: "Ingreso registrado",
+        description: `Se han registrado ${data.quantity} aves en el galpón ${data.shedNumber}.`,
+      });
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      toast({
+        title: "Error al registrar ingreso",
+        description: "Ocurrió un error al registrar el ingreso de aves. Intente nuevamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -45,6 +61,7 @@ export const useBirdEntryForm = ({ onSuccess }: UseBirdEntryFormProps) => {
     setSelectedFarmId,
     availableCycles,
     setAvailableCycles,
-    onSubmit
+    onSubmit,
+    isSubmitting
   };
 };
