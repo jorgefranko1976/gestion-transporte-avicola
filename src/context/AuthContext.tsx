@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserRole } from '@/lib/types';
 
@@ -7,6 +6,8 @@ type User = {
   name: string;
   role: UserRole;
   email?: string;
+  displayName?: string;
+  photoURL?: string;
 };
 
 type AuthContextType = {
@@ -14,6 +15,7 @@ type AuthContextType = {
   isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  signOut: () => void; // Added alias for logout for NavBar
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,8 +62,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const mockUser: User = {
           id: '1',
           name: username,
+          displayName: username,
           role,
           email: `${username}@example.com`,
+          photoURL: '/placeholder.svg',
         };
         
         setUser(mockUser);
@@ -84,8 +88,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('transportUser');
   };
 
+  // Alias for logout to keep compatibility with Navbar
+  const signOut = logout;
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, signOut }}>
       {children}
     </AuthContext.Provider>
   );

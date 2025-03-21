@@ -33,12 +33,8 @@ export const Navbar = () => {
   // Array of navigation items for cleaner mapping
   const navItems = [
     { path: '/', label: 'Dashboard', icon: <Home className="w-[18px] h-[18px] mr-2" /> },
-    { path: '/dispatches', label: 'Despachos', icon: <Package className="w-[18px] h-[18px] mr-2" /> },
-    { path: '/orders', label: 'Órdenes', icon: <FileText className="w-[18px] h-[18px] mr-2" /> },
     { path: '/vehicles', label: 'Vehículos', icon: <Truck className="w-[18px] h-[18px] mr-2" /> },
     { path: '/drivers', label: 'Conductores', icon: <Users className="w-[18px] h-[18px] mr-2" /> },
-    { path: '/owners', label: 'Propietarios', icon: <User className="w-[18px] h-[18px] mr-2" /> },
-    { path: '/monitor', label: 'Monitor', icon: <MapPin className="w-[18px] h-[18px] mr-2" /> },
     { path: '/settings', label: 'Configuración', icon: <Settings className="w-[18px] h-[18px] mr-2" /> },
   ];
 
@@ -176,3 +172,5 @@ export const Navbar = () => {
     </header>
   );
 };
+
+export default Navbar;

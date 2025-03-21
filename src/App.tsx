@@ -2,24 +2,17 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import NotFound from './pages/NotFound';
+import Settings from './pages/Settings';
 import Vehicles from './pages/Vehicles';
 import Drivers from './pages/Drivers';
-import OwnerList from './pages/OwnerList';
-import Orders from './pages/Orders';
-import Settings from './pages/Settings';
-import NotFound from './pages/NotFound';
-import NewDispatch from './pages/NewDispatch';
-import Dispatches from './pages/Dispatches';
-import DispatchDetails from './pages/DispatchDetails';
-import MonitorVehicles from './pages/MonitorVehicles';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   // Show loading state while checking authentication
-  if (loading) {
+  if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
@@ -40,7 +33,10 @@ function App() {
         
         <Route path="/" element={
           <ProtectedRoute>
-            <Dashboard />
+            <div className="p-8 mt-16">
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+              <p className="mt-4">Bienvenido al sistema de gestión LogiFleet.</p>
+            </div>
           </ProtectedRoute>
         } />
         
@@ -56,42 +52,6 @@ function App() {
           </ProtectedRoute>
         } />
         
-        <Route path="/owners" element={
-          <ProtectedRoute>
-            <OwnerList />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/orders" element={
-          <ProtectedRoute>
-            <Orders />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/new-dispatch/:orderId?" element={
-          <ProtectedRoute>
-            <NewDispatch />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/dispatches" element={
-          <ProtectedRoute>
-            <Dispatches />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/dispatch/:id" element={
-          <ProtectedRoute>
-            <DispatchDetails />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/monitor" element={
-          <ProtectedRoute>
-            <MonitorVehicles />
-          </ProtectedRoute>
-        } />
-
         <Route path="/settings/*" element={
           <ProtectedRoute>
             <Settings />
