@@ -1,12 +1,11 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Folder, LineChart, Tags, Settings as SettingsIcon, Users } from "lucide-react";
+import { Folder, LineChart, Tags, Settings as SettingsIcon } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import GrowthProfilesSettings from "@/components/settings/GrowthProfilesSettings";
 import BreedsSettings from "@/components/settings/BreedsSettings";
 import GeneralSettings from "@/components/settings/GeneralSettings";
-import UsersSettings from "@/components/settings/user-management/UsersSettings";
 import PageTransition from "@/components/transitions/PageTransition";
 
 const Settings = () => {
@@ -29,7 +28,7 @@ const Settings = () => {
             onValueChange={setActiveTab}
             className="space-y-6"
           >
-            <TabsList className="mb-8 grid w-full grid-cols-4 lg:w-auto">
+            <TabsList className="mb-8 grid w-full grid-cols-3 lg:w-auto">
               <TabsTrigger value="growth-profiles" className="flex items-center gap-2">
                 <LineChart className="h-4 w-4" />
                 <span>Perfiles de Crecimiento</span>
@@ -37,10 +36,6 @@ const Settings = () => {
               <TabsTrigger value="breeds" className="flex items-center gap-2">
                 <Tags className="h-4 w-4" />
                 <span>Razas</span>
-              </TabsTrigger>
-              <TabsTrigger value="users" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span>Usuarios</span>
               </TabsTrigger>
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <SettingsIcon className="h-4 w-4" />
@@ -54,10 +49,6 @@ const Settings = () => {
             
             <TabsContent value="breeds" className="space-y-8">
               <BreedsSettings />
-            </TabsContent>
-            
-            <TabsContent value="users" className="space-y-8">
-              <UsersSettings />
             </TabsContent>
             
             <TabsContent value="general" className="space-y-8">

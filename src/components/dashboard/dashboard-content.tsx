@@ -109,6 +109,48 @@ export const DashboardContent = ({
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle className="text-lg">Estado de Despachos</CardTitle>
+            <CardDescription>Distribución actual</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartPieChart>
+                  <Pie
+                    data={dispatchesByStatus}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={2}
+                    dataKey="value"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {dispatchesByStatus.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip formatter={(value, name) => [`${value} despachos`, name]} />
+                </RechartPieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="col-span-2">
+          <h3 className="text-lg font-semibold mb-4">Documentos por Vencer</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {documentsToExpire.map(doc => (
+              <DocumentCard key={doc.id} {...doc} />
+            ))}
+          </div>
+        </div>
+        
         <div>
           <h3 className="text-lg font-semibold mb-4">Acceso Rápido</h3>
           <div className="grid grid-cols-1 gap-4">
@@ -134,47 +176,7 @@ export const DashboardContent = ({
             />
           </div>
         </div>
-        
-        <div className="col-span-2">
-          <h3 className="text-lg font-semibold mb-4">Documentos por Vencer</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {documentsToExpire.map(doc => (
-              <DocumentCard key={doc.id} {...doc} />
-            ))}
-          </div>
-        </div>
       </div>
-      
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-lg">Estado de Despachos</CardTitle>
-          <CardDescription>Distribución actual</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px] w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartPieChart>
-                <Pie
-                  data={dispatchesByStatus}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={2}
-                  dataKey="value"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {dispatchesByStatus.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <RechartsTooltip formatter={(value, name) => [`${value} despachos`, name]} />
-              </RechartPieChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

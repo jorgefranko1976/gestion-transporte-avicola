@@ -1,13 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserRole } from '@/lib/types';
 
 type User = {
   id: string;
   name: string;
-  role: UserRole;
-  email?: string;
-  displayName?: string;
-  photoURL?: string;
+  role: 'driver' | 'coordinator';
 };
 
 type AuthContextType = {
@@ -15,7 +12,6 @@ type AuthContextType = {
   isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  signOut: () => void; // Added alias for logout for NavBar
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,23 +45,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Mock authentication logic
       if (username && password) {
         // For demo purposes only - in a real app, this would verify credentials with a backend
-        let role: UserRole = 'driver';
-        
-        if (username.includes('admin')) {
-          role = 'admin';
-        } else if (username.includes('coord')) {
-          role = 'coordinator';
-        } else if (username.includes('owner')) {
-          role = 'owner';
-        }
-        
         const mockUser: User = {
           id: '1',
           name: username,
-          displayName: username,
-          role,
-          email: `${username}@example.com`,
-          photoURL: '/placeholder.svg',
+          role: username.includes('coord') ? 'coordinator' : 'driver',
         };
         
         setUser(mockUser);
@@ -88,11 +71,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('transportUser');
   };
 
-  // Alias for logout to keep compatibility with Navbar
-  const signOut = logout;
-
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,67 +1,147 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
-import Login from './pages/Login';
-import NotFound from './pages/NotFound';
-import Settings from './pages/Settings';
-import Vehicles from './pages/Vehicles';
-import Drivers from './pages/Drivers';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import DriverPortal from "./pages/DriverPortal";
+import CoordinatorPortal from "./pages/CoordinatorPortal";
+import Vehicles from "./pages/Vehicles";
+import Farms from "./pages/Farms";
+import Settings from "./pages/Settings";
+import NotFound from "./pages/NotFound";
+import Drivers from "./pages/Drivers";
+import PESV from "./pages/PESV";
+import Reports from "./pages/Reports";
+
+const queryClient = new QueryClient();
 
 // Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ 
+  children, 
+  allowedRole 
+}: { 
+  children: JSX.Element, 
+  allowedRole?: 'driver' | 'coordinator' 
+}) => {
   const { user, isLoading } = useAuth();
-
-  // Show loading state while checking authentication
+  
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    // Could add a loading spinner here
+    return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
   }
-
-  // Redirect to login if not authenticated
+  
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-
-  // Render children if authenticated
-  return <>{children}</>;
+  
+  if (allowedRole && user.role !== allowedRole) {
+    return <Navigate to={user.role === 'driver' ? '/driver' : '/coordinator'} replace />;
+  }
+  
+  return children;
 };
 
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        
-        <Route path="/" element={
-          <ProtectedRoute>
-            <div className="p-8 mt-16">
-              <h1 className="text-2xl font-bold">Dashboard</h1>
-              <p className="mt-4">Bienvenido al sistema de gestión LogiFleet.</p>
-            </div>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/vehicles" element={
-          <ProtectedRoute>
-            <Vehicles />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/drivers" element={
-          <ProtectedRoute>
-            <Drivers />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/settings/*" element={
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
-  );
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <AuthProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            
+            {/* Protected routes */}
+            <Route 
+              path="/driver" 
+              element={
+                <ProtectedRoute allowedRole="driver">
+                  <DriverPortal />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/coordinator" 
+              element={
+                <ProtectedRoute allowedRole="coordinator">
+                  <CoordinatorPortal />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Vehículos route */}
+            <Route 
+              path="/vehicles" 
+              element={
+                <ProtectedRoute allowedRole="coordinator">
+                  <Vehicles />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Granjas route */}
+            <Route 
+              path="/farms" 
+              element={
+                <ProtectedRoute allowedRole="coordinator">
+                  <Farms />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Settings route */}
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute allowedRole="coordinator">
+                  <Settings />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Drivers route */}
+            <Route 
+              path="/drivers" 
+              element={
+                <ProtectedRoute allowedRole="coordinator">
+                  <Drivers />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Reports route */}
+            <Route 
+              path="/reports" 
+              element={
+                <ProtectedRoute allowedRole="coordinator">
+                  <Reports />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* PESV route */}
+            <Route 
+              path="/pesv" 
+              element={
+                <ProtectedRoute allowedRole="coordinator">
+                  <PESV />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Catch-all route - must be last */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

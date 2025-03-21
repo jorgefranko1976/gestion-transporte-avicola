@@ -28,7 +28,7 @@ export interface Driver {
   active: boolean;
   hireDate: Date;
   terminationDate: Date | null;
-  licenseExpiration: Date | null;
+  licenseExpiration: Date | null; // Added licenseExpiration field
 }
 
 export interface Observation {

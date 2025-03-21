@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -39,17 +40,6 @@ const GrowthProfileForm = ({
 }: GrowthProfileFormProps) => {
   const isNewProfile = !profile;
   
-  // Create default daily consumption with required values
-  const defaultDailyConsumption: DailyConsumption[] = [
-    { day: 1, amountPerBird: 12, waterPerBird: 25, expectedWeight: 55 },
-    { day: 7, amountPerBird: 35, waterPerBird: 70, expectedWeight: 175 },
-    { day: 14, amountPerBird: 68, waterPerBird: 140, expectedWeight: 430 },
-    { day: 21, amountPerBird: 110, waterPerBird: 220, expectedWeight: 830 },
-    { day: 28, amountPerBird: 155, waterPerBird: 310, expectedWeight: 1345 },
-    { day: 35, amountPerBird: 190, waterPerBird: 380, expectedWeight: 1950 },
-    { day: 42, amountPerBird: 205, waterPerBird: 410, expectedWeight: 2580 },
-  ];
-  
   const form = useForm<GrowthProfileFormValues>({
     resolver: zodResolver(growthProfileFormSchema),
     defaultValues: {
@@ -59,7 +49,15 @@ const GrowthProfileForm = ({
       sex: profile?.sex || "mixto",
       isDefault: profile?.isDefault || false,
       active: profile?.active !== undefined ? profile.active : true,
-      dailyConsumption: profile?.dailyConsumption || defaultDailyConsumption,
+      dailyConsumption: profile?.dailyConsumption || [
+        { day: 1, amountPerBird: 12, waterPerBird: 25, expectedWeight: 55 },
+        { day: 7, amountPerBird: 35, waterPerBird: 70, expectedWeight: 175 },
+        { day: 14, amountPerBird: 68, waterPerBird: 140, expectedWeight: 430 },
+        { day: 21, amountPerBird: 110, waterPerBird: 220, expectedWeight: 830 },
+        { day: 28, amountPerBird: 155, waterPerBird: 310, expectedWeight: 1345 },
+        { day: 35, amountPerBird: 190, waterPerBird: 380, expectedWeight: 1950 },
+        { day: 42, amountPerBird: 205, waterPerBird: 410, expectedWeight: 2580 },
+      ],
     },
   });
 
@@ -74,7 +72,7 @@ const GrowthProfileForm = ({
       description: data.description,
       breed: data.breed as ChickenBreedType,
       sex: data.sex as ChickenSex,
-      dailyConsumption: data.dailyConsumption as DailyConsumption[],
+      dailyConsumption: data.dailyConsumption,
       isDefault: data.isDefault || false,
       active: data.active,
       createdAt: profile?.createdAt || new Date(),
@@ -218,7 +216,7 @@ const GrowthProfileForm = ({
           <div className="space-y-4">
             <h4 className="font-medium">Consumo Diario</h4>
             <DailyConsumptionTable 
-              items={form.watch("dailyConsumption") as DailyConsumption[]}
+              items={form.watch("dailyConsumption")}
               onChange={handleUpdateDailyConsumption}
             />
           </div>

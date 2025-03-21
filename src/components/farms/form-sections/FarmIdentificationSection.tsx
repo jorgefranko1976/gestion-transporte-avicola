@@ -55,7 +55,7 @@ const FarmIdentificationSection = ({ form }: FarmIdentificationSectionProps) => 
             <FormLabel>Departamento</FormLabel>
             <Select 
               onValueChange={field.onChange} 
-              defaultValue={field.value || "pending_selection"}
+              defaultValue={field.value}
             >
               <FormControl>
                 <SelectTrigger>

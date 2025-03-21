@@ -1,3 +1,4 @@
+
 import { ChickenBreedType, ChickenSex } from './chicken-types';
 import { Dispatch } from './dispatch-types';
 import { ConfigurationItem } from './common-types';
@@ -13,8 +14,8 @@ export interface GrowthProfile extends ConfigurationItem {
 export interface DailyConsumption {
   day: number;
   amountPerBird: number; // en gramos de alimento
-  waterPerBird: number; // en mililitros de agua
-  expectedWeight: number; // peso esperado en gramos
+  waterPerBird?: number; // en mililitros de agua
+  expectedWeight?: number; // peso esperado en gramos
 }
 
 // Ciclo de producción

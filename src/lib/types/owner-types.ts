@@ -3,28 +3,15 @@ import { IdentificationType } from './common-types';
 
 export interface VehicleOwner {
   id: string;
-  name?: string;
+  name: string;
   identificationType: IdentificationType;
   identificationNumber: string;
   email?: string;
   phone?: string;
   address?: string;
   city?: string;
-  isCompany?: boolean;
+  isCompany: boolean;
   firstName?: string;
   lastName?: string;
-  hasCredit?: boolean;
-  creditAmount?: string;
-  creditTerm?: string;
-  creditEndDate?: Date;
-  isPaid?: boolean;
-  documents?: {
-    identification: string | null;
-    rut: string | null;
-    bankCertification: string | null;
-    dataProcessingConsent: string | null;
-    settlementCertificate: string | null;
-    signedPromissoryNote: string | null;
-    blankPromissoryInstructions: string | null;
-  };
+  hasCredit?: boolean; // Añadido para compatibilidad con componentes existentes
 }
