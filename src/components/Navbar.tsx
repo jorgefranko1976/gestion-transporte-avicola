@@ -1,7 +1,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { LogOut, Menu, Truck, User, X, Wheat, Settings, FileText, ClipboardList, AlertTriangle } from 'lucide-react';
+import { LogOut, Menu, Truck, User, X, Wheat, Settings, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -92,7 +92,6 @@ export const Navbar = ({ className }: NavbarProps) => {
                   <NavLink to="/vehicles" icon={<Truck className="w-4 h-4" />}>Vehículos</NavLink>
                   <NavLink to="/farms" icon={<Wheat className="w-4 h-4" />}>Granjas</NavLink>
                   <NavLink to="/drivers" icon={<User className="w-4 h-4" />}>Conductores</NavLink>
-                  <NavLink to="/reports" icon={<FileText className="w-4 h-4" />}>Reportes</NavLink>
                   <NavLink to="/pesv" icon={<AlertTriangle className="w-4 h-4" />}>PESV</NavLink>
                   <NavLink to="/settings" icon={<Settings className="w-4 h-4" />}>Configuración</NavLink>
                 </>
@@ -247,18 +246,6 @@ export const Navbar = ({ className }: NavbarProps) => {
                       >
                         <User className="w-4 h-4" />
                         <span>Conductores</span>
-                      </Link>
-                      <Link 
-                        to="/reports" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate('/reports');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <FileText className="w-4 h-4" />
-                        <span>Reportes</span>
                       </Link>
                       <Link 
                         to="/pesv" 
