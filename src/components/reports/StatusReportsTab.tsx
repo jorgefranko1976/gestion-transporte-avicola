@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Search, Download, TruckIcon, Clock, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -44,6 +43,7 @@ const StatusReportsTab = () => {
           accepted_at,
           eta,
           status,
+          driver_id,
           drivers(first_name, last_name)
         `);
       
@@ -78,11 +78,17 @@ const StatusReportsTab = () => {
             isDelayed = hoursRemaining < 0;
           }
           
+          let driverName = null;
+          // Safely access driver information if it exists
+          if (dispatch.drivers && typeof dispatch.drivers === 'object') {
+            driverName = `${dispatch.drivers.first_name} ${dispatch.drivers.last_name}`;
+          }
+          
           return {
             id: dispatch.id,
             orderId: dispatch.order_id,
             vehiclePlate: dispatch.vehicle_plate || 'No asignado',
-            driverName: dispatch.drivers ? `${dispatch.drivers.first_name} ${dispatch.drivers.last_name}` : null,
+            driverName: driverName,
             destination: dispatch.destination,
             acceptedAt: dispatch.accepted_at ? new Date(dispatch.accepted_at) : null,
             eta: dispatch.eta ? new Date(dispatch.eta) : null,

@@ -98,15 +98,23 @@ export const useReceiptSearch = () => {
       if (error) throw error;
       
       // Formatear los datos
-      const formattedReceipts = data.map(receipt => ({
-        id: receipt.id,
-        orderId: receipt.order_id,
-        completedAt: new Date(receipt.completed_at),
-        vehiclePlate: receipt.vehicle_plate || 'No asignado',
-        driverName: receipt.drivers ? `${receipt.drivers.first_name} ${receipt.drivers.last_name}` : null,
-        destination: receipt.destination,
-        receiptImageUrl: receipt.receipt_image_url
-      }));
+      const formattedReceipts = data.map(receipt => {
+        let driverName = null;
+        // Safely access driver information if it exists
+        if (receipt.drivers && typeof receipt.drivers === 'object') {
+          driverName = `${receipt.drivers.first_name} ${receipt.drivers.last_name}`;
+        }
+        
+        return {
+          id: receipt.id,
+          orderId: receipt.order_id,
+          completedAt: new Date(receipt.completed_at),
+          vehiclePlate: receipt.vehicle_plate || 'No asignado',
+          driverName: driverName,
+          destination: receipt.destination,
+          receiptImageUrl: receipt.receipt_image_url
+        };
+      });
       
       setReceipts(formattedReceipts);
       setFilteredReceipts(formattedReceipts);

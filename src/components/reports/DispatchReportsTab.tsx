@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -37,11 +36,9 @@ const DispatchReportsTab = () => {
   const [origins, setOrigins] = useState<string[]>([]);
   const [destinations, setDestinations] = useState<string[]>([]);
 
-  // Cargar datos iniciales
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        // Obtener orígenes (empresas de cargue)
         const { data: originsData, error: originsError } = await supabase
           .from('dispatches')
           .select('loading_company')
@@ -49,11 +46,9 @@ const DispatchReportsTab = () => {
           
         if (originsError) throw originsError;
         
-        // Filtrar empresas únicas
         const uniqueOrigins = [...new Set(originsData.map(item => item.loading_company))];
         setOrigins(uniqueOrigins);
         
-        // Obtener destinos (granjas)
         const { data: destinationsData, error: destinationsError } = await supabase
           .from('dispatches')
           .select('destination')
@@ -61,7 +56,6 @@ const DispatchReportsTab = () => {
           
         if (destinationsError) throw destinationsError;
         
-        // Filtrar destinos únicos
         const uniqueDestinations = [...new Set(destinationsData.map(item => item.destination))];
         setDestinations(uniqueDestinations);
         
@@ -74,7 +68,6 @@ const DispatchReportsTab = () => {
     fetchInitialData();
   }, []);
 
-  // Buscar despachos
   const handleSearch = async () => {
     if (!startDate || !endDate) {
       toast.error('Debes seleccionar un rango de fechas');
@@ -83,7 +76,6 @@ const DispatchReportsTab = () => {
     
     setIsLoading(true);
     try {
-      // Construir la consulta
       let query = supabase
         .from('dispatches')
         .select(`
@@ -93,13 +85,13 @@ const DispatchReportsTab = () => {
           loading_company,
           destination,
           vehicle_plate,
+          driver_id,
           drivers(first_name, last_name),
           status
         `)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', new Date(endDate.setHours(23, 59, 59)).toISOString());
       
-      // Aplicar filtros adicionales
       if (origin) {
         query = query.eq('loading_company', origin);
       }
@@ -108,24 +100,27 @@ const DispatchReportsTab = () => {
         query = query.eq('destination', destination);
       }
       
-      // Ejecutar la consulta
       const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
       
-      // Formatear los datos
-      const formattedDispatches = data.map(item => ({
-        id: item.id,
-        orderId: item.order_id,
-        date: new Date(item.created_at),
-        origin: item.loading_company,
-        destination: item.destination,
-        vehiclePlate: item.vehicle_plate || 'No asignado',
-        driverName: item.drivers 
-          ? `${item.drivers.first_name} ${item.drivers.last_name}`
-          : null,
-        status: item.status
-      }));
+      const formattedDispatches = data.map(item => {
+        let driverName = null;
+        if (item.drivers && typeof item.drivers === 'object') {
+          driverName = `${item.drivers.first_name} ${item.drivers.last_name}`;
+        }
+        
+        return {
+          id: item.id,
+          orderId: item.order_id,
+          date: new Date(item.created_at),
+          origin: item.loading_company,
+          destination: item.destination,
+          vehiclePlate: item.vehicle_plate || 'No asignado',
+          driverName: driverName,
+          status: item.status
+        };
+      });
       
       setDispatches(formattedDispatches);
       setFilteredDispatches(formattedDispatches);
@@ -138,7 +133,6 @@ const DispatchReportsTab = () => {
     }
   };
 
-  // Filtrar resultados por término de búsqueda
   useEffect(() => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
@@ -155,14 +149,12 @@ const DispatchReportsTab = () => {
     }
   }, [searchTerm, dispatches]);
 
-  // Exportar a CSV
   const exportToCSV = () => {
     if (filteredDispatches.length === 0) {
       toast.error('No hay datos para exportar');
       return;
     }
     
-    // Crear contenido CSV
     const headers = [
       'Orden', 
       'Fecha', 
@@ -185,7 +177,6 @@ const DispatchReportsTab = () => {
     
     const csvContent = [headers, ...csvRows].join('\n');
     
-    // Crear blob y descargar
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -317,7 +308,6 @@ const DispatchReportsTab = () => {
         </Button>
       </div>
       
-      {/* Tabla de resultados */}
       {dispatches.length > 0 ? (
         <div className="rounded-md border overflow-hidden">
           <div className="overflow-x-auto">

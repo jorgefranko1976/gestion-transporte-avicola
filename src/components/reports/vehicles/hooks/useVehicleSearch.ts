@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -71,7 +70,8 @@ export const useVehicleSearch = () => {
           soat_expiration,
           technical_inspection_expiration,
           status,
-          vehicle_owners(name, first_name, last_name)
+          owner_id,
+          vehicle_owners(id, name, first_name, last_name)
         `)
         .order('plate');
       
@@ -91,21 +91,32 @@ export const useVehicleSearch = () => {
       if (error) throw error;
       
       // Formatear los datos
-      const formattedVehicles = data.map(vehicle => ({
-        id: vehicle.id,
-        plate: vehicle.plate,
-        type: vehicle.vehicle_type,
-        brand: vehicle.brand,
-        model: vehicle.model,
-        line: vehicle.line,
-        active: vehicle.active,
-        ownerName: vehicle.vehicle_owners 
-          ? (vehicle.vehicle_owners.name || `${vehicle.vehicle_owners.first_name} ${vehicle.vehicle_owners.last_name}`)
-          : null,
-        soatExpiration: vehicle.soat_expiration ? new Date(vehicle.soat_expiration) : null,
-        techExpiration: vehicle.technical_inspection_expiration ? new Date(vehicle.technical_inspection_expiration) : null,
-        status: vehicle.status || 'available'
-      }));
+      const formattedVehicles = data.map(vehicle => {
+        let ownerName = null;
+        
+        // Safely access owner information if it exists
+        if (vehicle.vehicle_owners && typeof vehicle.vehicle_owners === 'object') {
+          if (vehicle.vehicle_owners.name) {
+            ownerName = vehicle.vehicle_owners.name;
+          } else if (vehicle.vehicle_owners.first_name && vehicle.vehicle_owners.last_name) {
+            ownerName = `${vehicle.vehicle_owners.first_name} ${vehicle.vehicle_owners.last_name}`;
+          }
+        }
+        
+        return {
+          id: vehicle.id,
+          plate: vehicle.plate,
+          type: vehicle.vehicle_type,
+          brand: vehicle.brand,
+          model: vehicle.model,
+          line: vehicle.line,
+          active: vehicle.active,
+          ownerName: ownerName,
+          soatExpiration: vehicle.soat_expiration ? new Date(vehicle.soat_expiration) : null,
+          techExpiration: vehicle.technical_inspection_expiration ? new Date(vehicle.technical_inspection_expiration) : null,
+          status: vehicle.status || 'available'
+        };
+      });
       
       setVehicles(formattedVehicles);
       setFilteredVehicles(formattedVehicles);

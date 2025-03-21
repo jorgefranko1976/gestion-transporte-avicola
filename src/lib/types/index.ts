@@ -9,4 +9,5 @@ export * from './chicken-types';
 export * from './production-types';
 export * from './common-types';
 export * from './owner-types';
-export * from './user-types';
+// Explicitly re-export UserRole to resolve ambiguity
+export { UserRole } from './user-types';

@@ -40,6 +40,17 @@ const GrowthProfileForm = ({
 }: GrowthProfileFormProps) => {
   const isNewProfile = !profile;
   
+  // Create default daily consumption with non-optional properties
+  const defaultDailyConsumption: DailyConsumption[] = [
+    { day: 1, amountPerBird: 12, waterPerBird: 25, expectedWeight: 55 },
+    { day: 7, amountPerBird: 35, waterPerBird: 70, expectedWeight: 175 },
+    { day: 14, amountPerBird: 68, waterPerBird: 140, expectedWeight: 430 },
+    { day: 21, amountPerBird: 110, waterPerBird: 220, expectedWeight: 830 },
+    { day: 28, amountPerBird: 155, waterPerBird: 310, expectedWeight: 1345 },
+    { day: 35, amountPerBird: 190, waterPerBird: 380, expectedWeight: 1950 },
+    { day: 42, amountPerBird: 205, waterPerBird: 410, expectedWeight: 2580 },
+  ];
+  
   const form = useForm<GrowthProfileFormValues>({
     resolver: zodResolver(growthProfileFormSchema),
     defaultValues: {
@@ -49,15 +60,7 @@ const GrowthProfileForm = ({
       sex: profile?.sex || "mixto",
       isDefault: profile?.isDefault || false,
       active: profile?.active !== undefined ? profile.active : true,
-      dailyConsumption: profile?.dailyConsumption || [
-        { day: 1, amountPerBird: 12, waterPerBird: 25, expectedWeight: 55 },
-        { day: 7, amountPerBird: 35, waterPerBird: 70, expectedWeight: 175 },
-        { day: 14, amountPerBird: 68, waterPerBird: 140, expectedWeight: 430 },
-        { day: 21, amountPerBird: 110, waterPerBird: 220, expectedWeight: 830 },
-        { day: 28, amountPerBird: 155, waterPerBird: 310, expectedWeight: 1345 },
-        { day: 35, amountPerBird: 190, waterPerBird: 380, expectedWeight: 1950 },
-        { day: 42, amountPerBird: 205, waterPerBird: 410, expectedWeight: 2580 },
-      ],
+      dailyConsumption: profile?.dailyConsumption || defaultDailyConsumption,
     },
   });
 
