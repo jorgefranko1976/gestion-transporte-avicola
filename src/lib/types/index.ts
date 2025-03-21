@@ -9,4 +9,4 @@ export * from './chicken-types';
 export * from './production-types';
 export * from './common-types';
 export * from './owner-types';
-
+export * from './user-types';
