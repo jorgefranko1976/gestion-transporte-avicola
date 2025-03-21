@@ -1,3 +1,4 @@
+
 // Vehicle types
 export type VehicleType = 'camion' | 'camion liviano' | 'dobletroque' | 'camioneta' | 'tracto camion';
 
@@ -127,3 +128,23 @@ export interface UploadedFile {
   records?: number;
   previewUrl?: string;
 }
+
+// Tipos para el módulo de Granjas
+export type WaterSource = 'acueducto' | 'carrotanque' | 'pozo' | 'nacedero' | 'rio' | 'caño';
+
+export interface Farm {
+  id: string;
+  name: string;
+  department: string;
+  zone: string;
+  internalId: string;
+  waterSource: WaterSource;
+  contactPerson: string;
+  contactPhone: string;
+  chickenCapacity: number;
+  concentrateCapacity: number; // En toneladas
+  shedsCount: number;
+  active: boolean;
+  createdAt: Date;
+}
+
