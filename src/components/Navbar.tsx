@@ -1,7 +1,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { LogOut, Menu, Truck, User, X } from 'lucide-react';
+import { LogOut, Menu, Truck, User, X, Wheat } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -78,6 +78,7 @@ export const Navbar = ({ className }: NavbarProps) => {
                 <>
                   <NavLink to="/coordinator">Panel de Coordinador</NavLink>
                   <NavLink to="/vehicles">Vehículos</NavLink>
+                  <NavLink to="/farms">Granjas</NavLink>
                   <NavLink to="/drivers">Conductores</NavLink>
                   <NavLink to="/reports">Reportes</NavLink>
                 </>
@@ -180,6 +181,13 @@ export const Navbar = ({ className }: NavbarProps) => {
                         className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors"
                       >
                         Vehículos
+                      </Link>
+                      <Link 
+                        to="/farms" 
+                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                      >
+                        <Wheat className="w-4 h-4" />
+                        <span>Granjas</span>
                       </Link>
                       <Link 
                         to="/drivers" 
