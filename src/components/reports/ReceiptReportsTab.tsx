@@ -268,7 +268,7 @@ const ReceiptReportsTab = () => {
               <SelectValue placeholder="Todos los vehículos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los vehículos</SelectItem>
+              <SelectItem value="all_vehicles">Todos los vehículos</SelectItem>
               {vehicles.map(v => (
                 <SelectItem key={v.plate} value={v.plate}>{v.plate}</SelectItem>
               ))}
@@ -283,7 +283,7 @@ const ReceiptReportsTab = () => {
               <SelectValue placeholder="Todos los conductores" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los conductores</SelectItem>
+              <SelectItem value="all_drivers">Todos los conductores</SelectItem>
               {drivers.map(d => (
                 <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
               ))}
