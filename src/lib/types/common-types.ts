@@ -2,8 +2,11 @@
 // Tipos de identificación
 export type IdentificationType = 'CC' | 'NIT' | 'CE';
 
+// User roles
+export type UserRole = 'admin' | 'coordinator' | 'driver' | 'owner';
+
 // Tipo de configuración para el módulo
-export type ConfigurationModule = 'growth-profiles' | 'breeds' | 'farms' | 'vehicles';
+export type ConfigurationModule = 'growth-profiles' | 'breeds' | 'farms' | 'vehicles' | 'users';
 
 // Estructura base para cualquier entidad de configuración
 export interface ConfigurationItem {
@@ -14,4 +17,3 @@ export interface ConfigurationItem {
   createdAt: Date;
   updatedAt?: Date;
 }
-
