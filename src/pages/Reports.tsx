@@ -6,7 +6,7 @@ import PageTransition from '@/components/transitions/PageTransition';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DispatchReportsTab from '@/components/reports/DispatchReportsTab';
 import FileReportsTab from '@/components/reports/FileReportsTab';
-import VehicleReportsTab from '@/components/reports/VehicleReportsTab';
+import VehicleReportsTab from '@/components/reports/vehicles/VehicleReportsTab';
 import DriverReportsTab from '@/components/reports/DriverReportsTab';
 import StatusReportsTab from '@/components/reports/StatusReportsTab';
 import ReceiptReportsTab from '@/components/reports/receipts/ReceiptReportsTab';
