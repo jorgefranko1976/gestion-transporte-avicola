@@ -9,8 +9,8 @@ export const useReceiptSearch = () => {
     new Date(new Date().setDate(new Date().getDate() - 30))
   );
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
-  const [vehiclePlate, setVehiclePlate] = useState('all_vehicles'); // Changed from empty string to 'all_vehicles'
-  const [driverId, setDriverId] = useState('all_drivers'); // Changed from empty string to 'all_drivers'
+  const [vehiclePlate, setVehiclePlate] = useState('all_vehicles');
+  const [driverId, setDriverId] = useState('all_drivers');
   const [searchTerm, setSearchTerm] = useState('');
   const [receipts, setReceipts] = useState<ReceiptReport[]>([]);
   const [filteredReceipts, setFilteredReceipts] = useState<ReceiptReport[]>([]);
@@ -30,7 +30,10 @@ export const useReceiptSearch = () => {
           .order('plate');
           
         if (vehiclesError) throw vehiclesError;
-        setVehicles(vehiclesData);
+        
+        // Filtrar valores nulos o vacíos
+        const filteredVehicles = vehiclesData.filter(v => v.plate && v.plate.trim() !== '');
+        setVehicles(filteredVehicles);
         
         // Obtener conductores
         const { data: driversData, error: driversError } = await supabase
@@ -43,13 +46,13 @@ export const useReceiptSearch = () => {
         
         const formattedDrivers = driversData.map(driver => ({
           id: driver.id,
-          name: `${driver.first_name} ${driver.last_name}`
+          name: `${driver.first_name || ''} ${driver.last_name || ''}`.trim() || 'Sin nombre'
         }));
         
         setDrivers(formattedDrivers);
         
       } catch (error) {
-        console.error('Error fetching initial data:', error);
+        console.error('Error al cargar datos iniciales:', error);
         toast.error('Error al cargar datos iniciales');
       }
     };
@@ -105,20 +108,20 @@ export const useReceiptSearch = () => {
             .from('drivers')
             .select('first_name, last_name')
             .eq('id', receipt.driver_id)
-            .single();
+            .maybeSingle();
             
           if (!driverError && driverData) {
-            driverName = `${driverData.first_name} ${driverData.last_name}`;
+            driverName = `${driverData.first_name || ''} ${driverData.last_name || ''}`.trim();
           }
         }
         
         return {
           id: receipt.id,
-          orderId: receipt.order_id,
+          orderId: receipt.order_id || 'Sin ID',
           completedAt: new Date(receipt.completed_at),
           vehiclePlate: receipt.vehicle_plate || 'No asignado',
-          driverName,
-          destination: receipt.destination,
+          driverName: driverName || 'No asignado',
+          destination: receipt.destination || 'No especificado',
           receiptImageUrl: receipt.receipt_image_url
         };
       }));
@@ -127,7 +130,7 @@ export const useReceiptSearch = () => {
       setFilteredReceipts(formattedReceipts);
       
     } catch (error) {
-      console.error('Error searching receipts:', error);
+      console.error('Error al buscar remisiones:', error);
       toast.error('Error al buscar remisiones');
     } finally {
       setIsLoading(false);
@@ -139,9 +142,9 @@ export const useReceiptSearch = () => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
       const filtered = receipts.filter(r => 
-        r.orderId.toLowerCase().includes(lowercaseSearch) ||
-        r.vehiclePlate.toLowerCase().includes(lowercaseSearch) ||
-        r.destination.toLowerCase().includes(lowercaseSearch) ||
+        (r.orderId && r.orderId.toLowerCase().includes(lowercaseSearch)) ||
+        (r.vehiclePlate && r.vehiclePlate.toLowerCase().includes(lowercaseSearch)) ||
+        (r.destination && r.destination.toLowerCase().includes(lowercaseSearch)) ||
         (r.driverName && r.driverName.toLowerCase().includes(lowercaseSearch))
       );
       setFilteredReceipts(filtered);

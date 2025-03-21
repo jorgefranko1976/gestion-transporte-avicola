@@ -112,7 +112,7 @@ export const ReceiptFilters = ({
           <SelectContent>
             <SelectItem value="all_drivers">Todos los conductores</SelectItem>
             {drivers.map(d => (
-              <SelectItem key={d.id} value={d.id || "no_id"}>{d.name || "Sin nombre"}</SelectItem>
+              <SelectItem key={d.id} value={d.id}>{d.name || "Sin nombre"}</SelectItem>
             ))}
           </SelectContent>
         </Select>

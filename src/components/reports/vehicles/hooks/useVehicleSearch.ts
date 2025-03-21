@@ -6,7 +6,7 @@ import { VehicleReport } from '../types';
 
 export const useVehicleSearch = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all_types');  // Changed the default value to 'all_types' instead of empty string
+  const [typeFilter, setTypeFilter] = useState<string>('all_types');
   const [searchTerm, setSearchTerm] = useState('');
   const [vehicles, setVehicles] = useState<VehicleReport[]>([]);
   const [filteredVehicles, setFilteredVehicles] = useState<VehicleReport[]>([]);
@@ -24,12 +24,16 @@ export const useVehicleSearch = () => {
           
         if (error) throw error;
         
-        // Filtrar tipos únicos
-        const uniqueTypes = [...new Set(data.map(item => item.vehicle_type))];
+        // Filtrar tipos únicos y eliminar valores nulos o vacíos
+        const uniqueTypes = [...new Set(data
+          .map(item => item.vehicle_type)
+          .filter(type => type && type.trim() !== '')
+        )];
+        
         setVehicleTypes(uniqueTypes);
         
       } catch (error) {
-        console.error('Error fetching vehicle types:', error);
+        console.error('Error al obtener tipos de vehículos:', error);
       }
     };
     
@@ -97,7 +101,7 @@ export const useVehicleSearch = () => {
             .from('vehicle_owners')
             .select('name, first_name, last_name')
             .eq('id', vehicle.owner_id)
-            .single();
+            .maybeSingle();
           
           if (!ownerError && ownerData) {
             ownerName = ownerData.name || `${ownerData.first_name || ''} ${ownerData.last_name || ''}`.trim();
@@ -107,12 +111,12 @@ export const useVehicleSearch = () => {
         return {
           id: vehicle.id,
           plate: vehicle.plate,
-          type: vehicle.vehicle_type,
-          brand: vehicle.brand,
-          model: vehicle.model,
-          line: vehicle.line,
+          type: vehicle.vehicle_type || 'Desconocido',
+          brand: vehicle.brand || 'Desconocido',
+          model: vehicle.model || 'Desconocido',
+          line: vehicle.line || 'Desconocido',
           active: vehicle.active,
-          ownerName,
+          ownerName: ownerName || 'No especificado',
           soatExpiration: vehicle.soat_expiration ? new Date(vehicle.soat_expiration) : null,
           techExpiration: vehicle.technical_inspection_expiration ? new Date(vehicle.technical_inspection_expiration) : null,
           status: vehicle.status || 'available'
@@ -123,7 +127,7 @@ export const useVehicleSearch = () => {
       setFilteredVehicles(formattedVehicles);
       
     } catch (error) {
-      console.error('Error searching vehicles:', error);
+      console.error('Error al buscar vehículos:', error);
       toast.error('Error al buscar vehículos');
     } finally {
       setIsLoading(false);
