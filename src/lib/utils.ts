@@ -1,15 +1,20 @@
-
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-import { DailyConsumption, ProductionCycle } from "./types"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { VehicleOwner } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-export const getFullName = (person: { firstName: string; lastName: string }) => {
-  return `${person.firstName} ${person.lastName}`;
-};
+export function getFullName(owner: Partial<VehicleOwner>): string {
+  if (owner.name) {
+    return owner.name;
+  } else if (owner.firstName || owner.lastName) {
+    return `${owner.firstName || ''} ${owner.lastName || ''}`.trim();
+  } else {
+    return `${owner.identificationType || ''} ${owner.identificationNumber || ''}`.trim();
+  }
+}
 
 /**
  * Calcula el consumo esperado de alimento para un día específico basado en la curva de alimentación

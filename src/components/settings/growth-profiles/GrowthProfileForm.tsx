@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -75,7 +74,7 @@ const GrowthProfileForm = ({
       description: data.description,
       breed: data.breed as ChickenBreedType,
       sex: data.sex as ChickenSex,
-      dailyConsumption: data.dailyConsumption,
+      dailyConsumption: data.dailyConsumption as DailyConsumption[],
       isDefault: data.isDefault || false,
       active: data.active,
       createdAt: profile?.createdAt || new Date(),
@@ -219,7 +218,7 @@ const GrowthProfileForm = ({
           <div className="space-y-4">
             <h4 className="font-medium">Consumo Diario</h4>
             <DailyConsumptionTable 
-              items={form.watch("dailyConsumption")}
+              items={form.watch("dailyConsumption") as DailyConsumption[]}
               onChange={handleUpdateDailyConsumption}
             />
           </div>

@@ -36,6 +36,17 @@ export const VehicleRow: React.FC<VehicleRowProps> = ({ vehicle, onViewDocuments
     vehicle.documents.soatExpiration !== null && vehicle.documents.technicalInspectionExpiration !== null && vehicle.documents.rcPolicyExpiration !== null &&
     vehicle.documents.soatExpiration > new Date() && vehicle.documents.technicalInspectionExpiration > new Date() && vehicle.documents.rcPolicyExpiration > new Date();
 
+  // Get owner name safely
+  const getOwnerDisplayName = () => {
+    if (vehicle.owner.name) {
+      return vehicle.owner.name;
+    } else if (vehicle.owner.firstName || vehicle.owner.lastName) {
+      return `${vehicle.owner.firstName || ''} ${vehicle.owner.lastName || ''}`.trim();
+    } else {
+      return `${vehicle.owner.identificationType} ${vehicle.owner.identificationNumber}`;
+    }
+  };
+
   return (
     <TableRow onClick={() => onViewDocuments(vehicle)} className="cursor-pointer hover:bg-muted/50">
       <TableCell className="font-medium">
@@ -46,7 +57,7 @@ export const VehicleRow: React.FC<VehicleRowProps> = ({ vehicle, onViewDocuments
       </TableCell>
       <TableCell>
         <div className="flex flex-col">
-          <span>{getFullName(vehicle.owner)}</span>
+          <span>{getOwnerDisplayName()}</span>
           <span className="text-xs text-muted-foreground">
             {vehicle.owner.identificationType} {vehicle.owner.identificationNumber}
           </span>
