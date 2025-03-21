@@ -1,5 +1,6 @@
 
 import * as z from "zod";
+import { ChickenBreed, ChickenSex } from "@/lib/types";
 
 export const farmFormSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
@@ -27,6 +28,12 @@ export const productionCycleFormSchema = z.object({
   }),
   initialBirdCount: z.coerce.number().min(1, "La cantidad inicial de aves debe ser mayor a 0"),
   growthProfileId: z.string().min(1, "Debes seleccionar un perfil de crecimiento"),
+  breed: z.enum(["cobb500", "ross308", "hubbard", "arbor_acres", "otras"] as const, {
+    required_error: "Debes seleccionar una raza",
+  }),
+  sex: z.enum(["macho", "hembra", "mixto"] as const, {
+    required_error: "Debes seleccionar el sexo de las aves",
+  }),
   concentrateReserve: z.coerce.number().min(0, "La reserva de concentrado no puede ser negativa"),
   notes: z.string().optional(),
 });
@@ -41,22 +48,42 @@ export const dailyRecordFormSchema = z.object({
   birdCount: z.coerce.number().min(0, "La cantidad de aves no puede ser negativa"),
   mortality: z.coerce.number().min(0, "La mortalidad no puede ser negativa"),
   actualConsumption: z.coerce.number().min(0, "El consumo real no puede ser negativo"),
+  actualWaterConsumption: z.coerce.number().min(0, "El consumo de agua no puede ser negativo").optional(),
+  birdWeight: z.coerce.number().min(0, "El peso no puede ser negativo").optional(),
   concentrateReceived: z.coerce.number().min(0, "La cantidad recibida no puede ser negativa"),
   notes: z.string().optional(),
 });
 
 export type DailyRecordFormValues = z.infer<typeof dailyRecordFormSchema>;
 
-// Esquema para perfiles de crecimiento
+// Esquema para perfiles de crecimiento (CurveFeed)
 export const growthProfileFormSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
   description: z.string().optional(),
+  breed: z.enum(["cobb500", "ross308", "hubbard", "arbor_acres", "otras"] as const, {
+    required_error: "Debes seleccionar una raza",
+  }),
+  sex: z.enum(["macho", "hembra", "mixto"] as const, {
+    required_error: "Debes seleccionar el sexo",
+  }),
   dailyConsumption: z.array(
     z.object({
       day: z.coerce.number().min(1, "El día debe ser mayor a 0"),
       amountPerBird: z.coerce.number().min(0, "La cantidad por ave no puede ser negativa"),
+      waterPerBird: z.coerce.number().min(0, "La cantidad de agua por ave no puede ser negativa").optional(),
+      expectedWeight: z.coerce.number().min(0, "El peso esperado no puede ser negativo").optional(),
     })
   ).min(1, "Debe haber al menos un registro de consumo diario"),
 });
 
 export type GrowthProfileFormValues = z.infer<typeof growthProfileFormSchema>;
+
+// Esquema para importar curvas de alimentación desde archivo
+export const curveFeedImportSchema = z.object({
+  file: z.instanceof(File, { message: "Debes seleccionar un archivo" }),
+  breed: z.enum(["cobb500", "ross308", "hubbard", "arbor_acres", "otras"] as const),
+  sex: z.enum(["macho", "hembra", "mixto"] as const),
+  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
+});
+
+export type CurveFeedImportValues = z.infer<typeof curveFeedImportSchema>;

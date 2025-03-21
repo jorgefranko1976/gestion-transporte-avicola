@@ -151,18 +151,28 @@ export interface Farm {
   minConcentrateReserve?: number;
 }
 
-// Perfil de crecimiento diario
+// Raza de pollos
+export type ChickenBreed = "cobb500" | "ross308" | "hubbard" | "arbor_acres" | "otras";
+
+// Sexo de las aves
+export type ChickenSex = "macho" | "hembra" | "mixto";
+
+// Perfil de crecimiento diario con curva de alimentación
 export interface GrowthProfile {
   id: string;
   name: string;
   description?: string;
+  breed: ChickenBreed;
+  sex: ChickenSex;
   dailyConsumption: DailyConsumption[];
   createdAt: Date;
 }
 
 export interface DailyConsumption {
   day: number;
-  amountPerBird: number; // en gramos
+  amountPerBird: number; // en gramos de alimento
+  waterPerBird?: number; // en mililitros de agua
+  expectedWeight?: number; // peso esperado en gramos
 }
 
 // Ciclo de producción
@@ -176,6 +186,8 @@ export interface ProductionCycle {
   currentBirdCount: number;
   growthProfileId: string;
   growthProfile?: GrowthProfile;
+  breed: ChickenBreed;
+  sex: ChickenSex;
   
   // Registro de consumo diario real
   dailyRecords: DailyRecord[];
@@ -202,8 +214,9 @@ export interface DailyRecord {
   mortality: number;
   expectedConsumption: number; // En kg
   actualConsumption: number; // En kg
+  expectedWaterConsumption?: number; // En litros
+  actualWaterConsumption?: number; // En litros
+  birdWeight?: number; // Peso promedio en gramos
   concentrateReceived: number; // En kg
   notes?: string;
 }
-
-// Eliminamos la función duplicada getFullName - ahora solo está en utils.ts
