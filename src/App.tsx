@@ -13,6 +13,9 @@ import Vehicles from "./pages/Vehicles";
 import Farms from "./pages/Farms";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Drivers from "./pages/Drivers";
+import PESV from "./pages/PESV";
+import Reports from "./pages/Reports";
 
 const queryClient = new QueryClient();
 
@@ -102,29 +105,32 @@ const App = () => (
               } 
             />
             
+            {/* Drivers route */}
             <Route 
               path="/drivers" 
               element={
                 <ProtectedRoute allowedRole="coordinator">
-                  <CoordinatorPortal />
+                  <Drivers />
                 </ProtectedRoute>
               } 
             />
             
+            {/* Reports route */}
             <Route 
               path="/reports" 
               element={
                 <ProtectedRoute allowedRole="coordinator">
-                  <CoordinatorPortal />
+                  <Reports />
                 </ProtectedRoute>
               } 
             />
             
+            {/* PESV route */}
             <Route 
               path="/pesv" 
               element={
                 <ProtectedRoute allowedRole="coordinator">
-                  <CoordinatorPortal />
+                  <PESV />
                 </ProtectedRoute>
               } 
             />
