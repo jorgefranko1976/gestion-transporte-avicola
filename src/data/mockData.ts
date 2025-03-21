@@ -1,4 +1,3 @@
-
 // Mock data for vehicles
 export const recentVehicles = [
   { id: '1', plate: 'WHK 426', type: 'camion', brand: 'Chevrolet', model: '2020', status: 'activo' },
@@ -186,3 +185,73 @@ export const chartConfig = {
   demorados: { label: "Demorados", color: "#f59e0b" },
   cancelados: { label: "Cancelados", color: "#ef4444" },
 };
+
+import { VehicleOwner } from "@/lib/types";
+
+// Datos de ejemplo para propietarios
+export const mockOwners: VehicleOwner[] = [
+  {
+    id: "owner-1",
+    firstName: "Juan",
+    lastName: "Pérez",
+    identificationType: "CC",
+    identificationNumber: "1020304050",
+    address: "Calle 123 #45-67",
+    city: "Bogotá",
+    phone: "3001234567",
+    hasCredit: false,
+    documents: {
+      identification: null,
+      rut: null,
+      bankCertification: null,
+      dataProcessingConsent: null,
+      settlementCertificate: null,
+      signedPromissoryNote: null,
+      blankPromissoryInstructions: null,
+    }
+  },
+  {
+    id: "owner-2",
+    firstName: "María",
+    lastName: "Rodríguez",
+    identificationType: "CC",
+    identificationNumber: "5060708090",
+    address: "Avenida 456 #78-90",
+    city: "Medellín",
+    phone: "3109876543",
+    hasCredit: true,
+    creditAmount: "50000000",
+    creditTerm: "36",
+    creditEndDate: new Date("2025-12-31"),
+    isPaid: false,
+    documents: {
+      identification: null,
+      rut: null,
+      bankCertification: null,
+      dataProcessingConsent: null,
+      settlementCertificate: null,
+      signedPromissoryNote: null,
+      blankPromissoryInstructions: null,
+    }
+  },
+  {
+    id: "owner-3",
+    firstName: "Carlos",
+    lastName: "González",
+    identificationType: "NIT",
+    identificationNumber: "900123456-7",
+    address: "Carrera 789 #12-34",
+    city: "Cali",
+    phone: "3201234567",
+    hasCredit: false,
+    documents: {
+      identification: null,
+      rut: null,
+      bankCertification: null,
+      dataProcessingConsent: null,
+      settlementCertificate: null,
+      signedPromissoryNote: null,
+      blankPromissoryInstructions: null,
+    }
+  }
+];

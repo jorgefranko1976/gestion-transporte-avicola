@@ -1,6 +1,34 @@
-
 // Vehicle types
 export type VehicleType = 'camion' | 'camion liviano' | 'dobletroque' | 'camioneta' | 'tracto camion';
+
+// Tipos de identificación
+export type IdentificationType = 'CC' | 'NIT' | 'CE';
+
+// Información del propietario del vehículo
+export interface VehicleOwner {
+  id: string; // Agregamos un ID para referenciar al propietario
+  firstName: string;
+  lastName: string;
+  identificationType: IdentificationType;
+  identificationNumber: string;
+  address: string;
+  city: string;
+  phone: string;
+  hasCredit: boolean;
+  creditAmount?: string;
+  creditTerm?: string;
+  creditEndDate?: Date;
+  isPaid?: boolean;
+  documents: {
+    identification: string | null;
+    rut: string | null;
+    bankCertification: string | null;
+    dataProcessingConsent: string | null;
+    settlementCertificate: string | null;
+    signedPromissoryNote: string | null;
+    blankPromissoryInstructions: string | null;
+  };
+}
 
 export interface Vehicle {
   id: string;
@@ -27,37 +55,10 @@ export interface Vehicle {
     propertyCard: string | null;
     photos: string[];
   };
-  owner: VehicleOwner;
+  ownerId: string; // Ahora solo guardamos la referencia al propietario
+  owner: VehicleOwner; // Para poder acceder a los datos completos
   active: boolean;
   createdAt: Date;
-}
-
-// Tipos de identificación
-export type IdentificationType = 'CC' | 'NIT' | 'CE';
-
-// Información del propietario del vehículo
-export interface VehicleOwner {
-  firstName: string;
-  lastName: string;
-  identificationType: IdentificationType;
-  identificationNumber: string;
-  address: string;
-  city: string;
-  phone: string;
-  hasCredit: boolean;
-  creditAmount?: string;
-  creditTerm?: string;
-  creditEndDate?: Date;
-  isPaid?: boolean;
-  documents: {
-    identification: string | null;
-    rut: string | null;
-    bankCertification: string | null;
-    dataProcessingConsent: string | null;
-    settlementCertificate: string | null;
-    signedPromissoryNote: string | null;
-    blankPromissoryInstructions: string | null;
-  };
 }
 
 // Driver types

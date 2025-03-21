@@ -15,17 +15,46 @@ export const vehicleFormSchema = z.object({
   engineNumber: z.string().min(1, "El número de motor es requerido"),
   chassisNumber: z.string().min(1, "El número de chasis es requerido"),
   
-  ownerFirstName: z.string().min(2, "El nombre del propietario es requerido"),
-  ownerLastName: z.string().min(2, "Los apellidos del propietario son requeridos"),
-  ownerIdentificationType: z.enum(["CC", "NIT", "CE"] as const),
-  ownerIdentificationNumber: z.string().min(5, "El número de identificación es requerido"),
-  ownerAddress: z.string().min(5, "La dirección es requerida"),
-  ownerCity: z.string().min(2, "La ciudad es requerida"),
-  ownerPhone: z.string().min(7, "El teléfono es requerido"),
-  ownerHasCredit: z.enum(["si", "no"]),
+  // Campo para seleccionar propietario existente o crear uno nuevo
+  ownerOption: z.enum(["existing", "new"]),
+  ownerId: z.string().optional(),
+
+  // Estos campos solo se usan cuando se crea un nuevo propietario
+  ownerFirstName: z.string().optional(),
+  ownerLastName: z.string().optional(),
+  ownerIdentificationType: z.enum(["CC", "NIT", "CE"] as const).optional(),
+  ownerIdentificationNumber: z.string().optional(),
+  ownerAddress: z.string().optional(),
+  ownerCity: z.string().optional(),
+  ownerPhone: z.string().optional(),
+  ownerHasCredit: z.enum(["si", "no"]).optional(),
   ownerCreditAmount: z.string().optional(),
   ownerCreditTerm: z.string().optional(),
   ownerCreditEndDate: z.date().optional(),
+}).refine((data) => {
+  // Validación adicional: si se selecciona propietario existente, debe especificarse un ID
+  if (data.ownerOption === "existing") {
+    return !!data.ownerId;
+  }
+  
+  // Si se crea un nuevo propietario, todos los campos obligatorios deben estar presentes
+  if (data.ownerOption === "new") {
+    return !!(
+      data.ownerFirstName &&
+      data.ownerLastName &&
+      data.ownerIdentificationType &&
+      data.ownerIdentificationNumber &&
+      data.ownerAddress &&
+      data.ownerCity &&
+      data.ownerPhone &&
+      data.ownerHasCredit
+    );
+  }
+  
+  return true;
+}, {
+  message: "Debe seleccionar un propietario existente o completar todos los campos para crear uno nuevo",
+  path: ["ownerOption"],
 });
 
 export type VehicleFormValues = z.infer<typeof vehicleFormSchema>;
