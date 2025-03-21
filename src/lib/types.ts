@@ -108,7 +108,9 @@ export interface Dispatch {
   destination: string;
   zone: string;
   farm: string;
+  farmId?: string; // Agregamos referencia a la granja por ID
   packages: number;
+  concentrateAmount?: number; // Cantidad de alimento en toneladas
   status: 'pending' | 'accepted' | 'in_progress' | 'delayed' | 'completed' | 'cancelled';
   acceptedAt: Date | null;
   completedAt: Date | null;
@@ -144,7 +146,63 @@ export interface Farm {
   chickenCapacity: number;
   concentrateCapacity: number; // En toneladas
   shedsCount: number;
+  currentCycle?: ProductionCycle | null; // Ciclo actual
+  cycles?: ProductionCycle[]; // Historial de ciclos
   active: boolean;
   createdAt: Date;
 }
 
+// Perfil de crecimiento diario
+export interface GrowthProfile {
+  id: string;
+  name: string;
+  description?: string;
+  dailyConsumption: DailyConsumption[];
+  createdAt: Date;
+}
+
+export interface DailyConsumption {
+  day: number;
+  amountPerBird: number; // en gramos
+}
+
+// Ciclo de producción
+export interface ProductionCycle {
+  id: string;
+  farmId: string;
+  startDate: Date;
+  estimatedEndDate: Date;
+  endDate?: Date | null;
+  initialBirdCount: number;
+  currentBirdCount: number;
+  growthProfileId: string;
+  growthProfile?: GrowthProfile;
+  
+  // Registro de consumo diario real
+  dailyRecords: DailyRecord[];
+  
+  // Cantidades totales
+  totalConcentrateReceived: number; // En toneladas
+  totalConcentrateConsumed: number; // En toneladas
+  concentrateReserve: number; // En toneladas
+  
+  // Despachos asociados
+  dispatches?: Dispatch[];
+  
+  status: 'active' | 'completed' | 'cancelled';
+  notes?: string;
+}
+
+// Registro diario
+export interface DailyRecord {
+  id: string;
+  cycleId: string;
+  day: number;
+  date: Date;
+  birdCount: number;
+  mortality: number;
+  expectedConsumption: number; // En kg
+  actualConsumption: number; // En kg
+  concentrateReceived: number; // En kg
+  notes?: string;
+}

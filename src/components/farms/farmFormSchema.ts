@@ -12,6 +12,51 @@ export const farmFormSchema = z.object({
   chickenCapacity: z.coerce.number().min(1, "La capacidad debe ser mayor a 0"),
   concentrateCapacity: z.coerce.number().min(0.1, "La capacidad debe ser mayor a 0"),
   shedsCount: z.coerce.number().int().min(1, "Debe haber al menos un galpón"),
+  minConcentrateReserve: z.coerce.number().min(0, "La reserva mínima no puede ser negativa").optional(),
 });
 
 export type FarmFormValues = z.infer<typeof farmFormSchema>;
+
+// Esquema para ciclos de producción
+export const productionCycleFormSchema = z.object({
+  startDate: z.date({
+    required_error: "La fecha de inicio es requerida",
+  }),
+  estimatedEndDate: z.date({
+    required_error: "La fecha de finalización estimada es requerida",
+  }),
+  initialBirdCount: z.coerce.number().min(1, "La cantidad inicial de aves debe ser mayor a 0"),
+  growthProfileId: z.string().min(1, "Debes seleccionar un perfil de crecimiento"),
+  concentrateReserve: z.coerce.number().min(0, "La reserva de concentrado no puede ser negativa"),
+  notes: z.string().optional(),
+});
+
+export type ProductionCycleFormValues = z.infer<typeof productionCycleFormSchema>;
+
+// Esquema para registros diarios
+export const dailyRecordFormSchema = z.object({
+  date: z.date({
+    required_error: "La fecha del registro es requerida",
+  }),
+  birdCount: z.coerce.number().min(0, "La cantidad de aves no puede ser negativa"),
+  mortality: z.coerce.number().min(0, "La mortalidad no puede ser negativa"),
+  actualConsumption: z.coerce.number().min(0, "El consumo real no puede ser negativo"),
+  concentrateReceived: z.coerce.number().min(0, "La cantidad recibida no puede ser negativa"),
+  notes: z.string().optional(),
+});
+
+export type DailyRecordFormValues = z.infer<typeof dailyRecordFormSchema>;
+
+// Esquema para perfiles de crecimiento
+export const growthProfileFormSchema = z.object({
+  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
+  description: z.string().optional(),
+  dailyConsumption: z.array(
+    z.object({
+      day: z.coerce.number().min(1, "El día debe ser mayor a 0"),
+      amountPerBird: z.coerce.number().min(0, "La cantidad por ave no puede ser negativa"),
+    })
+  ).min(1, "Debe haber al menos un registro de consumo diario"),
+});
+
+export type GrowthProfileFormValues = z.infer<typeof growthProfileFormSchema>;

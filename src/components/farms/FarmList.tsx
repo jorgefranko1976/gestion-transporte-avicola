@@ -2,7 +2,7 @@
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Farm } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { Tree, Droplet, User, Package, Building } from "lucide-react";
+import { Trees, Droplet, User, Package, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FarmListProps {
@@ -42,7 +42,7 @@ const FarmList = ({ farms }: FarmListProps) => {
                 <TableCell className="font-medium">{farm.internalId}</TableCell>
                 <TableCell>
                   <div className="flex items-center">
-                    <Tree className="h-4 w-4 mr-2 text-green-500" />
+                    <Trees className="h-4 w-4 mr-2 text-green-500" />
                     {farm.name}
                   </div>
                 </TableCell>
@@ -72,7 +72,7 @@ const FarmList = ({ farms }: FarmListProps) => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={farm.active ? "success" : "destructive"}>
+                  <Badge variant={farm.active ? "outline" : "destructive"} className={farm.active ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}>
                     {farm.active ? "Activa" : "Inactiva"}
                   </Badge>
                 </TableCell>

@@ -1,80 +1,79 @@
-
-import { Vehicle } from "@/lib/types";
-import { TableRow, TableCell } from "@/components/ui/table";
+import React from 'react';
+import { TableRow, TableCell } from "@/components/ui/table"
+import { Vehicle } from '@/lib/types';
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+import { getFullName } from '@/lib/utils';
 
 interface VehicleRowProps {
   vehicle: Vehicle;
-  onViewDocuments: (vehicle: Vehicle) => void;
-  vehicleCount: number; // Añadimos este prop para mostrar el contador de vehículos por propietario
+  onClick: () => void;
 }
 
-const VehicleRow = ({ vehicle, onViewDocuments, vehicleCount }: VehicleRowProps) => {
+const TypeBadge: React.FC<{ type: Vehicle['vehicleType'] }> = ({ type }) => {
+  let color = "bg-blue-100 text-blue-800 hover:bg-blue-200";
+
+  if (type === 'camion liviano') {
+    color = "bg-green-100 text-green-800 hover:bg-green-200";
+  } else if (type === 'dobletroque') {
+    color = "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+  } else if (type === 'camioneta') {
+    color = "bg-red-100 text-red-800 hover:bg-red-200";
+  } else if (type === 'tracto camion') {
+    color = "bg-purple-100 text-purple-800 hover:bg-purple-200";
+  }
+
   return (
-    <TableRow>
-      <TableCell className="font-medium">{vehicle.plate}</TableCell>
-      <TableCell>
-        <Badge variant="outline" className="capitalize">
-          {vehicle.vehicleType.replace(/-/g, ' ')}
-        </Badge>
-      </TableCell>
-      <TableCell>{vehicle.brand} / {vehicle.model}</TableCell>
-      <TableCell>
+    <Badge className={color}>
+      {type}
+    </Badge>
+  );
+};
+
+export const VehicleRow: React.FC<VehicleRowProps> = ({ vehicle, onClick }) => {
+  const hasValidDocuments =
+    vehicle.documents.soatExpiration !== null && vehicle.documents.technicalInspectionExpiration !== null && vehicle.documents.rcPolicyExpiration !== null &&
+    vehicle.documents.soatExpiration > new Date() && vehicle.documents.technicalInspectionExpiration > new Date() && vehicle.documents.rcPolicyExpiration > new Date();
+
+  return (
+    <TableRow onClick={onClick} className="cursor-pointer hover:bg-muted/50">
+      <TableCell className="font-medium">
         <div className="flex flex-col">
-          <span>{vehicle.owner.firstName} {vehicle.owner.lastName}</span>
-          <Badge variant="outline" className="w-fit mt-1">
-            {vehicleCount} vehículo{vehicleCount !== 1 ? 's' : ''}
-          </Badge>
+          <span>{vehicle.plate}</span>
+          <span className="text-xs text-muted-foreground">{vehicle.brand} {vehicle.line}</span>
         </div>
       </TableCell>
       <TableCell>
-        <Badge variant={vehicle.active ? "success" : "secondary"}>
-          {vehicle.active ? "Activo" : "Inactivo"}
-        </Badge>
+        <div className="flex flex-col">
+          <span>{getFullName(vehicle.owner)}</span>
+          <span className="text-xs text-muted-foreground">
+            {vehicle.owner.identificationType} {vehicle.owner.identificationNumber}
+          </span>
+        </div>
       </TableCell>
       <TableCell>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="flex items-center gap-1 text-primary"
-          onClick={() => onViewDocuments(vehicle)}
-        >
-          <FileText className="h-4 w-4" />
-          <span>Ver</span>
-        </Button>
+        {hasValidDocuments ? (
+          <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200">
+            Vigente
+          </Badge>
+        ) : (
+          <Badge variant="destructive">
+            Vencido
+          </Badge>
+        )}
       </TableCell>
-      <TableCell className="text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Abrir menú</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Editar vehículo</DropdownMenuItem>
-            <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              {vehicle.active ? "Desactivar" : "Activar"}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <TableCell>
+        <div className="flex flex-col">
+          <TypeBadge type={vehicle.vehicleType} />
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-xs text-muted-foreground">Modelo: {vehicle.model}</span>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <Badge variant={vehicle.active ? "outline" : "destructive"} className={vehicle.active ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}>
+          {vehicle.active ? "Activo" : "Inactivo"}
+        </Badge>
       </TableCell>
     </TableRow>
   );
 };
-
-export default VehicleRow;
