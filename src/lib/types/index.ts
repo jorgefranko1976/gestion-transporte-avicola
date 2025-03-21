@@ -9,4 +9,6 @@ export * from './chicken-types';
 export * from './production-types';
 export * from './common-types';
 export * from './owner-types';
-export * from './user-types';
+// Re-export the user-types explicitly to avoid the duplicate UserRole export
+import { UserProfile } from './user-types';
+export { UserProfile };
