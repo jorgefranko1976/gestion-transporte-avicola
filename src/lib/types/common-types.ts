@@ -1,6 +1,6 @@
 
 // Tipos de identificación
-export type IdentificationType = 'CC' | 'NIT' | 'CE';
+export type IdentificationType = 'CC' | 'NIT' | 'CE' | 'TI' | 'OTRO';
 
 // User roles
 export type UserRole = 'admin' | 'coordinator' | 'driver' | 'owner';

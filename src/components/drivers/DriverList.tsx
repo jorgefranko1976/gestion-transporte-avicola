@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Driver } from '@/lib/types';
+import { Driver, IdentificationType } from '@/lib/types';
 import { UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -28,7 +28,7 @@ const DriverList = ({ onRegisterClick }: DriverListProps) => {
           id: driver.id,
           firstName: driver.first_name,
           lastName: driver.last_name,
-          identificationType: driver.identification_type,
+          identificationType: driver.identification_type as IdentificationType, // Cast to IdentificationType
           identificationNumber: driver.identification_number,
           birthDate: new Date(driver.birth_date),
           address: driver.address,

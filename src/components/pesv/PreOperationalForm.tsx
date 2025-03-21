@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -58,7 +58,7 @@ const PreOperationalForm = () => {
   });
 
   // Cargar vehículos y conductores al iniciar
-  useState(() => {
+  useEffect(() => {
     const loadInitialData = async () => {
       try {
         // Obtener vehículos

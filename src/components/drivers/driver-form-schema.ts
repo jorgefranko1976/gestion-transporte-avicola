@@ -1,5 +1,6 @@
 
 import { z } from 'zod';
+import { IdentificationType } from '@/lib/types';
 
 // Schema de validación para el formulario
 export const driverFormSchema = z.object({
