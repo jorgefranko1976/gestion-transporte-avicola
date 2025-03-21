@@ -1,16 +1,14 @@
 
-import { ChickenBreed, ChickenSex } from './chicken-types';
+import { ChickenBreedType, ChickenSex } from './chicken-types';
 import { Dispatch } from './dispatch-types';
+import { ConfigurationItem } from './common-types';
 
 // Perfil de crecimiento diario con curva de alimentación
-export interface GrowthProfile {
-  id: string;
-  name: string;
-  description?: string;
-  breed: ChickenBreed;
+export interface GrowthProfile extends ConfigurationItem {
+  breed: ChickenBreedType;
   sex: ChickenSex;
   dailyConsumption: DailyConsumption[];
-  createdAt: Date;
+  isDefault?: boolean;
 }
 
 export interface DailyConsumption {
@@ -31,7 +29,7 @@ export interface ProductionCycle {
   currentBirdCount: number;
   growthProfileId: string;
   growthProfile?: GrowthProfile;
-  breed: ChickenBreed;
+  breed: ChickenBreedType;
   sex: ChickenSex;
   
   // Registro de consumo diario real
@@ -65,3 +63,4 @@ export interface DailyRecord {
   concentrateReceived: number; // En kg
   notes?: string;
 }
+

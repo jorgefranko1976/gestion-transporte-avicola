@@ -1,5 +1,5 @@
 
-import { ChickenBreed } from "@/lib/types";
+import { ChickenBreedType } from "@/lib/types";
 import {
   FormField,
   FormItem,

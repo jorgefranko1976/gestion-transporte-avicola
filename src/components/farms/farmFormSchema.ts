@@ -1,6 +1,5 @@
-
 import * as z from "zod";
-import { ChickenBreed, ChickenSex } from "@/lib/types";
+import { ChickenBreedType, ChickenSex } from "@/lib/types";
 
 export const farmFormSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
@@ -47,7 +46,7 @@ export const dailyRecordFormSchema = z.object({
   }),
   birdCount: z.coerce.number().min(0, "La cantidad de aves no puede ser negativa"),
   mortality: z.coerce.number().min(0, "La mortalidad no puede ser negativa"),
-  actualConsumption: z.coerce.number().min(0, "El consumo real no puede ser negativo"),
+  actualConsumption: z.coerce.number().min(0, "El consumo real no puede ser negativa"),
   actualWaterConsumption: z.coerce.number().min(0, "El consumo de agua no puede ser negativo").optional(),
   birdWeight: z.coerce.number().min(0, "El peso no puede ser negativo").optional(),
   concentrateReceived: z.coerce.number().min(0, "La cantidad recibida no puede ser negativa"),
@@ -66,6 +65,8 @@ export const growthProfileFormSchema = z.object({
   sex: z.enum(["macho", "hembra", "mixto"] as const, {
     required_error: "Debes seleccionar el sexo",
   }),
+  isDefault: z.boolean().optional(),
+  active: z.boolean().default(true),
   dailyConsumption: z.array(
     z.object({
       day: z.coerce.number().min(1, "El día debe ser mayor a 0"),
