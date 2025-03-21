@@ -44,7 +44,7 @@ const StatusReportsTab = () => {
           accepted_at,
           eta,
           status,
-          drivers(first_name, last_name)
+          driver_id
         `);
       
       // Filtrar por estado
@@ -56,41 +56,58 @@ const StatusReportsTab = () => {
       }
       
       // Ejecutar la consulta
-      const { data, error } = await query.order('accepted_at', { ascending: false });
+      const { data: dispatchesData, error: dispatchesError } = await query.order('accepted_at', { ascending: false });
       
-      if (error) throw error;
+      if (dispatchesError) throw dispatchesError;
       
+      // Obtener información de conductores para cada despacho
       const now = new Date();
       
-      // Formatear los datos
-      const formattedDispatches = data
-        .filter(d => d.status !== 'pending') // Excluir los pendientes
-        .map(dispatch => {
-          // Calcular horas restantes y si está demorado
-          let hoursRemaining = null;
-          let isDelayed = false;
-          
-          if (dispatch.accepted_at) {
-            const acceptedDate = new Date(dispatch.accepted_at);
-            const expectedEnd = addHours(acceptedDate, 24); // 24 horas después de aceptado
+      // Formatear los datos y obtener información del conductor
+      const formattedDispatches = await Promise.all(
+        dispatchesData
+          .filter(d => d.status !== 'pending') // Excluir los pendientes
+          .map(async (dispatch) => {
+            // Obtener información del conductor si tiene driver_id
+            let driverName = null;
+            if (dispatch.driver_id) {
+              const { data: driverData, error: driverError } = await supabase
+                .from('drivers')
+                .select('first_name, last_name')
+                .eq('id', dispatch.driver_id)
+                .single();
+                
+              if (!driverError && driverData) {
+                driverName = `${driverData.first_name} ${driverData.last_name}`;
+              }
+            }
             
-            hoursRemaining = differenceInHours(expectedEnd, now);
-            isDelayed = hoursRemaining < 0;
-          }
-          
-          return {
-            id: dispatch.id,
-            orderId: dispatch.order_id,
-            vehiclePlate: dispatch.vehicle_plate || 'No asignado',
-            driverName: dispatch.drivers ? `${dispatch.drivers.first_name} ${dispatch.drivers.last_name}` : null,
-            destination: dispatch.destination,
-            acceptedAt: dispatch.accepted_at ? new Date(dispatch.accepted_at) : null,
-            eta: dispatch.eta ? new Date(dispatch.eta) : null,
-            status: dispatch.status,
-            hoursRemaining,
-            isDelayed
-          };
-        });
+            // Calcular horas restantes y si está demorado
+            let hoursRemaining = null;
+            let isDelayed = false;
+            
+            if (dispatch.accepted_at) {
+              const acceptedDate = new Date(dispatch.accepted_at);
+              const expectedEnd = addHours(acceptedDate, 24); // 24 horas después de aceptado
+              
+              hoursRemaining = differenceInHours(expectedEnd, now);
+              isDelayed = hoursRemaining < 0;
+            }
+            
+            return {
+              id: dispatch.id,
+              orderId: dispatch.order_id,
+              vehiclePlate: dispatch.vehicle_plate || 'No asignado',
+              driverName,
+              destination: dispatch.destination,
+              acceptedAt: dispatch.accepted_at ? new Date(dispatch.accepted_at) : null,
+              eta: dispatch.eta ? new Date(dispatch.eta) : null,
+              status: dispatch.status,
+              hoursRemaining,
+              isDelayed
+            };
+          })
+      );
       
       setDispatches(formattedDispatches);
       setFilteredDispatches(formattedDispatches);

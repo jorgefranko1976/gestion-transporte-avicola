@@ -57,8 +57,8 @@ export const useVehicleSearch = () => {
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      // Construir la consulta
-      let query = supabase
+      // Construir la consulta básica
+      const { data: vehiclesData, error: vehiclesError } = await supabase
         .from('vehicles')
         .select(`
           id, 
@@ -71,40 +71,52 @@ export const useVehicleSearch = () => {
           soat_expiration,
           technical_inspection_expiration,
           status,
-          vehicle_owners(name, first_name, last_name)
+          owner_id
         `)
         .order('plate');
       
-      // Aplicar filtros de estado
+      if (vehiclesError) throw vehiclesError;
+      
+      // Obtener vehículos con filtros de estado aplicados
+      let filteredData = vehiclesData;
       if (statusFilter !== 'all') {
-        query = query.eq('active', statusFilter === 'active');
+        filteredData = vehiclesData.filter(v => v.active === (statusFilter === 'active'));
       }
       
       // Aplicar filtro de tipo
       if (typeFilter && typeFilter !== 'all_types') {
-        query = query.eq('vehicle_type', typeFilter);
+        filteredData = filteredData.filter(v => v.vehicle_type === typeFilter);
       }
       
-      // Ejecutar la consulta
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      
-      // Formatear los datos
-      const formattedVehicles = data.map(vehicle => ({
-        id: vehicle.id,
-        plate: vehicle.plate,
-        type: vehicle.vehicle_type,
-        brand: vehicle.brand,
-        model: vehicle.model,
-        line: vehicle.line,
-        active: vehicle.active,
-        ownerName: vehicle.vehicle_owners 
-          ? (vehicle.vehicle_owners.name || `${vehicle.vehicle_owners.first_name} ${vehicle.vehicle_owners.last_name}`)
-          : null,
-        soatExpiration: vehicle.soat_expiration ? new Date(vehicle.soat_expiration) : null,
-        techExpiration: vehicle.technical_inspection_expiration ? new Date(vehicle.technical_inspection_expiration) : null,
-        status: vehicle.status || 'available'
+      // Procesar cada vehículo para obtener información del propietario
+      const formattedVehicles = await Promise.all(filteredData.map(async vehicle => {
+        let ownerName = null;
+        
+        if (vehicle.owner_id) {
+          const { data: ownerData, error: ownerError } = await supabase
+            .from('vehicle_owners')
+            .select('name, first_name, last_name')
+            .eq('id', vehicle.owner_id)
+            .single();
+          
+          if (!ownerError && ownerData) {
+            ownerName = ownerData.name || `${ownerData.first_name || ''} ${ownerData.last_name || ''}`.trim();
+          }
+        }
+        
+        return {
+          id: vehicle.id,
+          plate: vehicle.plate,
+          type: vehicle.vehicle_type,
+          brand: vehicle.brand,
+          model: vehicle.model,
+          line: vehicle.line,
+          active: vehicle.active,
+          ownerName,
+          soatExpiration: vehicle.soat_expiration ? new Date(vehicle.soat_expiration) : null,
+          techExpiration: vehicle.technical_inspection_expiration ? new Date(vehicle.technical_inspection_expiration) : null,
+          status: vehicle.status || 'available'
+        };
       }));
       
       setVehicles(formattedVehicles);

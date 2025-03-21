@@ -66,7 +66,7 @@ export const useReceiptSearch = () => {
     
     setIsLoading(true);
     try {
-      // Construir la consulta
+      // Construir la consulta para obtener remisiones
       let query = supabase
         .from('dispatches')
         .select(`
@@ -76,8 +76,7 @@ export const useReceiptSearch = () => {
           vehicle_plate,
           driver_id,
           destination,
-          receipt_image_url,
-          drivers(first_name, last_name)
+          receipt_image_url
         `)
         .eq('status', 'completed')
         .gte('completed_at', startDate.toISOString())
@@ -93,19 +92,35 @@ export const useReceiptSearch = () => {
       }
       
       // Ejecutar la consulta
-      const { data, error } = await query.order('completed_at', { ascending: false });
+      const { data: dispatchesData, error: dispatchesError } = await query.order('completed_at', { ascending: false });
       
-      if (error) throw error;
-      
-      // Formatear los datos
-      const formattedReceipts = data.map(receipt => ({
-        id: receipt.id,
-        orderId: receipt.order_id,
-        completedAt: new Date(receipt.completed_at),
-        vehiclePlate: receipt.vehicle_plate || 'No asignado',
-        driverName: receipt.drivers ? `${receipt.drivers.first_name} ${receipt.drivers.last_name}` : null,
-        destination: receipt.destination,
-        receiptImageUrl: receipt.receipt_image_url
+      if (dispatchesError) throw dispatchesError;
+
+      // Para cada remisión, obtener el nombre del conductor si hay driver_id
+      const formattedReceipts = await Promise.all(dispatchesData.map(async (receipt) => {
+        let driverName = null;
+        
+        if (receipt.driver_id) {
+          const { data: driverData, error: driverError } = await supabase
+            .from('drivers')
+            .select('first_name, last_name')
+            .eq('id', receipt.driver_id)
+            .single();
+            
+          if (!driverError && driverData) {
+            driverName = `${driverData.first_name} ${driverData.last_name}`;
+          }
+        }
+        
+        return {
+          id: receipt.id,
+          orderId: receipt.order_id,
+          completedAt: new Date(receipt.completed_at),
+          vehiclePlate: receipt.vehicle_plate || 'No asignado',
+          driverName,
+          destination: receipt.destination,
+          receiptImageUrl: receipt.receipt_image_url
+        };
       }));
       
       setReceipts(formattedReceipts);

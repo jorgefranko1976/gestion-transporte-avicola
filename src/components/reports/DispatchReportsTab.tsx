@@ -93,7 +93,7 @@ const DispatchReportsTab = () => {
           loading_company,
           destination,
           vehicle_plate,
-          drivers(first_name, last_name),
+          driver_id,
           status
         `)
         .gte('created_at', startDate.toISOString())
@@ -109,22 +109,36 @@ const DispatchReportsTab = () => {
       }
       
       // Ejecutar la consulta
-      const { data, error } = await query.order('created_at', { ascending: false });
+      const { data: dispatchesData, error: dispatchesError } = await query.order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (dispatchesError) throw dispatchesError;
       
-      // Formatear los datos
-      const formattedDispatches = data.map(item => ({
-        id: item.id,
-        orderId: item.order_id,
-        date: new Date(item.created_at),
-        origin: item.loading_company,
-        destination: item.destination,
-        vehiclePlate: item.vehicle_plate || 'No asignado',
-        driverName: item.drivers 
-          ? `${item.drivers.first_name} ${item.drivers.last_name}`
-          : null,
-        status: item.status
+      // Procesar resultados y obtener información del conductor
+      const formattedDispatches = await Promise.all(dispatchesData.map(async (item) => {
+        let driverName = null;
+        
+        if (item.driver_id) {
+          const { data: driverData, error: driverError } = await supabase
+            .from('drivers')
+            .select('first_name, last_name')
+            .eq('id', item.driver_id)
+            .single();
+            
+          if (!driverError && driverData) {
+            driverName = `${driverData.first_name} ${driverData.last_name}`;
+          }
+        }
+        
+        return {
+          id: item.id,
+          orderId: item.order_id,
+          date: new Date(item.created_at),
+          origin: item.loading_company,
+          destination: item.destination,
+          vehiclePlate: item.vehicle_plate || 'No asignado',
+          driverName,
+          status: item.status
+        };
       }));
       
       setDispatches(formattedDispatches);
