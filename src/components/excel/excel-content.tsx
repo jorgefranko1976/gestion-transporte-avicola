@@ -1,7 +1,6 @@
-
 import { sampleExcelDataType2 } from "@/data/mockData";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Filter, Search } from "lucide-react";
+import { Filter, Search, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +30,7 @@ interface ExcelContentProps {
   activeDispatchStatus: 'todos' | 'pendiente' | 'en ruta' | 'completado' | 'demorado';
   setActiveDispatchStatus: (status: 'todos' | 'pendiente' | 'en ruta' | 'completado' | 'demorado') => void;
   lastUpdateDate: string;
+  onUploadClick: () => void;
 }
 
 export const ExcelContent = ({
@@ -41,7 +41,8 @@ export const ExcelContent = ({
   setActiveDataType,
   activeDispatchStatus,
   setActiveDispatchStatus,
-  lastUpdateDate
+  lastUpdateDate,
+  onUploadClick
 }: ExcelContentProps) => {
   
   const filteredData = excelData.filter(item => {
@@ -80,6 +81,13 @@ export const ExcelContent = ({
               className="pl-9 w-[240px]"
             />
           </div>
+          <Button 
+            onClick={onUploadClick}
+            className="flex items-center gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Cargar Excel</span>
+          </Button>
           <Button variant="outline" className="flex items-center gap-1">
             <Filter className="w-4 h-4" />
             <span>Filtros</span>
