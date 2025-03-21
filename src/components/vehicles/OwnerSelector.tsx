@@ -33,8 +33,8 @@ const OwnerSelector = ({ form, onOwnerTypeChange }: OwnerSelectorProps) => {
   useEffect(() => {
     if (searchTerm) {
       const filtered = owners.filter(owner => 
-        `${owner.firstName} ${owner.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        owner.identificationNumber.includes(searchTerm)
+        `${owner.firstName || ''} ${owner.lastName || ''}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (owner.identificationNumber && owner.identificationNumber.includes(searchTerm))
       );
       setFilteredOwners(filtered);
     } else {
@@ -107,8 +107,8 @@ const OwnerSelector = ({ form, onOwnerTypeChange }: OwnerSelectorProps) => {
                   </FormControl>
                   <SelectContent>
                     {filteredOwners.map((owner) => (
-                      <SelectItem key={owner.id} value={owner.id}>
-                        {owner.firstName} {owner.lastName} - {owner.identificationType}: {owner.identificationNumber}
+                      <SelectItem key={owner.id} value={owner.id || "no_id"}>
+                        {owner.firstName || ""} {owner.lastName || ""} - {owner.identificationType || ""}: {owner.identificationNumber || ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

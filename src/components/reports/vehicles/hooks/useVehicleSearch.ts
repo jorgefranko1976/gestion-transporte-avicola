@@ -45,10 +45,10 @@ export const useVehicleSearch = () => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
       const filtered = vehicles.filter(v => 
-        v.plate.toLowerCase().includes(lowercaseSearch) ||
-        v.brand.toLowerCase().includes(lowercaseSearch) ||
-        v.model.toLowerCase().includes(lowercaseSearch) ||
-        v.line.toLowerCase().includes(lowercaseSearch) ||
+        (v.plate && v.plate.toLowerCase().includes(lowercaseSearch)) ||
+        (v.brand && v.brand.toLowerCase().includes(lowercaseSearch)) ||
+        (v.model && v.model.toLowerCase().includes(lowercaseSearch)) ||
+        (v.line && v.line.toLowerCase().includes(lowercaseSearch)) ||
         (v.ownerName && v.ownerName.toLowerCase().includes(lowercaseSearch))
       );
       setFilteredVehicles(filtered);
@@ -110,7 +110,7 @@ export const useVehicleSearch = () => {
         
         return {
           id: vehicle.id,
-          plate: vehicle.plate,
+          plate: vehicle.plate || 'Sin placa',
           type: vehicle.vehicle_type || 'Desconocido',
           brand: vehicle.brand || 'Desconocido',
           model: vehicle.model || 'Desconocido',
