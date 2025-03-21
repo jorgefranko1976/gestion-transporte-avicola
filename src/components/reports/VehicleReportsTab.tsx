@@ -84,7 +84,7 @@ const VehicleReportsTab = () => {
       }
       
       // Aplicar filtro de tipo
-      if (typeFilter) {
+      if (typeFilter && typeFilter !== 'all_types') {
         query = query.eq('vehicle_type', typeFilter);
       }
       
@@ -215,7 +215,7 @@ const VehicleReportsTab = () => {
               <SelectValue placeholder="Todos los tipos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los tipos</SelectItem>
+              <SelectItem value="all_types">Todos los tipos</SelectItem>
               {vehicleTypes.map(type => (
                 <SelectItem key={type} value={type}>{type}</SelectItem>
               ))}

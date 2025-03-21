@@ -104,11 +104,11 @@ const ReceiptReportsTab = () => {
         .lte('completed_at', new Date(endDate.setHours(23, 59, 59)).toISOString());
       
       // Aplicar filtros adicionales
-      if (vehiclePlate) {
+      if (vehiclePlate && vehiclePlate !== 'all_vehicles') {
         query = query.eq('vehicle_plate', vehiclePlate);
       }
       
-      if (driverId) {
+      if (driverId && driverId !== 'all_drivers') {
         query = query.eq('driver_id', driverId);
       }
       
