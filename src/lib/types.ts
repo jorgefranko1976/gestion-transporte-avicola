@@ -1,3 +1,4 @@
+
 // Vehicle types
 export type VehicleType = 'camion' | 'camion liviano' | 'dobletroque' | 'camioneta' | 'tracto camion';
 
@@ -205,6 +206,4 @@ export interface DailyRecord {
   notes?: string;
 }
 
-export const getFullName = (person: { firstName: string; lastName: string }) => {
-  return `${person.firstName} ${person.lastName}`;
-};
+// Eliminamos la función duplicada getFullName - ahora solo está en utils.ts
