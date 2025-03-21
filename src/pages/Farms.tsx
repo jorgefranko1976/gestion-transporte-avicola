@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
@@ -70,6 +71,8 @@ const mockCycles: ProductionCycle[] = [
     initialBirdCount: 9500,
     currentBirdCount: 9350,
     growthProfileId: "profile1",
+    breed: "cobb500",
+    sex: "mixto",
     dailyRecords: [],
     totalConcentrateReceived: 12.5,
     totalConcentrateConsumed: 10.2,
@@ -84,6 +87,8 @@ const mockCycles: ProductionCycle[] = [
     initialBirdCount: 14800,
     currentBirdCount: 14500,
     growthProfileId: "profile2",
+    breed: "ross308",
+    sex: "macho",
     dailyRecords: [],
     totalConcentrateReceived: 18.2,
     totalConcentrateConsumed: 15.8,
