@@ -8,6 +8,12 @@ export interface ExcelState {
   previewData: ExcelPreviewData;
   excelData: any[];
   lastUpdateDate: string;
+  setShowUploadModal: (show: boolean) => void;
+  setSelectedFile: (file: File | null) => void;
+  setIsUploading: (isUploading: boolean) => void;
+  setPreviewData: (data: ExcelPreviewData) => void;
+  setExcelData: (data: any[]) => void;
+  setLastUpdateDate: (date: string) => void;
 }
 
 export interface ExcelStateSetters {
@@ -25,6 +31,15 @@ export interface ExcelAction {
   handleRemoveFile: () => void;
 }
 
-export type ExcelHook = ExcelState & {
+export type ExcelHook = {
+  showUploadModal: boolean;
   setShowUploadModal: (show: boolean) => void;
-} & ExcelAction;
+  selectedFile: File | null;
+  isUploading: boolean;
+  previewData: ExcelPreviewData;
+  excelData: any[];
+  lastUpdateDate: string;
+  handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleUpload: () => void;
+  handleRemoveFile: () => void;
+};

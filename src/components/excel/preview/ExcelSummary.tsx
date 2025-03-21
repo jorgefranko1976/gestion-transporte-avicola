@@ -27,6 +27,9 @@ const ExcelSummary = ({ selectedFile, previewData }: ExcelSummaryProps) => {
           <li>{previewData.reproductora.length} registros tipo REPRODUCTORA</li>
           <li>{previewData.engorde.length} registros tipo ENGORDE</li>
         </ul>
+        <p className="text-xs text-primary mt-2 font-medium">
+          ℹ️ Se muestran todos los registros encontrados en el archivo.
+        </p>
       </div>
     </>
   );

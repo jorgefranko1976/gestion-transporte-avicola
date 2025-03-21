@@ -20,16 +20,16 @@ export const useExcelState = (): ExcelState => {
 
   return {
     showUploadModal,
-    setShowUploadModal,
     selectedFile,
-    setSelectedFile,
     isUploading,
-    setIsUploading,
     previewData,
-    setPreviewData,
     excelData,
-    setExcelData,
     lastUpdateDate,
+    setShowUploadModal,
+    setSelectedFile,
+    setIsUploading,
+    setPreviewData,
+    setExcelData,
     setLastUpdateDate
   };
 };

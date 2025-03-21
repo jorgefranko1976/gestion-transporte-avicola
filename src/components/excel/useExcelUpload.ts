@@ -9,16 +9,16 @@ import { useExcelActions } from './hooks/useExcelActions';
 export const useExcelUpload = (): ExcelHook => {
   const {
     showUploadModal,
-    setShowUploadModal,
     selectedFile,
-    setSelectedFile,
     isUploading,
-    setIsUploading,
     previewData,
-    setPreviewData,
     excelData,
-    setExcelData,
     lastUpdateDate,
+    setShowUploadModal,
+    setSelectedFile,
+    setIsUploading,
+    setPreviewData,
+    setExcelData,
     setLastUpdateDate
   } = useExcelState();
 
