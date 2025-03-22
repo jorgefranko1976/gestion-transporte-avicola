@@ -107,7 +107,7 @@ const DispatchReportsTab = () => {
       const formattedDispatches = data.map(item => {
         let driverName = null;
         if (item.drivers && typeof item.drivers === 'object') {
-          driverName = `${item.drivers.first_name} ${item.drivers.last_name}`;
+          driverName = `${item.drivers.first_name || ''} ${item.drivers.last_name || ''}`.trim();
         }
         
         return {

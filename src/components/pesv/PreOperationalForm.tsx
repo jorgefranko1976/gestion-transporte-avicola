@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,7 +42,7 @@ const PreOperationalForm = () => {
   const [tirePhoto, setTirePhoto] = useState<File | null>(null);
   const [kitPhoto, setKitPhoto] = useState<File | null>(null);
 
-  // Inicializar el formulario
+  // Initialize the form
   const form = useForm<PreOperationalFormValues>({
     resolver: zodResolver(preOperationalSchema),
     defaultValues: {
@@ -56,11 +57,11 @@ const PreOperationalForm = () => {
     },
   });
 
-  // Cargar vehículos y conductores al iniciar
-  useState(() => {
+  // Load vehicles and drivers on component mount
+  useEffect(() => {
     const loadInitialData = async () => {
       try {
-        // Obtener vehículos
+        // Fetch vehicles
         const { data: vehiclesData } = await supabase
           .from('vehicles')
           .select('id, plate')
@@ -71,7 +72,7 @@ const PreOperationalForm = () => {
           setVehicles(vehiclesData.map(v => ({ id: v.id, plate: v.plate })));
         }
 
-        // Obtener conductores
+        // Fetch drivers
         const { data: driversData } = await supabase
           .from('drivers')
           .select('id, first_name, last_name')

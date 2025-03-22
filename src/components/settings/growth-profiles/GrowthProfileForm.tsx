@@ -40,7 +40,7 @@ const GrowthProfileForm = ({
 }: GrowthProfileFormProps) => {
   const isNewProfile = !profile;
   
-  // Create default daily consumption with non-optional properties
+  // Create default daily consumption with required non-optional properties
   const defaultDailyConsumption: DailyConsumption[] = [
     { day: 1, amountPerBird: 12, waterPerBird: 25, expectedWeight: 55 },
     { day: 7, amountPerBird: 35, waterPerBird: 70, expectedWeight: 175 },
@@ -75,7 +75,7 @@ const GrowthProfileForm = ({
       description: data.description,
       breed: data.breed as ChickenBreedType,
       sex: data.sex as ChickenSex,
-      dailyConsumption: data.dailyConsumption,
+      dailyConsumption: data.dailyConsumption as DailyConsumption[],
       isDefault: data.isDefault || false,
       active: data.active,
       createdAt: profile?.createdAt || new Date(),

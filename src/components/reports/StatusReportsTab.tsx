@@ -28,11 +28,11 @@ const StatusReportsTab = () => {
   const [filteredDispatches, setFilteredDispatches] = useState<StatusReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Buscar despachos
+  // Search dispatches
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      // Construir la consulta base
+      // Build base query
       let query = supabase
         .from('dispatches')
         .select(`
@@ -47,32 +47,32 @@ const StatusReportsTab = () => {
           drivers(first_name, last_name)
         `);
       
-      // Filtrar por estado
+      // Filter by status
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
       } else {
-        // Si es "todos", excluir los completados
+        // If "all", exclude completed
         query = query.not('status', 'eq', 'completed');
       }
       
-      // Ejecutar la consulta
+      // Execute query
       const { data, error } = await query.order('accepted_at', { ascending: false });
       
       if (error) throw error;
       
       const now = new Date();
       
-      // Formatear los datos
+      // Format data
       const formattedDispatches = data
-        .filter(d => d.status !== 'pending') // Excluir los pendientes
+        .filter(d => d.status !== 'pending') // Exclude pending
         .map(dispatch => {
-          // Calcular horas restantes y si está demorado
+          // Calculate remaining hours and if delayed
           let hoursRemaining = null;
           let isDelayed = false;
           
           if (dispatch.accepted_at) {
             const acceptedDate = new Date(dispatch.accepted_at);
-            const expectedEnd = addHours(acceptedDate, 24); // 24 horas después de aceptado
+            const expectedEnd = addHours(acceptedDate, 24); // 24 hours after accepted
             
             hoursRemaining = differenceInHours(expectedEnd, now);
             isDelayed = hoursRemaining < 0;
@@ -81,7 +81,7 @@ const StatusReportsTab = () => {
           let driverName = null;
           // Safely access driver information if it exists
           if (dispatch.drivers && typeof dispatch.drivers === 'object') {
-            driverName = `${dispatch.drivers.first_name} ${dispatch.drivers.last_name}`;
+            driverName = `${dispatch.drivers.first_name || ''} ${dispatch.drivers.last_name || ''}`.trim();
           }
           
           return {
@@ -109,7 +109,7 @@ const StatusReportsTab = () => {
     }
   };
 
-  // Filtrar resultados por término de búsqueda
+  // Filter results by search term
   useEffect(() => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
@@ -125,14 +125,14 @@ const StatusReportsTab = () => {
     }
   }, [searchTerm, dispatches]);
 
-  // Exportar a CSV
+  // Export to CSV
   const exportToCSV = () => {
     if (filteredDispatches.length === 0) {
       toast.error('No hay datos para exportar');
       return;
     }
     
-    // Crear contenido CSV
+    // Create CSV content
     const headers = [
       'Orden', 
       'Vehículo', 
@@ -157,7 +157,7 @@ const StatusReportsTab = () => {
     
     const csvContent = [headers, ...csvRows].join('\n');
     
-    // Crear blob y descargar
+    // Create blob and download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -222,7 +222,7 @@ const StatusReportsTab = () => {
         </Button>
       </div>
       
-      {/* Tabla de resultados */}
+      {/* Table of results */}
       {dispatches.length > 0 ? (
         <div className="rounded-md border overflow-hidden">
           <div className="overflow-x-auto">

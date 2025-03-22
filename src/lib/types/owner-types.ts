@@ -21,8 +21,8 @@ export interface VehicleOwner {
   phone?: string;
   email?: string;
   hasCredit?: boolean;
-  creditAmount?: string;
-  creditTerm?: string;
+  creditAmount?: number | string;
+  creditTerm?: string | number;
   creditEndDate?: Date;
   isPaid?: boolean;
   documents?: VehicleOwnerDocuments;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -18,11 +17,9 @@ export const useReceiptSearch = () => {
   const [vehicles, setVehicles] = useState<VehicleData[]>([]);
   const [drivers, setDrivers] = useState<DriverData[]>([]);
 
-  // Cargar datos iniciales
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        // Obtener vehículos
         const { data: vehiclesData, error: vehiclesError } = await supabase
           .from('vehicles')
           .select('plate')
@@ -32,7 +29,6 @@ export const useReceiptSearch = () => {
         if (vehiclesError) throw vehiclesError;
         setVehicles(vehiclesData);
         
-        // Obtener conductores
         const { data: driversData, error: driversError } = await supabase
           .from('drivers')
           .select('id, first_name, last_name')
@@ -57,7 +53,6 @@ export const useReceiptSearch = () => {
     fetchInitialData();
   }, []);
 
-  // Buscar remisiones
   const handleSearch = async () => {
     if (!startDate || !endDate) {
       toast.error('Debes seleccionar un rango de fechas');
@@ -66,7 +61,6 @@ export const useReceiptSearch = () => {
     
     setIsLoading(true);
     try {
-      // Construir la consulta
       let query = supabase
         .from('dispatches')
         .select(`
@@ -83,7 +77,6 @@ export const useReceiptSearch = () => {
         .gte('completed_at', startDate.toISOString())
         .lte('completed_at', new Date(endDate.setHours(23, 59, 59)).toISOString());
       
-      // Aplicar filtros adicionales
       if (vehiclePlate && vehiclePlate !== 'all_vehicles') {
         query = query.eq('vehicle_plate', vehiclePlate);
       }
@@ -92,17 +85,14 @@ export const useReceiptSearch = () => {
         query = query.eq('driver_id', driverId);
       }
       
-      // Ejecutar la consulta
       const { data, error } = await query.order('completed_at', { ascending: false });
       
       if (error) throw error;
       
-      // Formatear los datos
       const formattedReceipts = data.map(receipt => {
         let driverName = null;
-        // Safely access driver information if it exists
         if (receipt.drivers && typeof receipt.drivers === 'object') {
-          driverName = `${receipt.drivers.first_name} ${receipt.drivers.last_name}`;
+          driverName = `${receipt.drivers.first_name || ''} ${receipt.drivers.last_name || ''}`.trim();
         }
         
         return {
@@ -127,7 +117,6 @@ export const useReceiptSearch = () => {
     }
   };
 
-  // Filtrar resultados por término de búsqueda
   useEffect(() => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
