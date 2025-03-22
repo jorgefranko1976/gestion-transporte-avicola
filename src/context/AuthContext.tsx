@@ -36,9 +36,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log("AuthProvider useEffect running");
+    
     // Configurar el listener de cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession?.user?.id);
         setSession(currentSession);
         
         if (currentSession?.user) {
@@ -52,10 +55,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (error) {
               console.error('Error al obtener perfil:', error);
+              setIsLoading(false);
               return;
             }
 
             if (profile) {
+              console.log("Profile fetched:", profile);
               setUser({
                 id: currentSession.user.id,
                 name: `${profile.first_name} ${profile.last_name}`,
@@ -76,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Verificar sesión existente al cargar
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("Initial session check:", currentSession?.user?.id);
       if (currentSession?.user) {
         supabase
           .from('user_profiles')
@@ -90,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (profile) {
+              console.log("Initial profile fetched:", profile);
               setUser({
                 id: currentSession.user.id,
                 name: `${profile.first_name} ${profile.last_name}`,
@@ -115,18 +122,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
+      console.log("Attempting login for:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) {
+        console.error('Error de login:', error.message);
         toast.error(error.message);
         setIsLoading(false);
         return false;
       }
 
       if (data.user) {
+        console.log("Login successful for:", data.user.id);
         // El perfil se actualizará automáticamente a través del listener de onAuthStateChange
         return true;
       }
@@ -180,7 +190,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    setIsLoading(true);
     await supabase.auth.signOut();
+    setIsLoading(false);
   };
 
   return (

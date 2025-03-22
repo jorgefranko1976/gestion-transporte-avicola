@@ -7,6 +7,7 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 import PageTransition from './transitions/PageTransition';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from 'sonner';
 
 interface LoginFormProps {
   className?: string;
@@ -29,10 +30,18 @@ export const LoginForm = ({ className }: LoginFormProps) => {
       return;
     }
     
-    const success = await login(loginEmail, loginPassword);
-    
-    if (success) {
-      navigate('/coordinator');
+    try {
+      const success = await login(loginEmail, loginPassword);
+      
+      if (success) {
+        toast.success('Inicio de sesión exitoso');
+        // La redirección se maneja en el componente Login a través del useEffect
+      } else {
+        setLoginError('Credenciales incorrectas');
+      }
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+      setLoginError('Error al iniciar sesión. Por favor, intente de nuevo.');
     }
   };
 
@@ -67,6 +76,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                 className="w-full"
                 placeholder="correo@ejemplo.com"
                 autoComplete="email"
+                disabled={isLoading}
               />
             </div>
             
@@ -82,6 +92,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                 className="w-full"
                 placeholder="Ingrese su contraseña"
                 autoComplete="current-password"
+                disabled={isLoading}
               />
             </div>
             
