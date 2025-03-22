@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import PageTransition from './transitions/PageTransition';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LoginFormProps {
   className?: string;
@@ -16,6 +17,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +42,10 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   return (
     <PageTransition>
       <div className={cn('max-w-md w-full mx-auto', className)}>
-        <div className="glass-morphism rounded-2xl p-8 shadow-subtle">
+        <div className={cn(
+          'glass-morphism rounded-2xl p-8 shadow-subtle',
+          isMobile && 'mx-4'
+        )}>
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold">Iniciar Sesión</h2>
             <p className="text-muted-foreground mt-2">

@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserRole } from '@/lib/types';
+import { toast } from '@/components/ui/use-toast';
 
 type User = {
   id: string;
@@ -66,6 +67,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setUser(mockUser);
         localStorage.setItem('transportUser', JSON.stringify(mockUser));
+        
+        // Mostrar notificación de bienvenida
+        toast({
+          title: "¡Bienvenido!",
+          description: `Iniciaste sesión como ${role === 'driver' ? 'conductor' : 'coordinador'}.`,
+          duration: 3000,
+        });
+        
         setIsLoading(false);
         return true;
       }
@@ -82,6 +91,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('transportUser');
+    toast({
+      title: "Sesión cerrada",
+      description: "Has cerrado sesión correctamente.",
+      duration: 3000,
+    });
   };
 
   return (
