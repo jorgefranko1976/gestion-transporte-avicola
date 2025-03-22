@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AuthUser } from './types';
 import { Session } from '@supabase/supabase-js';
+import { UserRole } from '@/lib/types';
 
 export const fetchUserProfile = async (session: Session): Promise<AuthUser | null> => {
   try {
@@ -22,7 +23,7 @@ export const fetchUserProfile = async (session: Session): Promise<AuthUser | nul
       return {
         id: session.user.id,
         name: `${profile.first_name} ${profile.last_name}`,
-        role: profile.role,
+        role: profile.role as UserRole, // Explicitly cast the role to UserRole type
         email: session.user.email,
       };
     }
