@@ -1,11 +1,10 @@
 
-import { Button } from '@/components/ui/button';
 import { NoDispatchesFound } from './general/NoDispatchesFound';
 import { DateRangeFilters } from './general/components/DateRangeFilters';
 import { LocationFilters } from './general/components/LocationFilters';
 import { DispatchesTable } from './general/components/DispatchesTable';
 import { DispatchesLoading } from './general/components/DispatchesLoading';
-import { SearchExportBar } from './general/components/SearchExportBar';
+import SearchBarWithButton from './general/components/SearchBarWithButton';
 import { useDispatchReport } from './general/hooks/useDispatchReport';
 
 const DispatchReportsTab = () => {
@@ -63,23 +62,14 @@ const DispatchReportsTab = () => {
         />
       </div>
       
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <Button 
-          onClick={handleSearch} 
-          className="w-full md:w-auto"
-          disabled={!startDate || !endDate || isLoading}
-        >
-          {isLoading ? 'Buscando...' : 'Buscar Despachos'}
-        </Button>
-        
-        <SearchExportBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          isLoading={isLoading}
-          hasData={dispatches.length > 0}
-          onExport={exportToCSV}
-        />
-      </div>
+      <SearchBarWithButton
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        hasData={dispatches.length > 0}
+        isLoading={isLoading}
+        onExport={exportToCSV}
+        onSearch={handleSearch}
+      />
       
       {renderContent()}
     </div>

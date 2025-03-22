@@ -84,7 +84,6 @@ export const useVehicleSearch = () => {
           brand,
           model,
           line,
-          year,
           status,
           active,
           soat_expiration,
@@ -105,6 +104,7 @@ export const useVehicleSearch = () => {
       
       if (error) throw error;
       
+      // Ensure data is the correct type before formatting
       const formattedVehicles = formatVehicleData(data as VehicleData[]);
       
       setVehicles(formattedVehicles);

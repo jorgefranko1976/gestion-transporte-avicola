@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 interface SearchExportBarProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
-  isLoading: boolean;
+  isLoading?: boolean;
   hasData: boolean;
   onExport: () => void;
 }
@@ -19,7 +19,7 @@ export const SearchExportBar = ({
   onExport 
 }: SearchExportBarProps) => {
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-6">
+    <div className="flex flex-col md:flex-row gap-4 w-full">
       <div className="relative flex-grow">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input

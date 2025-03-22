@@ -9,6 +9,17 @@ import { DispatchesTable } from "./components/DispatchesTable";
 import { useDispatchSearch } from "./hooks/useDispatchSearch";
 import { exportDispatchesToCSV } from "./utils/exportUtils";
 
+// Define local interface to avoid type conflicts with useDispatchReport
+interface LocalDispatch {
+  id: string;
+  orderId: string;
+  date: Date;
+  origin: string;
+  destination: string;
+  vehiclePlate: string | null;
+  driverName: string | null;
+}
+
 const DispatchDateRangeReport = () => {
   const {
     startDate,
@@ -32,7 +43,14 @@ const DispatchDateRangeReport = () => {
       return;
     }
     
-    const success = exportDispatchesToCSV(dispatches);
+    // The dispatches from useDispatchSearch don't have status property
+    // Convert to the format expected by exportDispatchesToCSV
+    const dispatchesWithStatus = dispatches.map(d => ({
+      ...d,
+      status: 'pending' // Add a default status since it's required
+    }));
+    
+    const success = exportDispatchesToCSV(dispatchesWithStatus);
     if (success) {
       toast.success("Datos exportados correctamente");
     } else {
@@ -80,7 +98,7 @@ const DispatchDateRangeReport = () => {
       
       {/* Results table */}
       {dispatches.length > 0 ? (
-        <DispatchesTable dispatches={dispatches} />
+        <DispatchesTable dispatches={dispatches as any} />
       ) : isLoading ? (
         <div className="text-center py-8 border rounded-md">
           <p className="text-muted-foreground">Buscando despachos...</p>
