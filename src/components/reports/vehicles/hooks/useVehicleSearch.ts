@@ -1,21 +1,28 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { VehicleReport } from '../types';
 
-export interface VehicleReport {
+// Define an interface for the vehicle data returned from Supabase
+interface VehicleData {
   id: string;
   plate: string;
-  type: string;
+  vehicle_type: string;
   brand: string;
   model: string;
-  year: number;
-  ownerName: string;
-  driverName: string;
+  line?: string;
+  year?: number;
   status: string;
+  active: boolean;
+  vehicle_owners?: { name: string } | null;
+  drivers?: { first_name: string; last_name: string } | null;
+  soat_expiration?: Date | null;
+  technical_inspection_expiration?: Date | null;
 }
 
 export const useVehicleSearch = () => {
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [typeFilter, setTypeFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [vehicles, setVehicles] = useState<VehicleReport[]>([]);
@@ -26,15 +33,19 @@ export const useVehicleSearch = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
+        // Fetch unique vehicle types
         const { data: typesData, error: typesError } = await supabase
           .from('vehicles')
-          .select('type')
-          .order('type');
+          .select('vehicle_type')
+          .order('vehicle_type');
           
         if (typesError) throw typesError;
         
-        const uniqueTypes = [...new Set(typesData.map(item => item.type))];
-        setVehicleTypes(uniqueTypes);
+        // Extract unique types from the data
+        if (typesData) {
+          const uniqueTypes = [...new Set(typesData.map(item => item.vehicle_type))];
+          setVehicleTypes(uniqueTypes);
+        }
         
       } catch (error) {
         console.error('Error fetching initial data:', error);
@@ -53,8 +64,7 @@ export const useVehicleSearch = () => {
         v.type.toLowerCase().includes(lowercaseSearch) ||
         v.brand.toLowerCase().includes(lowercaseSearch) ||
         v.model.toLowerCase().includes(lowercaseSearch) ||
-        v.ownerName.toLowerCase().includes(lowercaseSearch) ||
-        v.driverName.toLowerCase().includes(lowercaseSearch)
+        (v.ownerName && v.ownerName.toLowerCase().includes(lowercaseSearch))
       );
       setFilteredVehicles(filtered);
     } else {
@@ -70,28 +80,32 @@ export const useVehicleSearch = () => {
         .select(`
           id,
           plate,
-          type,
+          vehicle_type,
           brand,
           model,
+          line,
           year,
           status,
+          active,
+          soat_expiration,
+          technical_inspection_expiration,
           vehicle_owners (name),
           drivers (first_name, last_name)
         `);
       
-      if (statusFilter) {
-        query = query.eq('status', statusFilter);
+      if (statusFilter && statusFilter !== 'all') {
+        query = query.eq('active', statusFilter === 'active');
       }
       
-      if (typeFilter) {
-        query = query.eq('type', typeFilter);
+      if (typeFilter && typeFilter !== 'all_types') {
+        query = query.eq('vehicle_type', typeFilter);
       }
       
       const { data, error } = await query.order('plate', { ascending: false });
       
       if (error) throw error;
       
-      const formattedVehicles = formatVehicleData(data);
+      const formattedVehicles = formatVehicleData(data as VehicleData[]);
       
       setVehicles(formattedVehicles);
       setFilteredVehicles(formattedVehicles);
@@ -104,24 +118,24 @@ export const useVehicleSearch = () => {
     }
   };
 
-  // This is where the TypeScript errors were occurring - we need to handle the case when drivers or owners are null
-  const formatVehicleData = (data: any[]): VehicleReport[] => {
+  // Format the raw Supabase data into the VehicleReport structure
+  const formatVehicleData = (data: VehicleData[]): VehicleReport[] => {
     return data.map(item => {
-      // Safely access nested properties using optional chaining
-      const ownerName = item.vehicle_owners?.name || 'No registrado';
-      const driverName = item.drivers?.first_name && item.drivers?.last_name
-        ? `${item.drivers.first_name} ${item.drivers.last_name}`
-        : 'No asignado';
+      // Safely access nested properties
+      const ownerName = item.vehicle_owners?.name || null;
       
+      // Convert to the VehicleReport format defined in types.ts
       return {
         id: item.id,
         plate: item.plate,
-        type: item.type,
+        type: item.vehicle_type,
         brand: item.brand,
         model: item.model,
-        year: item.year,
+        line: item.line || '',
+        active: item.active,
         ownerName: ownerName,
-        driverName: driverName,
+        soatExpiration: item.soat_expiration || null,
+        techExpiration: item.technical_inspection_expiration || null,
         status: item.status
       };
     });
