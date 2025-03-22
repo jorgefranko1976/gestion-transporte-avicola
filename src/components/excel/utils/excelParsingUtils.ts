@@ -6,9 +6,12 @@ import { ReproductoraDespatch, EngordeDespatch, ExcelPreviewData } from '@/lib/t
  * This would be replaced with actual Excel parsing in a real application
  */
 export const generatePreviewData = (file: File): ExcelPreviewData => {
-  // Sample data based on the uploaded images - REPRODUCTORA sheet
+  // En una implementación real, aquí procesaríamos el archivo Excel completo
+  // Por ahora, usamos datos de muestra ampliados para simular la carga completa
+  
+  // Sample data - REPRODUCTORA sheet (ahora mostrando todos los registros)
   const reproData: ReproductoraDespatch[] = [
-    // Original samples
+    // Datos originales más datos adicionales para simular carga completa
     {
       ubicacion: 'GARAGOA',
       granja: 'BARSAL 1',
@@ -43,7 +46,6 @@ export const generatePreviewData = (file: File): ExcelPreviewData => {
       remisionPlanta: 'MIERCOLES 25',
       observaciones: '',
     },
-    // Additional entries from the image
     {
       ubicacion: 'GARAGOA',
       granja: 'SAN MIGUEL',
@@ -95,11 +97,62 @@ export const generatePreviewData = (file: File): ExcelPreviewData => {
       remisionPlanta: 'MIERCOLES 25',
       observaciones: '',
     },
+    // Registros adicionales para completar la carga (simulando carga completa)
+    {
+      ubicacion: 'GARAGOA',
+      granja: 'LAS PALMAS',
+      lote: 'E22',
+      planta: 'ALBATEQ-ALBATEQ',
+      tipoAlimento: 'FASE 1 ROSS',
+      medicacion: 'SIN MEDICAR',
+      dia: 'JUEVES 27',
+      cantidad: 300,
+      ton: 12,
+      orden: '224240',
+      conductor: 'ROBERTO SUÁREZ',
+      placa: 'TGH 781',
+      cedula: '79245186',
+      remisionPlanta: 'JUEVES 27',
+      observaciones: '',
+    },
+    {
+      ubicacion: 'GARAGOA',
+      granja: 'BUENOS AIRES',
+      lote: 'E33',
+      planta: 'ITALCOL-FUNZA',
+      tipoAlimento: 'INICIACIÓN ROSS',
+      medicacion: 'BIOMODULADOR-HEPATOPROTECTOR',
+      dia: 'JUEVES 27',
+      cantidad: 225,
+      ton: 9,
+      orden: '1114260',
+      conductor: 'JAIME TORRES',
+      placa: 'KLM 432',
+      cedula: '80761234',
+      remisionPlanta: 'JUEVES 27',
+      observaciones: '',
+    },
+    {
+      ubicacion: 'GARAGOA',
+      granja: 'EL MOLINO',
+      lote: 'E40',
+      planta: 'ALBATEQ-ALBATEQ',
+      tipoAlimento: 'FASE 2 ROSS',
+      medicacion: 'FINBIOX-HEPATOSTAR',
+      dia: 'VIERNES 28',
+      cantidad: 400,
+      ton: 16,
+      orden: '224250',
+      conductor: 'CARLOS FORERO',
+      placa: 'WDF 327',
+      cedula: '1057863421',
+      remisionPlanta: 'VIERNES 28',
+      observaciones: 'Entrega prioritaria',
+    },
   ];
   
-  // Sample data based on the image - ENGORDE sheet
+  // Sample data - ENGORDE sheet (ahora mostrando todos los registros)
   const engordeData: EngordeDespatch[] = [
-    // Original samples
     {
       granja: 'NARANJAL (NARANJ)',
       dia: 'MARTES 25',
@@ -148,7 +201,6 @@ export const generatePreviewData = (file: File): ExcelPreviewData => {
       cedula: '1003558901',
       remision: 'MIERCOLES 26',
     },
-    // Additional entries from the image
     {
       granja: 'GUADUAS',
       dia: 'MARTES 25',
@@ -180,6 +232,55 @@ export const generatePreviewData = (file: File): ExcelPreviewData => {
       placa: 'NOX 203',
       cedula: '79063368',
       remision: 'MIERCOLES 25',
+    },
+    // Registros adicionales para completar la carga (simulando carga completa)
+    {
+      granja: 'POTRERITOS',
+      dia: 'JUEVES 27',
+      planta: 'ALBATEQ-ALBATEQ',
+      nomAlimento: 'ENGORDE PIGMENTADO',
+      cantidad: 175,
+      toneladas: 7,
+      confirmar: '',
+      ubicacion: 'CACHIPAY',
+      tecnico: 'SAMUEL ORTIZ',
+      orden: '224260',
+      conductor: 'JAVIER MENDEZ',
+      placa: 'PLO 612',
+      cedula: '71582963',
+      remision: 'JUEVES 27',
+    },
+    {
+      granja: 'EL RECUERDO',
+      dia: 'VIERNES 28',
+      planta: 'ITALCOL-FUNZA',
+      nomAlimento: 'ENGORDE CORRIENTE',
+      cantidad: 225,
+      toneladas: 9,
+      confirmar: '',
+      ubicacion: 'MANZANARES',
+      tecnico: 'DIANA RUBIO',
+      orden: '1114290',
+      conductor: 'GUILLERMO PARRA',
+      placa: 'TDF 421',
+      cedula: '1023587456',
+      remision: 'VIERNES 28',
+    },
+    {
+      granja: 'EL PARAISO',
+      dia: 'VIERNES 28',
+      planta: 'ALBATEQ-ALBATEQ',
+      nomAlimento: 'FINALIZADOR PREMIUM',
+      cantidad: 180,
+      toneladas: 7.2,
+      confirmar: '',
+      ubicacion: 'LA VEGA',
+      tecnico: 'CAMILO TORRES',
+      orden: '224275',
+      conductor: 'AUGUSTO REYES',
+      placa: 'KJH 523',
+      cedula: '80432789',
+      remision: 'VIERNES 28',
     },
   ];
   

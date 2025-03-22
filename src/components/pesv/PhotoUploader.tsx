@@ -1,8 +1,9 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera, X, Image } from "lucide-react";
+import { toast } from "sonner";
 
 interface PhotoUploaderProps {
   title: string;
@@ -14,6 +15,7 @@ interface PhotoUploaderProps {
 
 const PhotoUploader = ({ title, description, file, onUpload, onRemove }: PhotoUploaderProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -26,12 +28,19 @@ const PhotoUploader = ({ title, description, file, onUpload, onRemove }: PhotoUp
         setPreviewUrl(fileReader.result as string);
       };
       fileReader.readAsDataURL(selectedFile);
+      toast.success(`Foto de ${title} cargada con éxito`);
     }
   };
 
   const handleRemove = () => {
     onRemove();
     setPreviewUrl(null);
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   return (
@@ -54,7 +63,7 @@ const PhotoUploader = ({ title, description, file, onUpload, onRemove }: PhotoUp
             </Button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center p-4 h-[180px] cursor-pointer border-2 border-dashed border-muted-foreground/20 rounded-md hover:bg-muted/20 transition-colors">
+          <div className="flex flex-col items-center justify-center p-4 h-[180px] cursor-pointer border-2 border-dashed border-muted-foreground/20 rounded-md hover:bg-muted/20 transition-colors">
             <div className="flex flex-col items-center gap-2 text-center">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <Camera className="h-6 w-6 text-primary" />
@@ -68,18 +77,20 @@ const PhotoUploader = ({ title, description, file, onUpload, onRemove }: PhotoUp
                 variant="secondary" 
                 size="sm"
                 className="mt-2"
+                onClick={triggerFileInput}
               >
                 Tomar foto
               </Button>
             </div>
             <input
+              ref={fileInputRef}
               type="file"
               className="hidden"
               accept="image/*"
               onChange={handleFileChange}
               capture="environment"
             />
-          </label>
+          </div>
         )}
       </CardContent>
     </Card>

@@ -1,14 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FileX, Upload, X, Calendar } from "lucide-react";
+import { FileX, Upload, X, Calendar, FileText } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface DocumentUploaderProps {
   title: string;
@@ -34,15 +35,28 @@ const DocumentUploader = ({
   onExpirationChange,
 }: DocumentUploaderProps) => {
   const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Crear vista previa cuando cambia el archivo
+    if (file) {
+      const fileUrl = URL.createObjectURL(file);
+      setPreview(fileUrl);
+      
+      // Cleanup al desmontar
+      return () => {
+        if (preview) URL.revokeObjectURL(preview);
+      };
+    }
+  }, [file]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       onUpload(selectedFile);
       
-      // Crear URL para vista previa
-      const fileUrl = URL.createObjectURL(selectedFile);
-      setPreview(fileUrl);
+      // Ya no necesitamos establecer la vista previa aquí, se hace en useEffect
+      toast.success(`${title} cargado con éxito`);
     }
   };
 
@@ -51,6 +65,12 @@ const DocumentUploader = ({
     if (preview) {
       URL.revokeObjectURL(preview);
       setPreview(null);
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -67,17 +87,23 @@ const DocumentUploader = ({
                 <h4 className="text-sm font-medium">{title}</h4>
                 <p className="text-xs text-muted-foreground">{description}</p>
               </div>
-              <label className="cursor-pointer">
+              <div>
                 <Input
+                  ref={fileInputRef}
                   type="file"
                   className="hidden"
                   accept={isPhoto ? "image/*" : ".pdf,.doc,.docx,image/*"}
                   onChange={handleFileChange}
                 />
-                <Button type="button" variant="outline" size="sm">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={triggerFileInput}
+                >
                   Seleccionar archivo
                 </Button>
-              </label>
+              </div>
               
               {hasExpiration && onExpirationChange && (
                 <div className="mt-3 w-full">
@@ -120,7 +146,7 @@ const DocumentUploader = ({
           </div>
         ) : (
           <div className="relative">
-            {preview && isPhoto ? (
+            {isPhoto && preview ? (
               <div className="aspect-square overflow-hidden bg-muted">
                 <img 
                   src={preview} 
@@ -128,14 +154,24 @@ const DocumentUploader = ({
                   className="h-full w-full object-cover" 
                 />
               </div>
+            ) : preview && !isPhoto && preview.includes('image') ? (
+              <div className="p-4">
+                <div className="w-full h-40 overflow-hidden bg-muted flex items-center justify-center">
+                  <img 
+                    src={preview} 
+                    alt={title} 
+                    className="max-h-full max-w-full object-contain" 
+                  />
+                </div>
+              </div>
             ) : (
               <div className="flex items-center justify-center p-6 min-h-[160px] bg-muted/20">
                 <div className="text-center space-y-2">
                   <div className="bg-primary/10 rounded-full p-3 mx-auto">
-                    <FileX className="h-6 w-6 text-primary" />
+                    <FileText className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium truncate max-w-[180px]">{file.name}</h4>
+                    <h4 className="text-sm font-medium truncate max-w-[180px] mx-auto">{file.name}</h4>
                     <p className="text-xs text-muted-foreground">
                       {(file.size / 1024).toFixed(2)} KB
                     </p>
