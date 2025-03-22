@@ -1,8 +1,11 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserRole } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 
-type User = {
+type AuthUser = {
   id: string;
   name: string;
   role: UserRole;
@@ -10,82 +13,178 @@ type User = {
 };
 
 type AuthContextType = {
-  user: User | null;
+  user: AuthUser | null;
+  session: Session | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string, userData: {
+    first_name: string;
+    last_name: string;
+    role: UserRole;
+    identification_type: string;
+    identification_number: string;
+    phone?: string;
+  }) => Promise<boolean>;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
-    const storedUser = localStorage.getItem('transportUser');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user data:', error);
-        localStorage.removeItem('transportUser');
-      }
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = async (username: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // This is a mock authentication - in a real app, this would be an API call
-    try {
-      // Simulate network request
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Mock authentication logic
-      if (username && password) {
-        // For demo purposes only - in a real app, this would verify credentials with a backend
-        let role: UserRole = 'driver';
+    // Configurar el listener de cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        setSession(currentSession);
         
-        if (username.includes('admin')) {
-          role = 'admin';
-        } else if (username.includes('coord')) {
-          role = 'coordinator';
-        } else if (username.includes('owner')) {
-          role = 'owner';
+        if (currentSession?.user) {
+          try {
+            // Obtener datos del perfil del usuario
+            const { data: profile, error } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .eq('id', currentSession.user.id)
+              .single();
+
+            if (error) {
+              console.error('Error al obtener perfil:', error);
+              return;
+            }
+
+            if (profile) {
+              setUser({
+                id: currentSession.user.id,
+                name: `${profile.first_name} ${profile.last_name}`,
+                role: profile.role as UserRole,
+                email: currentSession.user.email,
+              });
+            }
+          } catch (error) {
+            console.error('Error al procesar sesión:', error);
+          }
+        } else {
+          setUser(null);
         }
         
-        const mockUser: User = {
-          id: '1',
-          name: username,
-          role,
-          email: `${username}@example.com`,
-        };
-        
-        setUser(mockUser);
-        localStorage.setItem('transportUser', JSON.stringify(mockUser));
         setIsLoading(false);
+      }
+    );
+
+    // Verificar sesión existente al cargar
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      if (currentSession?.user) {
+        supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', currentSession.user.id)
+          .single()
+          .then(({ data: profile, error }) => {
+            if (error) {
+              console.error('Error al obtener perfil:', error);
+              setIsLoading(false);
+              return;
+            }
+
+            if (profile) {
+              setUser({
+                id: currentSession.user.id,
+                name: `${profile.first_name} ${profile.last_name}`,
+                role: profile.role as UserRole,
+                email: currentSession.user.email,
+              });
+            }
+            setSession(currentSession);
+            setIsLoading(false);
+          });
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    // Limpieza al desmontar
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        toast.error(error.message);
+        setIsLoading(false);
+        return false;
+      }
+
+      if (data.user) {
+        // El perfil se actualizará automáticamente a través del listener de onAuthStateChange
         return true;
       }
       
       setIsLoading(false);
       return false;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Error de login:', error);
       setIsLoading(false);
       return false;
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('transportUser');
+  const signup = async (
+    email: string, 
+    password: string,
+    userData: {
+      first_name: string;
+      last_name: string;
+      role: UserRole;
+      identification_type: string;
+      identification_number: string;
+      phone?: string;
+    }
+  ): Promise<boolean> => {
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userData,
+        }
+      });
+      
+      if (error) {
+        toast.error(error.message);
+        setIsLoading(false);
+        return false;
+      }
+
+      toast.success('Registro exitoso. Por favor inicia sesión.');
+      setIsLoading(false);
+      return true;
+    } catch (error) {
+      console.error('Error de registro:', error);
+      setIsLoading(false);
+      return false;
+    }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, session, isLoading, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
