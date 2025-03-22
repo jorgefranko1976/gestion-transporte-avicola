@@ -12,10 +12,12 @@ const Login = () => {
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    // Si ya está cargando, no hacemos nada
+    console.log("Login page - Auth state:", { user, isLoading });
+    
+    // If still loading auth state, don't do anything
     if (isLoading) return;
 
-    // Si hay un usuario autenticado, redirigimos según su rol
+    // If there's an authenticated user, redirect based on role
     if (user) {
       console.log("User authenticated, redirecting to dashboard for role:", user.role);
       setRedirecting(true);
@@ -28,10 +30,11 @@ const Login = () => {
         } else {
           navigate('/driver');
         }
-      }, 500); // Pequeño delay para la transición
+      }, 500); // Small delay for transition
     }
   }, [user, isLoading, navigate]);
 
+  // If we're in a loading or redirecting state, show a skeleton
   if (isLoading || redirecting) {
     return (
       <div className="min-h-screen bg-background">
@@ -52,7 +55,7 @@ const Login = () => {
       <Navbar />
       
       <div className="pt-24 pb-16">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 flex justify-center">
           <LoginForm className="mt-8" />
         </div>
       </div>

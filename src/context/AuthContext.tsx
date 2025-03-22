@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserRole } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log("AuthProvider useEffect running");
     
-    // Configurar el listener de cambios de autenticación
+    // Set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log("Auth state changed:", event, currentSession?.user?.id);
@@ -46,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (currentSession?.user) {
           try {
-            // Obtener datos del perfil del usuario
+            // Get user profile data
             const { data: profile, error } = await supabase
               .from('user_profiles')
               .select('*')
@@ -54,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               .single();
 
             if (error) {
-              console.error('Error al obtener perfil:', error);
+              console.error('Error fetching profile:', error);
               setIsLoading(false);
               return;
             }
@@ -69,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               });
             }
           } catch (error) {
-            console.error('Error al procesar sesión:', error);
+            console.error('Error processing session:', error);
           }
         } else {
           setUser(null);
@@ -79,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Verificar sesión existente al cargar
+    // Check for existing session on load
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Initial session check:", currentSession?.user?.id);
       if (currentSession?.user) {
@@ -90,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single()
           .then(({ data: profile, error }) => {
             if (error) {
-              console.error('Error al obtener perfil:', error);
+              console.error('Error fetching profile:', error);
               setIsLoading(false);
               return;
             }
@@ -112,7 +111,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // Limpieza al desmontar
     return () => {
       subscription.unsubscribe();
     };
@@ -129,22 +127,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
-        console.error('Error de login:', error.message);
+        console.error('Login error:', error.message);
         toast.error(error.message);
         setIsLoading(false);
         return false;
       }
 
+      console.log("Login response:", data);
+      
       if (data.user) {
         console.log("Login successful for:", data.user.id);
-        // El perfil se actualizará automáticamente a través del listener de onAuthStateChange
+        // User profile will be updated automatically through the onAuthStateChange listener
         return true;
       }
       
       setIsLoading(false);
       return false;
     } catch (error) {
-      console.error('Error de login:', error);
+      console.error('Login error:', error);
       setIsLoading(false);
       return false;
     }

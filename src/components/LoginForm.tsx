@@ -2,12 +2,12 @@
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import PageTransition from './transitions/PageTransition';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from 'sonner';
+import { Label } from '@/components/ui/label';
 
 interface LoginFormProps {
   className?: string;
@@ -19,7 +19,6 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const [loginError, setLoginError] = useState('');
   
   const { login, isLoading } = useAuth();
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +30,14 @@ export const LoginForm = ({ className }: LoginFormProps) => {
     }
     
     try {
+      console.log("Attempting login with:", { email: loginEmail });
       const success = await login(loginEmail, loginPassword);
       
       if (success) {
         toast.success('Inicio de sesión exitoso');
-        // La redirección se maneja en el componente Login a través del useEffect
+        // Redirect is handled in the Login component
       } else {
+        console.error("Login failed but no error was thrown");
         setLoginError('Credenciales incorrectas');
       }
     } catch (error) {
@@ -56,7 +57,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
             </p>
           </div>
           
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-6">
             {loginError && (
               <div className="p-3 bg-destructive/10 text-destructive rounded-lg border border-destructive/20 flex items-center gap-2 text-sm">
                 <AlertCircle className="w-4 h-4" />
@@ -65,9 +66,9 @@ export const LoginForm = ({ className }: LoginFormProps) => {
             )}
             
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
+              <Label htmlFor="email" className="text-sm font-medium">
                 Correo Electrónico
-              </label>
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -81,9 +82,9 @@ export const LoginForm = ({ className }: LoginFormProps) => {
             </div>
             
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
+              <Label htmlFor="password" className="text-sm font-medium">
                 Contraseña
-              </label>
+              </Label>
               <Input
                 id="password"
                 type="password"
