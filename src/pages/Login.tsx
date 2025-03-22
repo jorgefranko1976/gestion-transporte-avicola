@@ -12,7 +12,9 @@ const Login = () => {
   useEffect(() => {
     // If already logged in, redirect to appropriate dashboard
     if (user) {
-      if (user.role === 'coordinator') {
+      if (user.role === 'admin') {
+        navigate('/settings');
+      } else if (user.role === 'coordinator') {
         navigate('/coordinator');
       } else {
         navigate('/driver');
