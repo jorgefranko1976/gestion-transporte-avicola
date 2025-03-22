@@ -99,9 +99,9 @@ export const useVehicleSearch = () => {
         if (vehicle.vehicle_owners && typeof vehicle.vehicle_owners === 'object') {
           const owner = vehicle.vehicle_owners;
           
-          if (owner?.name) {
+          if (owner && 'name' in owner && owner.name) {
             ownerName = owner.name;
-          } else if (owner?.first_name && owner?.last_name) {
+          } else if (owner && 'first_name' in owner && 'last_name' in owner && owner.first_name && owner.last_name) {
             ownerName = `${owner.first_name} ${owner.last_name}`;
           }
         }
