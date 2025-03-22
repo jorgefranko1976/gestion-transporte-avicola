@@ -1,8 +1,14 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ReceiptReport, VehicleData, DriverData } from '../types';
+
+const getDriverName = (receipt: any) => {
+  if (!receipt.drivers) return 'No asignado';
+  return receipt.drivers.first_name && receipt.drivers.last_name
+    ? `${receipt.drivers.first_name} ${receipt.drivers.last_name}`
+    : 'No asignado';
+};
 
 export const useReceiptSearch = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(
@@ -91,10 +97,7 @@ export const useReceiptSearch = () => {
       if (error) throw error;
       
       const formattedReceipts = data.map(receipt => {
-        let driverName = null;
-        if (receipt.drivers && typeof receipt.drivers === 'object') {
-          driverName = `${receipt.drivers?.first_name || ''} ${receipt.drivers?.last_name || ''}`.trim();
-        }
+        let driverName = getDriverName(receipt);
         
         return {
           id: receipt.id,

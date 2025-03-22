@@ -71,10 +71,7 @@ const StatusReportsTab = () => {
             isDelayed = hoursRemaining < 0;
           }
           
-          let driverName = null;
-          if (dispatch.drivers && typeof dispatch.drivers === 'object') {
-            driverName = `${dispatch.drivers?.first_name || ''} ${dispatch.drivers?.last_name || ''}`.trim();
-          }
+          let driverName = getDriverName(dispatch);
           
           return {
             id: dispatch.id,
@@ -301,6 +298,13 @@ const StatusBadge = ({ status, isDelayed }: { status: string, isDelayed: boolean
       {label}
     </span>
   );
+};
+
+const getDriverName = (dispatch: any) => {
+  if (!dispatch.drivers) return 'No asignado';
+  return dispatch.drivers.first_name && dispatch.drivers.last_name
+    ? `${dispatch.drivers.first_name} ${dispatch.drivers.last_name}`
+    : 'No asignado';
 };
 
 export default StatusReportsTab;

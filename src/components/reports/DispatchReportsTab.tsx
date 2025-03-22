@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -106,10 +105,7 @@ const DispatchReportsTab = () => {
       if (error) throw error;
       
       const formattedDispatches = data.map(item => {
-        let driverName = null;
-        if (item.drivers && typeof item.drivers === 'object') {
-          driverName = `${item.drivers?.first_name || ''} ${item.drivers?.last_name || ''}`.trim();
-        }
+        let driverName = getDriverName(item);
         
         return {
           id: item.id,
@@ -378,3 +374,10 @@ const DispatchReportsTab = () => {
 };
 
 export default DispatchReportsTab;
+
+const getDriverName = (item: any) => {
+  if (!item.drivers) return 'No asignado';
+  return item.drivers.first_name && item.drivers.last_name
+    ? `${item.drivers.first_name} ${item.drivers.last_name}`
+    : 'No asignado';
+};

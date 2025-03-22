@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -96,10 +97,12 @@ export const useVehicleSearch = () => {
         
         // Safely access owner information if it exists
         if (vehicle.vehicle_owners && typeof vehicle.vehicle_owners === 'object') {
-          if (vehicle.vehicle_owners?.name) {
-            ownerName = vehicle.vehicle_owners.name;
-          } else if (vehicle.vehicle_owners?.first_name && vehicle.vehicle_owners?.last_name) {
-            ownerName = `${vehicle.vehicle_owners.first_name} ${vehicle.vehicle_owners.last_name}`;
+          const owner = vehicle.vehicle_owners;
+          
+          if (owner?.name) {
+            ownerName = owner.name;
+          } else if (owner?.first_name && owner?.last_name) {
+            ownerName = `${owner.first_name} ${owner.last_name}`;
           }
         }
         
