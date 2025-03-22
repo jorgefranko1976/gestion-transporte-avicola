@@ -48,7 +48,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
 
   return (
     <PageTransition>
-      <div className={cn('max-w-md w-full mx-auto', className)}>
+      <div className={cn('max-w-md w-full mx-auto bg-background', className)}>
         <div className="glass-morphism rounded-2xl p-8 shadow-subtle">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold">Sistema de Transporte</h2>

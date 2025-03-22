@@ -23,6 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (currentSession?.user) {
           const userProfile = await fetchUserProfile(currentSession);
+          console.log("Fetched user profile:", userProfile);
           setUser(userProfile);
         } else {
           setUser(null);
@@ -37,11 +38,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Initial session check:", currentSession?.user?.id);
       if (currentSession?.user) {
         fetchUserProfile(currentSession).then(userProfile => {
+          console.log("Initial profile fetch:", userProfile);
           setUser(userProfile);
           setSession(currentSession);
           setIsLoading(false);
         });
       } else {
+        console.log("No initial session found");
         setIsLoading(false);
       }
     });
@@ -52,9 +55,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    console.log("Login method called with email:", email);
     setIsLoading(true);
     
-    const { success } = await loginUser(email, password);
+    const { success, data, error } = await loginUser(email, password);
+    
+    console.log("Login result:", { success, data: data?.user?.id || null, error });
     
     if (!success) {
       setIsLoading(false);
