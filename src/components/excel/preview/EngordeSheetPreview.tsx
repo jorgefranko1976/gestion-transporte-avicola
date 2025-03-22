@@ -17,7 +17,7 @@ interface EngordeSheetPreviewProps {
 const EngordeSheetPreview = ({ data }: EngordeSheetPreviewProps) => {
   if (!data.length) return null;
   
-  // Define key columns for readability - not showing all columns to save space
+  // Define key columns for readability - showing all important columns
   const keyColumns = [
     'granja', 'dia', 'planta', 'nomAlimento', 'cantidad', 
     'toneladas', 'ubicacion', 'tecnico', 'orden', 'conductor', 'placa'
@@ -25,8 +25,11 @@ const EngordeSheetPreview = ({ data }: EngordeSheetPreviewProps) => {
   
   return (
     <div className="h-full overflow-auto">
+      <div className="mb-2 px-2 text-sm text-muted-foreground">
+        Mostrando {data.length} registros
+      </div>
       <Table>
-        <TableHeader>
+        <TableHeader className="sticky top-0 bg-white z-10">
           <TableRow>
             {keyColumns.map((column) => (
               <TableHead key={column} className="text-xs whitespace-nowrap">
@@ -39,7 +42,7 @@ const EngordeSheetPreview = ({ data }: EngordeSheetPreviewProps) => {
           {data.map((row, idx) => (
             <TableRow key={idx}>
               {keyColumns.map((column) => (
-                <TableCell key={`${idx}-${column}`} className="text-xs">
+                <TableCell key={`${idx}-${column}`} className="text-xs py-2">
                   {formatCellValue(row[column as keyof EngordeDespatch])}
                 </TableCell>
               ))}

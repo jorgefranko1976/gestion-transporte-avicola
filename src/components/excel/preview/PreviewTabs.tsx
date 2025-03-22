@@ -12,6 +12,9 @@ interface PreviewTabsProps {
 
 const PreviewTabs = ({ previewData }: PreviewTabsProps) => {
   const [activeSheet, setActiveSheet] = useState<'reproductora' | 'engorde'>('reproductora');
+  
+  // Ensure all records are visible by setting a minimum height
+  const tabContentHeight = 'max-h-[60vh]';
 
   return (
     <Tabs 
@@ -34,7 +37,7 @@ const PreviewTabs = ({ previewData }: PreviewTabsProps) => {
         </TabsTrigger>
       </TabsList>
       
-      <div className="flex-1 overflow-auto border rounded-md">
+      <div className={`flex-1 overflow-auto border rounded-md ${tabContentHeight}`}>
         <TabsContent value="reproductora" className="m-0 h-full">
           {previewData.reproductora.length > 0 ? (
             <ReproductoraSheetPreview data={previewData.reproductora} />

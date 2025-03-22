@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,15 +34,13 @@ const DocumentUploader = ({
   onExpirationChange,
 }: DocumentUploaderProps) => {
   const [preview, setPreview] = useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Crear vista previa cuando cambia el archivo
     if (file) {
       const fileUrl = URL.createObjectURL(file);
       setPreview(fileUrl);
       
-      // Cleanup al desmontar
       return () => {
         if (preview) URL.revokeObjectURL(preview);
       };
@@ -55,7 +52,6 @@ const DocumentUploader = ({
       const selectedFile = e.target.files[0];
       onUpload(selectedFile);
       
-      // Ya no necesitamos establecer la vista previa aquí, se hace en useEffect
       toast.success(`${title} cargado con éxito`);
     }
   };

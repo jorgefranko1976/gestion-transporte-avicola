@@ -26,9 +26,9 @@ const ExcelPreviewModal = ({
 }: ExcelPreviewModalProps) => {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl mx-4 flex flex-col h-[80vh]">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl mx-4 flex flex-col h-[85vh]">
         <div className="flex justify-between items-center border-b p-4">
-          <h3 className="text-lg font-medium">Vista previa del archivo Excel</h3>
+          <h3 className="text-lg font-medium">Vista previa completa del archivo Excel</h3>
           <button 
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500"
