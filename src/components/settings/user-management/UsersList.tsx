@@ -50,7 +50,7 @@ const UsersList = () => {
         if (data) {
           const formattedUsers: UserProfile[] = data.map(user => ({
             id: user.id,
-            email: user.email || '',
+            email: '', // Set default empty email since it's not in the DB response
             firstName: user.first_name,
             lastName: user.last_name,
             role: user.role,
