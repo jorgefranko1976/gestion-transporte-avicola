@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { VehicleReport } from '../types';
 
-// Define an interface for the vehicle data returned from Supabase
+// Update the interface to properly match the shape returned by Supabase
 interface VehicleData {
   id: string;
   plate: string;
@@ -17,8 +17,8 @@ interface VehicleData {
   active: boolean;
   vehicle_owners?: { name: string } | null;
   drivers?: { first_name: string; last_name: string } | null;
-  soat_expiration?: Date | null;
-  technical_inspection_expiration?: Date | null;
+  soat_expiration?: string | null;
+  technical_inspection_expiration?: string | null;
 }
 
 export const useVehicleSearch = () => {
@@ -104,8 +104,8 @@ export const useVehicleSearch = () => {
       
       if (error) throw error;
       
-      // Ensure data is the correct type before formatting
-      const formattedVehicles = formatVehicleData(data as VehicleData[]);
+      // Use type assertion to resolve the type mismatch
+      const formattedVehicles = formatVehicleData(data as unknown as VehicleData[]);
       
       setVehicles(formattedVehicles);
       setFilteredVehicles(formattedVehicles);
@@ -134,8 +134,8 @@ export const useVehicleSearch = () => {
         line: item.line || '',
         active: item.active,
         ownerName: ownerName,
-        soatExpiration: item.soat_expiration || null,
-        techExpiration: item.technical_inspection_expiration || null,
+        soatExpiration: item.soat_expiration ? new Date(item.soat_expiration) : null,
+        techExpiration: item.technical_inspection_expiration ? new Date(item.technical_inspection_expiration) : null,
         status: item.status
       };
     });
