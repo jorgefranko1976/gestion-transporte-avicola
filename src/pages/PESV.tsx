@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PreOperationalForm from '@/components/pesv/PreOperationalForm';
-import InspectionsList from '@/components/pesv/InspectionsList';
+import InspectionsList from '@/components/pesv/inspections/InspectionsList';
 import { PortalLayout } from '@/components/layout/PortalLayout';
 
 const PESV = () => {
