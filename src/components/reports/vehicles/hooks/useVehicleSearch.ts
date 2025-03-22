@@ -1,51 +1,60 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { VehicleReport } from '../types';
+
+export interface VehicleReport {
+  id: string;
+  plate: string;
+  type: string;
+  brand: string;
+  model: string;
+  year: number;
+  ownerName: string;
+  driverName: string;
+  status: string;
+}
 
 export const useVehicleSearch = () => {
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [vehicles, setVehicles] = useState<VehicleReport[]>([]);
   const [filteredVehicles, setFilteredVehicles] = useState<VehicleReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [vehicleTypes, setVehicleTypes] = useState<string[]>([]);
 
-  // Cargar tipos de vehículos al iniciar
   useEffect(() => {
-    const fetchVehicleTypes = async () => {
+    const fetchInitialData = async () => {
       try {
-        const { data, error } = await supabase
+        const { data: typesData, error: typesError } = await supabase
           .from('vehicles')
-          .select('vehicle_type')
-          .order('vehicle_type');
+          .select('type')
+          .order('type');
           
-        if (error) throw error;
+        if (typesError) throw typesError;
         
-        // Filtrar tipos únicos
-        const uniqueTypes = [...new Set(data.map(item => item.vehicle_type))];
+        const uniqueTypes = [...new Set(typesData.map(item => item.type))];
         setVehicleTypes(uniqueTypes);
         
       } catch (error) {
-        console.error('Error fetching vehicle types:', error);
+        console.error('Error fetching initial data:', error);
+        toast.error('Error al cargar datos iniciales');
       }
     };
     
-    fetchVehicleTypes();
+    fetchInitialData();
   }, []);
 
-  // Filtrar resultados por término de búsqueda
   useEffect(() => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
       const filtered = vehicles.filter(v => 
         v.plate.toLowerCase().includes(lowercaseSearch) ||
+        v.type.toLowerCase().includes(lowercaseSearch) ||
         v.brand.toLowerCase().includes(lowercaseSearch) ||
         v.model.toLowerCase().includes(lowercaseSearch) ||
-        v.line.toLowerCase().includes(lowercaseSearch) ||
-        (v.ownerName && v.ownerName.toLowerCase().includes(lowercaseSearch))
+        v.ownerName.toLowerCase().includes(lowercaseSearch) ||
+        v.driverName.toLowerCase().includes(lowercaseSearch)
       );
       setFilteredVehicles(filtered);
     } else {
@@ -53,73 +62,36 @@ export const useVehicleSearch = () => {
     }
   }, [searchTerm, vehicles]);
 
-  // Buscar vehículos
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      // Construir la consulta
       let query = supabase
         .from('vehicles')
         .select(`
-          id, 
+          id,
           plate,
-          vehicle_type,
+          type,
           brand,
           model,
-          line,
-          active,
-          soat_expiration,
-          technical_inspection_expiration,
+          year,
           status,
-          owner_id,
-          vehicle_owners(id, name, first_name, last_name)
-        `)
-        .order('plate');
+          vehicle_owners (name),
+          drivers (first_name, last_name)
+        `);
       
-      // Aplicar filtros de estado
-      if (statusFilter !== 'all') {
-        query = query.eq('active', statusFilter === 'active');
+      if (statusFilter) {
+        query = query.eq('status', statusFilter);
       }
       
-      // Aplicar filtro de tipo
-      if (typeFilter && typeFilter !== 'all_types') {
-        query = query.eq('vehicle_type', typeFilter);
+      if (typeFilter) {
+        query = query.eq('type', typeFilter);
       }
       
-      // Ejecutar la consulta
-      const { data, error } = await query;
+      const { data, error } = await query.order('plate', { ascending: false });
       
       if (error) throw error;
       
-      // Formatear los datos
-      const formattedVehicles = data.map(vehicle => {
-        let ownerName = null;
-        
-        // Safely access owner information if it exists
-        if (vehicle.vehicle_owners && typeof vehicle.vehicle_owners === 'object') {
-          const owner = vehicle.vehicle_owners;
-          
-          if (owner && 'name' in owner && owner.name) {
-            ownerName = owner.name;
-          } else if (owner && 'first_name' in owner && 'last_name' in owner && owner.first_name && owner.last_name) {
-            ownerName = `${owner.first_name} ${owner.last_name}`;
-          }
-        }
-        
-        return {
-          id: vehicle.id,
-          plate: vehicle.plate,
-          type: vehicle.vehicle_type,
-          brand: vehicle.brand,
-          model: vehicle.model,
-          line: vehicle.line,
-          active: vehicle.active,
-          ownerName: ownerName,
-          soatExpiration: vehicle.soat_expiration ? new Date(vehicle.soat_expiration) : null,
-          techExpiration: vehicle.technical_inspection_expiration ? new Date(vehicle.technical_inspection_expiration) : null,
-          status: vehicle.status || 'available'
-        };
-      });
+      const formattedVehicles = formatVehicleData(data);
       
       setVehicles(formattedVehicles);
       setFilteredVehicles(formattedVehicles);
@@ -130,6 +102,29 @@ export const useVehicleSearch = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // This is where the TypeScript errors were occurring - we need to handle the case when drivers or owners are null
+  const formatVehicleData = (data: any[]): VehicleReport[] => {
+    return data.map(item => {
+      // Safely access nested properties using optional chaining
+      const ownerName = item.vehicle_owners?.name || 'No registrado';
+      const driverName = item.drivers?.first_name && item.drivers?.last_name
+        ? `${item.drivers.first_name} ${item.drivers.last_name}`
+        : 'No asignado';
+      
+      return {
+        id: item.id,
+        plate: item.plate,
+        type: item.type,
+        brand: item.brand,
+        model: item.model,
+        year: item.year,
+        ownerName: ownerName,
+        driverName: driverName,
+        status: item.status
+      };
+    });
   };
 
   return {
