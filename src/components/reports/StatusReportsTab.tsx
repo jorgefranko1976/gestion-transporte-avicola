@@ -28,11 +28,9 @@ const StatusReportsTab = () => {
   const [filteredDispatches, setFilteredDispatches] = useState<StatusReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Search dispatches
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      // Build base query
       let query = supabase
         .from('dispatches')
         .select(`
@@ -47,41 +45,35 @@ const StatusReportsTab = () => {
           drivers(first_name, last_name)
         `);
       
-      // Filter by status
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
       } else {
-        // If "all", exclude completed
         query = query.not('status', 'eq', 'completed');
       }
       
-      // Execute query
       const { data, error } = await query.order('accepted_at', { ascending: false });
       
       if (error) throw error;
       
       const now = new Date();
       
-      // Format data
       const formattedDispatches = data
-        .filter(d => d.status !== 'pending') // Exclude pending
+        .filter(d => d.status !== 'pending')
         .map(dispatch => {
-          // Calculate remaining hours and if delayed
           let hoursRemaining = null;
           let isDelayed = false;
           
           if (dispatch.accepted_at) {
             const acceptedDate = new Date(dispatch.accepted_at);
-            const expectedEnd = addHours(acceptedDate, 24); // 24 hours after accepted
+            const expectedEnd = addHours(acceptedDate, 24);
             
             hoursRemaining = differenceInHours(expectedEnd, now);
             isDelayed = hoursRemaining < 0;
           }
           
           let driverName = null;
-          // Safely access driver information if it exists
           if (dispatch.drivers && typeof dispatch.drivers === 'object') {
-            driverName = `${dispatch.drivers.first_name || ''} ${dispatch.drivers.last_name || ''}`.trim();
+            driverName = `${dispatch.drivers?.first_name || ''} ${dispatch.drivers?.last_name || ''}`.trim();
           }
           
           return {
@@ -109,7 +101,6 @@ const StatusReportsTab = () => {
     }
   };
 
-  // Filter results by search term
   useEffect(() => {
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
@@ -125,14 +116,12 @@ const StatusReportsTab = () => {
     }
   }, [searchTerm, dispatches]);
 
-  // Export to CSV
   const exportToCSV = () => {
     if (filteredDispatches.length === 0) {
       toast.error('No hay datos para exportar');
       return;
     }
     
-    // Create CSV content
     const headers = [
       'Orden', 
       'Vehículo', 
@@ -157,7 +146,6 @@ const StatusReportsTab = () => {
     
     const csvContent = [headers, ...csvRows].join('\n');
     
-    // Create blob and download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -222,7 +210,6 @@ const StatusReportsTab = () => {
         </Button>
       </div>
       
-      {/* Table of results */}
       {dispatches.length > 0 ? (
         <div className="rounded-md border overflow-hidden">
           <div className="overflow-x-auto">

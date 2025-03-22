@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -92,7 +93,7 @@ export const useReceiptSearch = () => {
       const formattedReceipts = data.map(receipt => {
         let driverName = null;
         if (receipt.drivers && typeof receipt.drivers === 'object') {
-          driverName = `${receipt.drivers.first_name || ''} ${receipt.drivers.last_name || ''}`.trim();
+          driverName = `${receipt.drivers?.first_name || ''} ${receipt.drivers?.last_name || ''}`.trim();
         }
         
         return {

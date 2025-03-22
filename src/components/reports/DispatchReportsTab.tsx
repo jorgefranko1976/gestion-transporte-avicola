@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -107,7 +108,7 @@ const DispatchReportsTab = () => {
       const formattedDispatches = data.map(item => {
         let driverName = null;
         if (item.drivers && typeof item.drivers === 'object') {
-          driverName = `${item.drivers.first_name || ''} ${item.drivers.last_name || ''}`.trim();
+          driverName = `${item.drivers?.first_name || ''} ${item.drivers?.last_name || ''}`.trim();
         }
         
         return {

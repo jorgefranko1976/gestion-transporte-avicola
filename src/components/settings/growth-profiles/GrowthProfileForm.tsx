@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -60,12 +59,12 @@ const GrowthProfileForm = ({
       sex: profile?.sex || "mixto",
       isDefault: profile?.isDefault || false,
       active: profile?.active !== undefined ? profile.active : true,
-      dailyConsumption: profile?.dailyConsumption || defaultDailyConsumption,
+      dailyConsumption: profile?.dailyConsumption as DailyConsumption[] || defaultDailyConsumption,
     },
   });
 
   const handleUpdateDailyConsumption = (updatedItems: DailyConsumption[]) => {
-    form.setValue("dailyConsumption", updatedItems);
+    form.setValue("dailyConsumption", updatedItems as DailyConsumption[]);
   };
 
   const onSubmit = (data: GrowthProfileFormValues) => {
