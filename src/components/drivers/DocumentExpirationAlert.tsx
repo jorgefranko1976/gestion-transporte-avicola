@@ -21,9 +21,7 @@ const DocumentExpirationAlert = () => {
         .select(`
           soat_expiration,
           technical_inspection_expiration,
-          drivers!inner (
-            license_expiration
-          )
+          drivers(license_expiration)
         `)
         .not('soat_expiration', 'is', null)
         .not('technical_inspection_expiration', 'is', null)
@@ -40,7 +38,10 @@ const DocumentExpirationAlert = () => {
       vehicleData?.forEach(vehicle => {
         const soatExp = new Date(vehicle.soat_expiration!);
         const techExp = new Date(vehicle.technical_inspection_expiration!);
-        const licenseExp = new Date(vehicle.drivers.license_expiration!);
+        
+        // Accedemos correctamente a la licencia del conductor
+        const driver = vehicle.drivers as unknown as { license_expiration: string };
+        const licenseExp = new Date(driver.license_expiration);
 
         const checkExpiration = (date: Date, type: string) => {
           const diffTime = date.getTime() - today.getTime();
