@@ -2,98 +2,87 @@
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import PageTransition from './transitions/PageTransition';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from 'sonner';
-import { Label } from '@/components/ui/label';
 
 interface LoginFormProps {
   className?: string;
 }
 
 export const LoginForm = ({ className }: LoginFormProps) => {
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginError, setLoginError] = useState('');
-  
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoginError('');
+    setError('');
     
-    if (!loginEmail || !loginPassword) {
-      setLoginError('Por favor, complete todos los campos');
+    if (!username || !password) {
+      setError('Por favor, complete todos los campos');
       return;
     }
     
-    try {
-      console.log("Attempting login with:", { email: loginEmail });
-      const success = await login(loginEmail, loginPassword);
-      
-      if (success) {
-        toast.success('Inicio de sesión exitoso');
-        // Redirect is handled in the Login component
-      } else {
-        console.error("Login failed but no error was thrown");
-        setLoginError('Credenciales incorrectas');
-      }
-    } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      setLoginError('Error al iniciar sesión. Por favor, intente de nuevo.');
+    const success = await login(username, password);
+    
+    if (success) {
+      // Redirect based on role
+      const userRole = username.includes('coord') ? 'coordinator' : 'driver';
+      navigate(userRole === 'coordinator' ? '/coordinator' : '/driver');
+    } else {
+      setError('Credenciales inválidas. Inténtelo de nuevo.');
     }
   };
 
   return (
     <PageTransition>
-      <div className={cn('max-w-md w-full mx-auto bg-background', className)}>
+      <div className={cn('max-w-md w-full mx-auto', className)}>
         <div className="glass-morphism rounded-2xl p-8 shadow-subtle">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold">Sistema de Transporte</h2>
+            <h2 className="text-2xl font-bold">Iniciar Sesión</h2>
             <p className="text-muted-foreground mt-2">
-              Acceda al sistema con sus credenciales
+              Ingrese sus credenciales para acceder al sistema
             </p>
           </div>
           
-          <form onSubmit={handleLogin} className="space-y-6">
-            {loginError && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
               <div className="p-3 bg-destructive/10 text-destructive rounded-lg border border-destructive/20 flex items-center gap-2 text-sm">
                 <AlertCircle className="w-4 h-4" />
-                <span>{loginError}</span>
+                <span>{error}</span>
               </div>
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Correo Electrónico
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                className="w-full"
-                placeholder="correo@ejemplo.com"
-                autoComplete="email"
-                disabled={isLoading}
+              <label htmlFor="username" className="text-sm font-medium">
+                Usuario
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-2 border border-input rounded-lg bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 ease-apple"
+                placeholder="Ingrese su nombre de usuario"
+                autoComplete="username"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
+              <label htmlFor="password" className="text-sm font-medium">
                 Contraseña
-              </Label>
-              <Input
+              </label>
+              <input
                 id="password"
                 type="password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                className="w-full"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-input rounded-lg bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 ease-apple"
                 placeholder="Ingrese su contraseña"
                 autoComplete="current-password"
-                disabled={isLoading}
               />
             </div>
             
@@ -117,10 +106,10 @@ export const LoginForm = ({ className }: LoginFormProps) => {
               </button>
             </div>
             
-            <Button
+            <button
               type="submit"
               disabled={isLoading}
-              className="w-full"
+              className="w-full bg-primary text-white py-2.5 rounded-lg font-medium transition-all duration-300 ease-apple hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed btn-hover"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -130,7 +119,19 @@ export const LoginForm = ({ className }: LoginFormProps) => {
               ) : (
                 "Iniciar Sesión"
               )}
-            </Button>
+            </button>
+            
+            <div className="text-center text-sm text-muted-foreground">
+              <p>
+                Para propósitos de demo:
+              </p>
+              <p className="mt-1">
+                Usar <span className="font-mono bg-muted px-1 py-0.5 rounded">conductor</span> o <span className="font-mono bg-muted px-1 py-0.5 rounded">coordinador</span> como usuario
+              </p>
+              <p className="mt-1">
+                Cualquier valor para la contraseña
+              </p>
+            </div>
           </form>
         </div>
       </div>

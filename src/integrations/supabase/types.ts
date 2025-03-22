@@ -585,45 +585,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_profiles: {
-        Row: {
-          active: boolean
-          created_at: string
-          first_name: string
-          id: string
-          identification_number: string
-          identification_type: string
-          last_name: string
-          phone: string | null
-          role: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          first_name: string
-          id: string
-          identification_number: string
-          identification_type: string
-          last_name: string
-          phone?: string | null
-          role: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          first_name?: string
-          id?: string
-          identification_number?: string
-          identification_type?: string
-          last_name?: string
-          phone?: string | null
-          role?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       vehicle_documents: {
         Row: {
           created_at: string
