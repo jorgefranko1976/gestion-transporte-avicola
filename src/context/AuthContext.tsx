@@ -38,14 +38,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Configurar el listener de cambios de autenticación
+    console.log('AuthProvider: Configurando listener de autenticación');
+    
+    // Primero configurar el listener de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log('Auth state changed:', event);
         setSession(currentSession);
         
         if (currentSession) {
-          await getUserProfile(currentSession.user);
+          try {
+            await getUserProfile(currentSession.user);
+          } catch (error) {
+            console.error('Error al obtener perfil después de cambio de estado:', error);
+            setUser(null);
+          }
         } else {
           setUser(null);
         }
@@ -54,14 +61,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Verificar sesión actual al cargar
+    // Después verificar la sesión actual
     const checkSession = async () => {
       try {
+        console.log('AuthProvider: Verificando sesión existente');
         const { data: { session: currentSession } } = await supabase.auth.getSession();
-        setSession(currentSession);
         
         if (currentSession) {
+          console.log('AuthProvider: Sesión existente encontrada');
+          setSession(currentSession);
           await getUserProfile(currentSession.user);
+        } else {
+          console.log('AuthProvider: No hay sesión existente');
         }
       } catch (error) {
         console.error('Error al obtener la sesión:', error);
@@ -73,12 +84,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkSession();
 
     return () => {
+      console.log('AuthProvider: Limpiando suscripción');
       subscription.unsubscribe();
     };
   }, []);
 
   const getUserProfile = async (authUser: User) => {
     try {
+      console.log('Obteniendo perfil para usuario:', authUser.id);
       // Obtener el perfil del usuario desde la tabla user_profiles
       const { data, error } = await supabase
         .from('user_profiles')
@@ -87,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) {
+        console.error('Error al consultar el perfil:', error);
         throw error;
       }
 
@@ -101,6 +115,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setUser(userProfile);
         console.log('Usuario obtenido:', userProfile);
+      } else {
+        console.log('No se encontró perfil para el usuario:', authUser.id);
+        setUser(null);
       }
     } catch (error) {
       console.error('Error al obtener el perfil del usuario:', error);

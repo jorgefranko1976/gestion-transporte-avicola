@@ -2,10 +2,11 @@
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import PageTransition from './transitions/PageTransition';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
 
 interface LoginFormProps {
   className?: string;
@@ -15,25 +16,32 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, isLoading, user } = useAuth();
-  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login } = useAuth();
   const isMobile = useIsMobile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
     
-    if (!email || !password) {
-      setError('Por favor, complete todos los campos');
-      return;
-    }
-    
-    const success = await login(email, password);
-    
-    if (success) {
-      // La redirección se manejará en el componente Login.tsx basado en el rol del usuario
-    } else {
-      setError('Credenciales inválidas. Inténtelo de nuevo.');
+    try {
+      if (!email || !password) {
+        setError('Por favor, complete todos los campos');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const success = await login(email, password);
+      
+      if (!success) {
+        setError('Credenciales inválidas. Inténtelo de nuevo.');
+      }
+    } catch (err) {
+      console.error('Error en login:', err);
+      setError('Ocurrió un error al intentar iniciar sesión. Intente nuevamente.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -63,14 +71,15 @@ export const LoginForm = ({ className }: LoginFormProps) => {
               <label htmlFor="email" className="text-sm font-medium">
                 Correo Electrónico
               </label>
-              <input
+              <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-input rounded-lg bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 ease-apple"
+                className="w-full px-4 py-2"
                 placeholder="Ingrese su correo electrónico"
                 autoComplete="email"
+                disabled={isSubmitting}
               />
             </div>
             
@@ -78,14 +87,15 @@ export const LoginForm = ({ className }: LoginFormProps) => {
               <label htmlFor="password" className="text-sm font-medium">
                 Contraseña
               </label>
-              <input
+              <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-input rounded-lg bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 ease-apple"
+                className="w-full px-4 py-2"
                 placeholder="Ingrese su contraseña"
                 autoComplete="current-password"
+                disabled={isSubmitting}
               />
             </div>
             
@@ -109,12 +119,12 @@ export const LoginForm = ({ className }: LoginFormProps) => {
               </button>
             </div>
             
-            <button
+            <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="w-full bg-primary text-white py-2.5 rounded-lg font-medium transition-all duration-300 ease-apple hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed btn-hover"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Iniciando sesión...</span>
@@ -122,7 +132,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
               ) : (
                 "Iniciar Sesión"
               )}
-            </button>
+            </Button>
           </form>
         </div>
       </div>
