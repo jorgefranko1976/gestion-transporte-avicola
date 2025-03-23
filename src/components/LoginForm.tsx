@@ -3,7 +3,6 @@ import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import PageTransition from './transitions/PageTransition';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
@@ -32,6 +31,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
         return;
       }
       
+      console.log('Intentando iniciar sesión con:', email);
       const success = await login(email, password);
       
       if (!success) {

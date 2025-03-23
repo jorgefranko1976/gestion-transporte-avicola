@@ -36,69 +36,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [authInitialized, setAuthInitialized] = useState(false);
 
-  // Configurar el listener de autenticación y verificar la sesión una sola vez al inicio
-  useEffect(() => {
-    console.log('Inicializando autenticación...');
-    
-    const initAuth = async () => {
-      // Primero configurar la suscripción al cambio de estado de autenticación
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, currentSession) => {
-          console.log('Cambio de estado de autenticación:', event);
-          
-          setSession(currentSession);
-          
-          if (currentSession) {
-            try {
-              await getUserProfile(currentSession.user);
-            } catch (error) {
-              console.error('Error al obtener perfil en cambio de estado:', error);
-              setUser(null);
-            }
-          } else {
-            setUser(null);
-          }
-          
-          // Si es la primera carga, marcar como inicializado
-          if (!authInitialized) {
-            setIsLoading(false);
-            setAuthInitialized(true);
-          }
-        }
-      );
-
-      // Después verificar la sesión existente
-      try {
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
-        
-        if (existingSession) {
-          console.log('Sesión existente encontrada');
-          setSession(existingSession);
-          await getUserProfile(existingSession.user);
-        } else {
-          console.log('No hay sesión existente');
-        }
-        
-        // Marcar la autenticación como inicializada y terminar la carga
-        setIsLoading(false);
-        setAuthInitialized(true);
-      } catch (error) {
-        console.error('Error al verificar sesión:', error);
-        setIsLoading(false);
-        setAuthInitialized(true);
-      }
-
-      return () => {
-        console.log('Limpiando suscripción de autenticación');
-        subscription.unsubscribe();
-      };
-    };
-
-    initAuth();
-  }, []);
-
+  // Función para obtener el perfil del usuario
   const getUserProfile = async (authUser: User) => {
     try {
       console.log('Obteniendo perfil para usuario:', authUser.id);
@@ -112,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error al consultar el perfil:', error);
-        throw error;
+        return null;
       }
 
       if (data) {
@@ -120,21 +59,70 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const userProfile: UserProfile = {
           id: data.id,
           name: `${data.first_name} ${data.last_name}`,
-          role: data.role as UserRole, // Asegurarnos de que se trate como UserRole
+          role: data.role as UserRole,
           email: data.email || authUser.email
         };
         
-        setUser(userProfile);
         console.log('Usuario obtenido:', userProfile);
+        return userProfile;
       } else {
         console.log('No se encontró perfil para el usuario:', authUser.id);
-        setUser(null);
+        return null;
       }
     } catch (error) {
       console.error('Error al obtener el perfil del usuario:', error);
-      setUser(null);
+      return null;
     }
   };
+
+  // Inicializar la autenticación
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        setIsLoading(true);
+        console.log('Inicializando autenticación...');
+        
+        // Configurar el listener de cambios de autenticación
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, currentSession) => {
+            console.log('Cambio de estado de autenticación:', event);
+            setSession(currentSession);
+            
+            if (currentSession?.user) {
+              const profile = await getUserProfile(currentSession.user);
+              setUser(profile);
+            } else {
+              setUser(null);
+            }
+          }
+        );
+        
+        // Verificar si hay una sesión existente
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        setSession(existingSession);
+        
+        if (existingSession?.user) {
+          console.log('Sesión existente encontrada');
+          const profile = await getUserProfile(existingSession.user);
+          setUser(profile);
+        } else {
+          console.log('No hay sesión existente');
+        }
+        
+        // Terminar la carga
+        setIsLoading(false);
+        
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Error al inicializar autenticación:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    initAuth();
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     console.log('Intentando iniciar sesión con:', email);
