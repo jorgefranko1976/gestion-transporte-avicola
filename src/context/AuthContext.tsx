@@ -95,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const userProfile: UserProfile = {
           id: data.id,
           name: `${data.first_name} ${data.last_name}`,
-          role: data.role,
+          role: data.role as UserRole, // Aquí hacemos un cast explícito a UserRole
           email: data.email || authUser.email
         };
         
