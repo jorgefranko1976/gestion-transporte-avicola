@@ -12,10 +12,10 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ className }: LoginFormProps) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -23,17 +23,15 @@ export const LoginForm = ({ className }: LoginFormProps) => {
     e.preventDefault();
     setError('');
     
-    if (!username || !password) {
+    if (!email || !password) {
       setError('Por favor, complete todos los campos');
       return;
     }
     
-    const success = await login(username, password);
+    const success = await login(email, password);
     
     if (success) {
-      // Redirect based on role
-      const userRole = username.includes('coord') ? 'coordinator' : 'driver';
-      navigate(userRole === 'coordinator' ? '/coordinator' : '/driver');
+      // La redirección se manejará en el componente Login.tsx basado en el rol del usuario
     } else {
       setError('Credenciales inválidas. Inténtelo de nuevo.');
     }
@@ -62,17 +60,17 @@ export const LoginForm = ({ className }: LoginFormProps) => {
             )}
             
             <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium">
-                Usuario
+              <label htmlFor="email" className="text-sm font-medium">
+                Correo Electrónico
               </label>
               <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-input rounded-lg bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 ease-apple"
-                placeholder="Ingrese su nombre de usuario"
-                autoComplete="username"
+                placeholder="Ingrese su correo electrónico"
+                autoComplete="email"
               />
             </div>
             
@@ -125,18 +123,6 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                 "Iniciar Sesión"
               )}
             </button>
-            
-            <div className="text-center text-sm text-muted-foreground">
-              <p>
-                Para propósitos de demo:
-              </p>
-              <p className="mt-1">
-                Usar <span className="font-mono bg-muted px-1 py-0.5 rounded">conductor</span> o <span className="font-mono bg-muted px-1 py-0.5 rounded">coordinador</span> como usuario
-              </p>
-              <p className="mt-1">
-                Cualquier valor para la contraseña
-              </p>
-            </div>
           </form>
         </div>
       </div>

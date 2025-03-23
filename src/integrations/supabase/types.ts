@@ -589,6 +589,7 @@ export type Database = {
         Row: {
           active: boolean
           created_at: string
+          email: string | null
           first_name: string
           id: string
           identification_number: string
@@ -601,6 +602,7 @@ export type Database = {
         Insert: {
           active?: boolean
           created_at?: string
+          email?: string | null
           first_name: string
           id: string
           identification_number: string
@@ -613,6 +615,7 @@ export type Database = {
         Update: {
           active?: boolean
           created_at?: string
+          email?: string | null
           first_name?: string
           id?: string
           identification_number?: string
@@ -871,7 +874,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "coordinator" | "driver" | "owner"
     }
     CompositeTypes: {
       [_ in never]: never
