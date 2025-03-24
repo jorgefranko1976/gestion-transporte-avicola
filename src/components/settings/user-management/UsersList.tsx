@@ -1,14 +1,69 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { UserProfile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Plus, Search, Trash2, Loader2 } from 'lucide-react';
+import { Edit, Plus, Search, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UserForm from './UserForm';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+
+const mockUsers: UserProfile[] = [
+  {
+    id: '1',
+    email: 'admin@transportapp.com',
+    firstName: 'Admin',
+    lastName: 'Principal',
+    role: 'admin',
+    identificationType: 'CC',
+    identificationNumber: '123456789',
+    phone: '3001234567',
+    active: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '2',
+    email: 'coordinador@transportapp.com',
+    firstName: 'Coordinador',
+    lastName: 'Despachos',
+    role: 'coordinator',
+    identificationType: 'CC',
+    identificationNumber: '987654321',
+    phone: '3007654321',
+    active: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '3',
+    email: 'conductor@transportapp.com',
+    firstName: 'Juan',
+    lastName: 'Conductor',
+    role: 'driver',
+    identificationType: 'CC',
+    identificationNumber: '1122334455',
+    phone: '3009876543',
+    active: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    driverId: 'driver-123',
+  },
+  {
+    id: '4',
+    email: 'propietario@transportapp.com',
+    firstName: 'Pedro',
+    lastName: 'Propietario',
+    role: 'owner',
+    identificationType: 'CC',
+    identificationNumber: '5544332211',
+    phone: '3001234567',
+    active: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ownedVehicleIds: ['vehicle-1', 'vehicle-2'],
+  },
+];
 
 const getRoleBadgeColor = (role: string) => {
   switch(role) {
@@ -31,118 +86,33 @@ const getRoleDisplayName = (role: string) => {
 };
 
 const UsersList = () => {
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [users, setUsers] = useState<UserProfile[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*');
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        const mappedUsers: UserProfile[] = data.map(user => ({
-          id: user.id,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          email: user.email || '',
-          role: user.role,
-          identificationType: user.identification_type,
-          identificationNumber: user.identification_number,
-          phone: user.phone || '',
-          active: user.active,
-          createdAt: new Date(user.created_at),
-          updatedAt: new Date(user.updated_at)
-        }));
-        
-        setUsers(mappedUsers);
-      }
-    } catch (error) {
-      console.error('Error al obtener usuarios:', error);
-      toast.error('Error al cargar los usuarios');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const filteredUsers = users.filter(user => 
     user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.identificationNumber.includes(searchTerm)
   );
 
-  const handleSaveUser = async (userData: UserProfile) => {
+  const handleSaveUser = (userData: UserProfile) => {
     if (selectedUser) {
-      // Actualizar usuario existente
-      try {
-        const { error } = await supabase
-          .from('user_profiles')
-          .update({
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            email: userData.email,
-            role: userData.role,
-            identification_type: userData.identificationType,
-            identification_number: userData.identificationNumber,
-            phone: userData.phone || null,
-            active: userData.active,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', userData.id);
-
-        if (error) throw error;
-        
-        // Actualizar estado local
-        setUsers(users.map(user => user.id === userData.id ? userData : user));
-        toast.success('Usuario actualizado correctamente');
-      } catch (error) {
-        console.error('Error al actualizar usuario:', error);
-        toast.error('Error al actualizar el usuario');
-      }
+      // Update existing user
+      setUsers(users.map(user => user.id === userData.id ? userData : user));
+    } else {
+      // Add new user
+      setUsers([...users, { ...userData, id: `user-${Date.now()}`, createdAt: new Date(), updatedAt: new Date() }]);
     }
-    
-    // Para nuevos usuarios, no es necesario hacer nada aquí porque ya se 
-    // registraron a través del signUp en UserForm
-    
     setIsAddUserDialogOpen(false);
     setSelectedUser(null);
-    fetchUsers(); // Refrescar la lista para asegurar que tenemos los datos actualizados
   };
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = (userId: string) => {
     if (confirm('¿Está seguro de eliminar este usuario?')) {
-      try {
-        // No eliminamos usuarios realmente, solo los marcamos como inactivos
-        const { error } = await supabase
-          .from('user_profiles')
-          .update({ active: false })
-          .eq('id', userId);
-
-        if (error) throw error;
-        
-        // Actualizar estado local
-        setUsers(users.map(user => 
-          user.id === userId ? { ...user, active: false } : user
-        ));
-        
-        toast.success('Usuario desactivado correctamente');
-      } catch (error) {
-        console.error('Error al desactivar usuario:', error);
-        toast.error('Error al desactivar el usuario');
-      }
+      setUsers(users.filter(user => user.id !== userId));
     }
   };
 
@@ -150,15 +120,6 @@ const UsersList = () => {
     setSelectedUser(user);
     setIsAddUserDialogOpen(true);
   };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Cargando usuarios...</span>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

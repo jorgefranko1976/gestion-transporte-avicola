@@ -1,14 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { UserProfile, UserRole } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuth } from '@/context/AuthContext';
 import {
   Form,
   FormControl,
@@ -24,24 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Switch,
-} from '@/components/ui/switch';
-
-// Esquema de validación con zod
-const userFormSchema = z.object({
-  firstName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
-  email: z.string().email('Correo electrónico inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional(),
-  role: z.enum(['admin', 'coordinator', 'driver', 'owner']),
-  identificationType: z.enum(['CC', 'CE', 'NIT']),
-  identificationNumber: z.string().min(3, 'Número de identificación inválido'),
-  phone: z.string().optional(),
-  active: z.boolean(),
-});
-
-type UserFormValues = z.infer<typeof userFormSchema>;
+import { Switch } from '@/components/ui/switch';
 
 interface UserFormProps {
   initialData?: UserProfile;
@@ -50,81 +28,29 @@ interface UserFormProps {
 }
 
 const UserForm: React.FC<UserFormProps> = ({ initialData, onSave, onCancel }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { signUp } = useAuth();
-
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: initialData 
-      ? {
-          firstName: initialData.firstName,
-          lastName: initialData.lastName,
-          email: initialData.email ?? '',
-          role: initialData.role as UserRole,
-          identificationType: initialData.identificationType as 'CC' | 'CE' | 'NIT',
-          identificationNumber: initialData.identificationNumber,
-          phone: initialData.phone ?? '',
-          active: initialData.active,
-        } 
-      : {
-          firstName: '',
-          lastName: '',
-          email: '',
-          password: '',
-          role: 'driver',
-          identificationType: 'CC',
-          identificationNumber: '',
-          phone: '',
-          active: true,
-        },
+  const form = useForm<UserProfile>({
+    defaultValues: initialData || {
+      email: '',
+      firstName: '',
+      lastName: '',
+      role: 'driver',
+      identificationType: 'CC',
+      identificationNumber: '',
+      phone: '',
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      id: '',
+    },
   });
 
-  const handleSubmit = async (data: UserFormValues) => {
-    setIsSubmitting(true);
-    
-    try {
-      // Si es un nuevo usuario y tenemos contraseña
-      if (!initialData && data.password) {
-        const result = await signUp({
-          email: data.email,
-          password: data.password,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          role: data.role as UserRole,
-          identificationType: data.identificationType,
-          identificationNumber: data.identificationNumber,
-          phone: data.phone
-        });
-
-        if (!result.success) {
-          toast.error(result.error || 'Error al crear usuario');
-          setIsSubmitting(false);
-          return;
-        }
-      }
-      
-      // Siempre llamamos a onSave para actualizar la UI
-      const userData: UserProfile = {
-        id: initialData?.id || `new-${Date.now()}`, // En realidad su ID será asignada por Supabase
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        role: data.role,
-        identificationType: data.identificationType,
-        identificationNumber: data.identificationNumber,
-        phone: data.phone || '',
-        active: data.active,
-        createdAt: initialData?.createdAt || new Date(),
-        updatedAt: new Date(),
-      };
-      
-      onSave(userData);
-    } catch (error) {
-      console.error('Error al guardar usuario:', error);
-      toast.error('Ha ocurrido un error al guardar el usuario');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleSubmit = (data: UserProfile) => {
+    onSave({
+      ...data,
+      id: initialData?.id || '',
+      createdAt: initialData?.createdAt || new Date(),
+      updatedAt: new Date(),
+    });
   };
 
   return (
@@ -172,27 +98,6 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSave, onCancel }) =>
             </FormItem>
           )}
         />
-
-        {/* Campo de contraseña solo para nuevos usuarios */}
-        {!initialData && (
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contraseña</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="password" 
-                    placeholder="Mínimo 6 caracteres" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
@@ -299,18 +204,11 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSave, onCancel }) =>
         />
 
         <div className="flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>{initialData ? 'Actualizando...' : 'Creando...'}</span>
-              </div>
-            ) : (
-              initialData ? 'Actualizar Usuario' : 'Crear Usuario'
-            )}
+          <Button type="submit">
+            {initialData ? 'Actualizar Usuario' : 'Crear Usuario'}
           </Button>
         </div>
       </form>
