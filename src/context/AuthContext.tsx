@@ -42,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [initializationComplete, setInitializationComplete] = useState(false);
 
   // Función para obtener el perfil del usuario desde Supabase
   const fetchUserProfile = async (userId: string) => {
@@ -53,13 +54,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) {
-        console.error('Error fetching user profile:', error);
+        console.error('Error al obtener perfil de usuario:', error);
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Exception fetching user profile:', error);
+      console.error('Excepción al obtener perfil de usuario:', error);
       return null;
     }
   };
@@ -76,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = await fetchUserProfile(currentSession.user.id);
       
       if (!profile) {
-        console.warn('No profile found for user', currentSession.user.id);
+        console.warn('No se encontró perfil para el usuario', currentSession.user.id);
         setUser(null);
         setIsLoading(false);
         return;
@@ -96,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
     } catch (error) {
-      console.error('Error setting user state:', error);
+      console.error('Error al establecer estado de usuario:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -104,28 +105,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    console.log('Setting up auth state listener');
+    console.log('Configurando listener de estado de autenticación');
+    let isSubscribed = true;
+    
     // Configurar el listener de cambio de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        console.log('Auth state changed', event, currentSession?.user?.id);
-        setSession(currentSession);
-        await updateUserState(currentSession);
+        console.log('Estado de autenticación cambiado', event, currentSession?.user?.id);
+        
+        if (isSubscribed) {
+          setSession(currentSession);
+          await updateUserState(currentSession);
+          if (!initializationComplete) setInitializationComplete(true);
+        }
       }
     );
 
     // Obtener la sesión actual
     supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
-      console.log('Got current session', currentSession?.user?.id);
-      setSession(currentSession);
-      await updateUserState(currentSession);
+      console.log('Sesión actual obtenida', currentSession?.user?.id);
+      
+      if (isSubscribed) {
+        setSession(currentSession);
+        await updateUserState(currentSession);
+        setInitializationComplete(true);
+      }
     }).catch(error => {
-      console.error('Error getting session:', error);
-      setIsLoading(false);
+      console.error('Error al obtener sesión:', error);
+      if (isSubscribed) {
+        setIsLoading(false);
+        setInitializationComplete(true);
+      }
     });
 
     return () => {
-      console.log('Cleaning up auth state listener');
+      console.log('Limpiando listener de estado de autenticación');
+      isSubscribed = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -134,24 +149,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      console.log('Attempting login for', email);
+      console.log('Intentando iniciar sesión para', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
-        console.error('Login error:', error.message);
+        console.error('Error de inicio de sesión:', error.message);
         toast.error(error.message);
         setIsLoading(false);
         return false;
       }
 
-      console.log('Login successful', data.session?.user?.id);
-      // La actualización del estado del usuario se maneja en el listener
+      console.log('Inicio de sesión exitoso', data.session?.user?.id);
       return true;
     } catch (error) {
-      console.error('Login exception:', error);
+      console.error('Excepción de inicio de sesión:', error);
       toast.error('Error al iniciar sesión');
       setIsLoading(false);
       return false;
@@ -213,19 +227,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     setIsLoading(true);
     try {
-      console.log('Attempting logout');
+      console.log('Intentando cerrar sesión');
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('Logout error:', error.message);
+        console.error('Error al cerrar sesión:', error.message);
         toast.error('Error al cerrar sesión');
       } else {
         toast.success('Sesión cerrada correctamente');
-        console.log('Logout successful');
+        console.log('Sesión cerrada correctamente');
         setUser(null);
         setSession(null);
       }
     } catch (error) {
-      console.error('Logout exception:', error);
+      console.error('Excepción al cerrar sesión:', error);
       toast.error('Error al cerrar sesión');
     } finally {
       setIsLoading(false);
@@ -234,7 +248,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={{ user, session, isLoading, login, signup, logout }}>
-      {children}
+      {initializationComplete ? children : 
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4 text-lg">Inicializando aplicación...</p>
+          </div>
+        </div>
+      }
     </AuthContext.Provider>
   );
 };
@@ -242,7 +263,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
   return context;
 };

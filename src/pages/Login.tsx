@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 
 const Login = () => {
   const { user, isLoading } = useAuth();
@@ -13,12 +12,13 @@ const Login = () => {
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    // Si ya está autenticado, redirigir al dashboard correspondiente
+    // Solo intentar redirección si tenemos un usuario autenticado
     if (user && !isLoading) {
-      console.log('User authenticated, redirecting to dashboard', user.role);
+      console.log('Usuario autenticado, redirigiendo al dashboard', user.role);
       setRedirecting(true);
       
-      try {
+      // Usar un timeout para evitar problemas de redirección inmediata
+      const redirectTimer = setTimeout(() => {
         if (user.role === 'coordinator' || user.role === 'admin') {
           navigate('/coordinator');
         } else if (user.role === 'driver') {
@@ -26,26 +26,36 @@ const Login = () => {
         } else if (user.role === 'owner') {
           navigate('/owner');
         } else {
-          navigate('/driver'); // Default fallback
+          navigate('/driver'); // Opción predeterminada
         }
-      } catch (error) {
-        console.error('Error during redirect:', error);
-        toast.error('Error al redirigir. Por favor, intente nuevamente.');
-        setRedirecting(false);
-      }
+      }, 100);
+      
+      return () => clearTimeout(redirectTimer);
     }
   }, [user, isLoading, navigate]);
 
-  if (isLoading || redirecting) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
-            <p className="mt-4 text-lg">
-              {isLoading ? "Cargando..." : "Redirigiendo..."}
-            </p>
+            <p className="mt-4 text-lg">Cargando...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (redirecting) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
+            <p className="mt-4 text-lg">Redirigiendo...</p>
           </div>
         </div>
       </div>

@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -44,24 +43,29 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isLoggingIn) return; // Prevenir múltiples envíos
+    if (isLoggingIn || isLoading) return; // Prevenir múltiples envíos
     
     setLoginError('');
     setIsLoggingIn(true);
     
     try {
-      if (!email || !password) {
-        setLoginError('Por favor, complete todos los campos');
+      if (!email.trim()) {
+        setLoginError('Por favor, ingrese su correo electrónico');
+        setIsLoggingIn(false);
+        return;
+      }
+      
+      if (!password) {
+        setLoginError('Por favor, ingrese su contraseña');
         setIsLoggingIn(false);
         return;
       }
       
       console.log("Iniciando sesión con:", email);
-      const success = await login(email, password);
+      const success = await login(email.trim(), password);
       
       if (!success) {
         setLoginError('Credenciales inválidas. Inténtelo de nuevo.');
-        toast.error('Error al iniciar sesión');
       } else {
         toast.success('Inicio de sesión exitoso');
       }
@@ -77,14 +81,39 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isRegistering) return; // Prevenir múltiples envíos
+    if (isRegistering || isLoading) return; // Prevenir múltiples envíos
     
     setRegisterError('');
     setIsRegistering(true);
     
     try {
-      if (!registerEmail || !registerPassword || !confirmPassword || !firstName || !lastName) {
-        setRegisterError('Por favor, complete todos los campos obligatorios');
+      // Validación de campos
+      if (!registerEmail.trim()) {
+        setRegisterError('Por favor, ingrese un correo electrónico');
+        setIsRegistering(false);
+        return;
+      }
+      
+      if (!registerPassword) {
+        setRegisterError('Por favor, ingrese una contraseña');
+        setIsRegistering(false);
+        return;
+      }
+      
+      if (!confirmPassword) {
+        setRegisterError('Por favor, confirme su contraseña');
+        setIsRegistering(false);
+        return;
+      }
+      
+      if (!firstName.trim()) {
+        setRegisterError('Por favor, ingrese su nombre');
+        setIsRegistering(false);
+        return;
+      }
+      
+      if (!lastName.trim()) {
+        setRegisterError('Por favor, ingrese su apellido');
         setIsRegistering(false);
         return;
       }
@@ -103,11 +132,11 @@ export const LoginForm = ({ className }: LoginFormProps) => {
       
       console.log("Registrando usuario:", registerEmail);
       const success = await signup(
-        registerEmail, 
+        registerEmail.trim(), 
         registerPassword, 
         {
-          first_name: firstName,
-          last_name: lastName,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
           role: 'driver' // Por defecto, todos los nuevos usuarios son conductores
         }
       );
@@ -118,6 +147,13 @@ export const LoginForm = ({ className }: LoginFormProps) => {
         setEmail(registerEmail);
         setPassword('');
         toast.success('Registro exitoso. Ahora puede iniciar sesión.');
+        
+        // Limpiar los campos de registro
+        setRegisterEmail('');
+        setRegisterPassword('');
+        setConfirmPassword('');
+        setFirstName('');
+        setLastName('');
       } else {
         toast.error('No se pudo completar el registro. Inténtelo nuevamente.');
       }
@@ -168,7 +204,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Ingrese su correo electrónico"
                     autoComplete="email"
-                    disabled={isLoggingIn}
+                    disabled={isLoggingIn || isLoading}
                   />
                 </div>
                 
@@ -184,7 +220,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Ingrese su contraseña"
                     autoComplete="current-password"
-                    disabled={isLoggingIn}
+                    disabled={isLoggingIn || isLoading}
                   />
                 </div>
                 
@@ -246,7 +282,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                       onChange={(e) => setFirstName(e.target.value)}
                       className="w-full"
                       placeholder="Nombre"
-                      disabled={isRegistering}
+                      disabled={isRegistering || isLoading}
                     />
                   </div>
                   
@@ -261,7 +297,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                       onChange={(e) => setLastName(e.target.value)}
                       className="w-full"
                       placeholder="Apellido"
-                      disabled={isRegistering}
+                      disabled={isRegistering || isLoading}
                     />
                   </div>
                 </div>
@@ -278,7 +314,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Ingrese su correo electrónico"
                     autoComplete="email"
-                    disabled={isRegistering}
+                    disabled={isRegistering || isLoading}
                   />
                 </div>
                 
@@ -294,7 +330,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Contraseña (mínimo 6 caracteres)"
                     autoComplete="new-password"
-                    disabled={isRegistering}
+                    disabled={isRegistering || isLoading}
                   />
                 </div>
                 
@@ -310,7 +346,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Confirmar contraseña"
                     autoComplete="new-password"
-                    disabled={isRegistering}
+                    disabled={isRegistering || isLoading}
                   />
                 </div>
                 
