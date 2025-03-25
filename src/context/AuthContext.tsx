@@ -45,18 +45,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Función para obtener el perfil del usuario desde Supabase
   const fetchUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
-      console.error('Error fetching user profile:', error);
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Exception fetching user profile:', error);
       return null;
     }
-
-    return data;
   };
 
   // Actualizar el estado del usuario con los datos de la sesión y el perfil
@@ -70,18 +75,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const profile = await fetchUserProfile(currentSession.user.id);
       
+      if (!profile) {
+        console.warn('No profile found for user', currentSession.user.id);
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+      
       setUser({
         id: currentSession.user.id,
         email: currentSession.user.email,
-        name: profile ? `${profile.first_name} ${profile.last_name}` : currentSession.user.email || 'Usuario',
-        role: (profile?.role || 'driver') as UserRole,
-        profile: profile ? {
+        name: `${profile.first_name} ${profile.last_name}`,
+        role: (profile.role || 'driver') as UserRole,
+        profile: {
           first_name: profile.first_name,
           last_name: profile.last_name,
           phone: profile.phone,
           identification_type: profile.identification_type,
           identification_number: profile.identification_number
-        } : undefined
+        }
       });
     } catch (error) {
       console.error('Error setting user state:', error);
@@ -92,9 +104,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    console.log('Setting up auth state listener');
     // Configurar el listener de cambio de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_, currentSession) => {
+      async (event, currentSession) => {
+        console.log('Auth state changed', event, currentSession?.user?.id);
         setSession(currentSession);
         await updateUserState(currentSession);
       }
@@ -102,17 +116,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Obtener la sesión actual
     supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
+      console.log('Got current session', currentSession?.user?.id);
       setSession(currentSession);
       await updateUserState(currentSession);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('Cleaning up auth state listener');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
     try {
+      console.log('Attempting login for', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -125,11 +144,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
 
-      // Actualizar el estado del usuario
-      await updateUserState(data.session);
+      console.log('Login successful', data.session?.user?.id);
+      // La actualización del estado del usuario se maneja en el listener
       return true;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login exception:', error);
       toast.error('Error al iniciar sesión');
       setIsLoading(false);
       return false;
@@ -151,6 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
+      console.log('Attempting signup for', email);
       // Crear usuario en Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -176,10 +196,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Si es exitoso, mostrar mensaje de éxito
       toast.success('Usuario registrado correctamente. Ahora puedes iniciar sesión.');
+      console.log('Signup successful', data.user?.id);
       setIsLoading(false);
       return true;
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error('Signup exception:', error);
       toast.error('Error al registrar usuario');
       setIsLoading(false);
       return false;
@@ -187,14 +208,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Logout error:', error.message);
+    try {
+      console.log('Attempting logout');
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Logout error:', error.message);
+        toast.error('Error al cerrar sesión');
+      } else {
+        toast.success('Sesión cerrada correctamente');
+        console.log('Logout successful');
+        setUser(null);
+        setSession(null);
+      }
+    } catch (error) {
+      console.error('Logout exception:', error);
       toast.error('Error al cerrar sesión');
-    } else {
-      toast.success('Sesión cerrada correctamente');
-      setUser(null);
-      setSession(null);
     }
   };
 

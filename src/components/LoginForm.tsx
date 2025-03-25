@@ -20,6 +20,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   
   // Register state
   const [registerEmail, setRegisterEmail] = useState('');
@@ -28,6 +29,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [registerError, setRegisterError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
   
   const { login, signup, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -35,55 +37,73 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
+    setIsLoggingIn(true);
     
-    if (!email || !password) {
-      setLoginError('Por favor, complete todos los campos');
-      return;
-    }
-    
-    const success = await login(email, password);
-    
-    if (success) {
-      // Redirigir basado en el rol se manejará en los useEffect del componente Login
-    } else {
-      setLoginError('Credenciales inválidas. Inténtelo de nuevo.');
+    try {
+      if (!email || !password) {
+        setLoginError('Por favor, complete todos los campos');
+        setIsLoggingIn(false);
+        return;
+      }
+      
+      const success = await login(email, password);
+      
+      if (!success) {
+        setLoginError('Credenciales inválidas. Inténtelo de nuevo.');
+      }
+    } catch (error) {
+      console.error('Error durante el inicio de sesión:', error);
+      setLoginError('Error al iniciar sesión. Inténtelo de nuevo más tarde.');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegisterError('');
+    setIsRegistering(true);
     
-    if (!registerEmail || !registerPassword || !confirmPassword || !firstName || !lastName) {
-      setRegisterError('Por favor, complete todos los campos obligatorios');
-      return;
-    }
-    
-    if (registerPassword !== confirmPassword) {
-      setRegisterError('Las contraseñas no coinciden');
-      return;
-    }
-    
-    if (registerPassword.length < 6) {
-      setRegisterError('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    
-    const success = await signup(
-      registerEmail, 
-      registerPassword, 
-      {
-        first_name: firstName,
-        last_name: lastName,
-        role: 'driver' // Por defecto, todos los nuevos usuarios son conductores
+    try {
+      if (!registerEmail || !registerPassword || !confirmPassword || !firstName || !lastName) {
+        setRegisterError('Por favor, complete todos los campos obligatorios');
+        setIsRegistering(false);
+        return;
       }
-    );
-    
-    if (success) {
-      // Cambiar a la pestaña de login después de un registro exitoso
-      setActiveTab('login');
-      setEmail(registerEmail);
-      setPassword('');
+      
+      if (registerPassword !== confirmPassword) {
+        setRegisterError('Las contraseñas no coinciden');
+        setIsRegistering(false);
+        return;
+      }
+      
+      if (registerPassword.length < 6) {
+        setRegisterError('La contraseña debe tener al menos 6 caracteres');
+        setIsRegistering(false);
+        return;
+      }
+      
+      const success = await signup(
+        registerEmail, 
+        registerPassword, 
+        {
+          first_name: firstName,
+          last_name: lastName,
+          role: 'driver' // Por defecto, todos los nuevos usuarios son conductores
+        }
+      );
+      
+      if (success) {
+        // Cambiar a la pestaña de login después de un registro exitoso
+        setActiveTab('login');
+        setEmail(registerEmail);
+        setPassword('');
+      }
+    } catch (error) {
+      console.error('Error durante el registro:', error);
+      setRegisterError('Error al registrar usuario. Inténtelo de nuevo más tarde.');
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -125,6 +145,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Ingrese su correo electrónico"
                     autoComplete="email"
+                    disabled={isLoggingIn}
                   />
                 </div>
                 
@@ -140,6 +161,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Ingrese su contraseña"
                     autoComplete="current-password"
+                    disabled={isLoggingIn}
                   />
                 </div>
                 
@@ -165,10 +187,10 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                 
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoggingIn}
                   className="w-full"
                 >
-                  {isLoading ? (
+                  {isLoggingIn ? (
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span>Iniciando sesión...</span>
@@ -201,6 +223,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                       onChange={(e) => setFirstName(e.target.value)}
                       className="w-full"
                       placeholder="Nombre"
+                      disabled={isRegistering}
                     />
                   </div>
                   
@@ -215,6 +238,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                       onChange={(e) => setLastName(e.target.value)}
                       className="w-full"
                       placeholder="Apellido"
+                      disabled={isRegistering}
                     />
                   </div>
                 </div>
@@ -231,6 +255,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Ingrese su correo electrónico"
                     autoComplete="email"
+                    disabled={isRegistering}
                   />
                 </div>
                 
@@ -246,6 +271,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Contraseña (mínimo 6 caracteres)"
                     autoComplete="new-password"
+                    disabled={isRegistering}
                   />
                 </div>
                 
@@ -261,15 +287,16 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                     className="w-full"
                     placeholder="Confirmar contraseña"
                     autoComplete="new-password"
+                    disabled={isRegistering}
                   />
                 </div>
                 
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isRegistering}
                   className="w-full"
                 >
-                  {isLoading ? (
+                  {isRegistering ? (
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span>Registrando...</span>
