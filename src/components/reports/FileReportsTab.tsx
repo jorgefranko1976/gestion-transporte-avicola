@@ -43,7 +43,7 @@ const FileReportsTab = () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('uploaded_files')
+        .from('excel_files')
         .select('*')
         .gte('uploaded_at', startDate.toISOString())
         .lte('uploaded_at', new Date(endDate.setHours(23, 59, 59)).toISOString())
@@ -56,7 +56,7 @@ const FileReportsTab = () => {
         name: file.name,
         type: file.type,
         uploadedAt: new Date(file.uploaded_at),
-        uploadedBy: file.uploaded_by,
+        uploadedBy: file.uploaded_by || 'Sistema',
         records: file.records,
         status: file.status,
         reproCount: file.repro_count,
