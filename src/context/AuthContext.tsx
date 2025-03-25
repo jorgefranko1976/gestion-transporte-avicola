@@ -119,6 +119,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Got current session', currentSession?.user?.id);
       setSession(currentSession);
       await updateUserState(currentSession);
+    }).catch(error => {
+      console.error('Error getting session:', error);
+      setIsLoading(false);
     });
 
     return () => {
@@ -208,6 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    setIsLoading(true);
     try {
       console.log('Attempting logout');
       const { error } = await supabase.auth.signOut();
@@ -223,6 +227,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Logout exception:', error);
       toast.error('Error al cerrar sesión');
+    } finally {
+      setIsLoading(false);
     }
   };
 

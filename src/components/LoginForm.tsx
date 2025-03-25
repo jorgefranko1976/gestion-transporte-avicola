@@ -1,13 +1,13 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import PageTransition from './transitions/PageTransition';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 
 interface LoginFormProps {
   className?: string;
@@ -32,10 +32,20 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const [isRegistering, setIsRegistering] = useState(false);
   
   const { login, signup, isLoading } = useAuth();
-  const navigate = useNavigate();
+
+  // Evitar que los estados se queden atascados
+  useEffect(() => {
+    return () => {
+      setIsLoggingIn(false);
+      setIsRegistering(false);
+    };
+  }, []);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isLoggingIn) return; // Prevenir múltiples envíos
+    
     setLoginError('');
     setIsLoggingIn(true);
     
@@ -46,14 +56,19 @@ export const LoginForm = ({ className }: LoginFormProps) => {
         return;
       }
       
+      console.log("Iniciando sesión con:", email);
       const success = await login(email, password);
       
       if (!success) {
         setLoginError('Credenciales inválidas. Inténtelo de nuevo.');
+        toast.error('Error al iniciar sesión');
+      } else {
+        toast.success('Inicio de sesión exitoso');
       }
     } catch (error) {
       console.error('Error durante el inicio de sesión:', error);
       setLoginError('Error al iniciar sesión. Inténtelo de nuevo más tarde.');
+      toast.error('Error inesperado al iniciar sesión');
     } finally {
       setIsLoggingIn(false);
     }
@@ -61,6 +76,9 @@ export const LoginForm = ({ className }: LoginFormProps) => {
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isRegistering) return; // Prevenir múltiples envíos
+    
     setRegisterError('');
     setIsRegistering(true);
     
@@ -83,6 +101,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
         return;
       }
       
+      console.log("Registrando usuario:", registerEmail);
       const success = await signup(
         registerEmail, 
         registerPassword, 
@@ -98,10 +117,14 @@ export const LoginForm = ({ className }: LoginFormProps) => {
         setActiveTab('login');
         setEmail(registerEmail);
         setPassword('');
+        toast.success('Registro exitoso. Ahora puede iniciar sesión.');
+      } else {
+        toast.error('No se pudo completar el registro. Inténtelo nuevamente.');
       }
     } catch (error) {
       console.error('Error durante el registro:', error);
       setRegisterError('Error al registrar usuario. Inténtelo de nuevo más tarde.');
+      toast.error('Error inesperado durante el registro');
     } finally {
       setIsRegistering(false);
     }
@@ -187,10 +210,10 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                 
                 <Button
                   type="submit"
-                  disabled={isLoggingIn}
+                  disabled={isLoggingIn || isLoading}
                   className="w-full"
                 >
-                  {isLoggingIn ? (
+                  {isLoggingIn || isLoading ? (
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span>Iniciando sesión...</span>
@@ -293,10 +316,10 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                 
                 <Button
                   type="submit"
-                  disabled={isRegistering}
+                  disabled={isRegistering || isLoading}
                   className="w-full"
                 >
-                  {isRegistering ? (
+                  {isRegistering || isLoading ? (
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span>Registrando...</span>

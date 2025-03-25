@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Login = () => {
   const { user, isLoading } = useAuth();
@@ -17,7 +18,7 @@ const Login = () => {
       console.log('User authenticated, redirecting to dashboard', user.role);
       setRedirecting(true);
       
-      setTimeout(() => {
+      try {
         if (user.role === 'coordinator' || user.role === 'admin') {
           navigate('/coordinator');
         } else if (user.role === 'driver') {
@@ -27,7 +28,11 @@ const Login = () => {
         } else {
           navigate('/driver'); // Default fallback
         }
-      }, 500); // Pequeño retraso para asegurar que la redirección funcione
+      } catch (error) {
+        console.error('Error during redirect:', error);
+        toast.error('Error al redirigir. Por favor, intente nuevamente.');
+        setRedirecting(false);
+      }
     }
   }, [user, isLoading, navigate]);
 
