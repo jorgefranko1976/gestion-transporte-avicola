@@ -12,28 +12,33 @@ const Login = () => {
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    // Solo intentar redirección si tenemos un usuario autenticado
+    // Solo intentar redirección si tenemos un usuario autenticado y no estamos cargando
     if (user && !isLoading) {
       console.log('Usuario autenticado, redirigiendo al dashboard', user.role);
       setRedirecting(true);
       
-      // Usar un timeout para evitar problemas de redirección inmediata
       const redirectTimer = setTimeout(() => {
-        if (user.role === 'coordinator' || user.role === 'admin') {
-          navigate('/coordinator');
-        } else if (user.role === 'driver') {
-          navigate('/driver');
-        } else if (user.role === 'owner') {
-          navigate('/owner');
-        } else {
-          navigate('/driver'); // Opción predeterminada
+        try {
+          if (user.role === 'coordinator' || user.role === 'admin') {
+            navigate('/coordinator');
+          } else if (user.role === 'driver') {
+            navigate('/driver');
+          } else if (user.role === 'owner') {
+            navigate('/owner');
+          } else {
+            navigate('/driver'); // Opción predeterminada
+          }
+        } catch (error) {
+          console.error('Error durante la redirección:', error);
+          setRedirecting(false);
         }
-      }, 100);
+      }, 500);
       
       return () => clearTimeout(redirectTimer);
     }
   }, [user, isLoading, navigate]);
 
+  // Si estamos en estado de carga, mostramos un spinner
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -48,6 +53,7 @@ const Login = () => {
     );
   }
 
+  // Si estamos redirigiendo después de un inicio de sesión exitoso
   if (redirecting) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -62,6 +68,7 @@ const Login = () => {
     );
   }
 
+  // Si no hay usuario autenticado, mostrar el formulario de inicio de sesión
   return (
     <div className="min-h-screen bg-background">
       <Navbar />

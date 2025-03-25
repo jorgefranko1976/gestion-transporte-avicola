@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -40,40 +41,89 @@ export const LoginForm = ({ className }: LoginFormProps) => {
     };
   }, []);
 
+  // Validar formulario de inicio de sesión
+  const validateLoginForm = () => {
+    if (!email.trim()) {
+      setLoginError('Por favor, ingrese su correo electrónico');
+      return false;
+    }
+    
+    if (!password) {
+      setLoginError('Por favor, ingrese su contraseña');
+      return false;
+    }
+    
+    return true;
+  };
+
+  // Validar formulario de registro
+  const validateRegisterForm = () => {
+    if (!registerEmail.trim()) {
+      setRegisterError('Por favor, ingrese un correo electrónico');
+      return false;
+    }
+    
+    if (!registerPassword) {
+      setRegisterError('Por favor, ingrese una contraseña');
+      return false;
+    }
+    
+    if (!confirmPassword) {
+      setRegisterError('Por favor, confirme su contraseña');
+      return false;
+    }
+    
+    if (!firstName.trim()) {
+      setRegisterError('Por favor, ingrese su nombre');
+      return false;
+    }
+    
+    if (!lastName.trim()) {
+      setRegisterError('Por favor, ingrese su apellido');
+      return false;
+    }
+    
+    if (registerPassword !== confirmPassword) {
+      setRegisterError('Las contraseñas no coinciden');
+      return false;
+    }
+    
+    if (registerPassword.length < 6) {
+      setRegisterError('La contraseña debe tener al menos 6 caracteres');
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (isLoggingIn || isLoading) return; // Prevenir múltiples envíos
     
     setLoginError('');
+    
+    if (!validateLoginForm()) {
+      return;
+    }
+    
     setIsLoggingIn(true);
     
     try {
-      if (!email.trim()) {
-        setLoginError('Por favor, ingrese su correo electrónico');
-        setIsLoggingIn(false);
-        return;
-      }
-      
-      if (!password) {
-        setLoginError('Por favor, ingrese su contraseña');
-        setIsLoggingIn(false);
-        return;
-      }
-      
       console.log("Iniciando sesión con:", email);
       const success = await login(email.trim(), password);
       
       if (!success) {
         setLoginError('Credenciales inválidas. Inténtelo de nuevo.');
+        setIsLoggingIn(false);
       } else {
         toast.success('Inicio de sesión exitoso');
+        // El AuthContext manejará la redirección
       }
     } catch (error) {
       console.error('Error durante el inicio de sesión:', error);
       setLoginError('Error al iniciar sesión. Inténtelo de nuevo más tarde.');
       toast.error('Error inesperado al iniciar sesión');
-    } finally {
       setIsLoggingIn(false);
     }
   };
@@ -84,52 +134,14 @@ export const LoginForm = ({ className }: LoginFormProps) => {
     if (isRegistering || isLoading) return; // Prevenir múltiples envíos
     
     setRegisterError('');
+    
+    if (!validateRegisterForm()) {
+      return;
+    }
+    
     setIsRegistering(true);
     
     try {
-      // Validación de campos
-      if (!registerEmail.trim()) {
-        setRegisterError('Por favor, ingrese un correo electrónico');
-        setIsRegistering(false);
-        return;
-      }
-      
-      if (!registerPassword) {
-        setRegisterError('Por favor, ingrese una contraseña');
-        setIsRegistering(false);
-        return;
-      }
-      
-      if (!confirmPassword) {
-        setRegisterError('Por favor, confirme su contraseña');
-        setIsRegistering(false);
-        return;
-      }
-      
-      if (!firstName.trim()) {
-        setRegisterError('Por favor, ingrese su nombre');
-        setIsRegistering(false);
-        return;
-      }
-      
-      if (!lastName.trim()) {
-        setRegisterError('Por favor, ingrese su apellido');
-        setIsRegistering(false);
-        return;
-      }
-      
-      if (registerPassword !== confirmPassword) {
-        setRegisterError('Las contraseñas no coinciden');
-        setIsRegistering(false);
-        return;
-      }
-      
-      if (registerPassword.length < 6) {
-        setRegisterError('La contraseña debe tener al menos 6 caracteres');
-        setIsRegistering(false);
-        return;
-      }
-      
       console.log("Registrando usuario:", registerEmail);
       const success = await signup(
         registerEmail.trim(), 
@@ -157,11 +169,12 @@ export const LoginForm = ({ className }: LoginFormProps) => {
       } else {
         toast.error('No se pudo completar el registro. Inténtelo nuevamente.');
       }
+      
+      setIsRegistering(false);
     } catch (error) {
       console.error('Error durante el registro:', error);
       setRegisterError('Error al registrar usuario. Inténtelo de nuevo más tarde.');
       toast.error('Error inesperado durante el registro');
-    } finally {
       setIsRegistering(false);
     }
   };

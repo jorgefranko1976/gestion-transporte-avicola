@@ -106,17 +106,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     console.log('Configurando listener de estado de autenticación');
-    let isSubscribed = true;
+    let mounted = true;
     
     // Configurar el listener de cambio de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log('Estado de autenticación cambiado', event, currentSession?.user?.id);
         
-        if (isSubscribed) {
+        if (mounted) {
           setSession(currentSession);
           await updateUserState(currentSession);
-          if (!initializationComplete) setInitializationComplete(true);
+          if (!initializationComplete) {
+            setInitializationComplete(true);
+          }
         }
       }
     );
@@ -125,14 +127,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
       console.log('Sesión actual obtenida', currentSession?.user?.id);
       
-      if (isSubscribed) {
+      if (mounted) {
         setSession(currentSession);
         await updateUserState(currentSession);
         setInitializationComplete(true);
       }
     }).catch(error => {
       console.error('Error al obtener sesión:', error);
-      if (isSubscribed) {
+      if (mounted) {
         setIsLoading(false);
         setInitializationComplete(true);
       }
@@ -140,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       console.log('Limpiando listener de estado de autenticación');
-      isSubscribed = false;
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
