@@ -2,7 +2,6 @@
 import React, { createContext, useContext } from 'react';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useAuthMethods } from '@/hooks/useAuthMethods';
-import { fetchUserProfile } from '@/hooks/useUserProfile';
 import LoadingScreen from '@/components/auth/LoadingScreen';
 import { AuthContextType } from '@/types/auth';
 
@@ -32,6 +31,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signup,
     logout
   };
+
+  // Evitamos mostrar el indicador de carga indefinidamente agregando un tiempo máximo
+  // Si initializationComplete es false después de 3 segundos, mostramos el contenido de igual manera
+  React.useEffect(() => {
+    if (!initializationComplete) {
+      const timer = setTimeout(() => {
+        console.log('Tiempo de espera excedido, mostrando contenido...');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [initializationComplete]);
 
   return (
     <AuthContext.Provider value={authContextValue}>

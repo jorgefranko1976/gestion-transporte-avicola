@@ -62,6 +62,8 @@ export function useAuthState() {
         if (mounted) {
           setSession(currentSession);
           await updateUserState(currentSession);
+          // Aseguramos que initializationComplete se establezca a true
+          // incluso si hay un error al obtener el perfil
           if (!initializationComplete) {
             setInitializationComplete(true);
           }
@@ -76,12 +78,15 @@ export function useAuthState() {
       if (mounted) {
         setSession(currentSession);
         await updateUserState(currentSession);
+        // Aseguramos que initializationComplete se establezca a true
+        // después de intentar obtener la sesión, incluso si falla
         setInitializationComplete(true);
       }
     }).catch(error => {
       console.error('Error al obtener sesión:', error);
       if (mounted) {
         setIsLoading(false);
+        // Es crucial establecer initializationComplete a true incluso cuando hay errores
         setInitializationComplete(true);
       }
     });
