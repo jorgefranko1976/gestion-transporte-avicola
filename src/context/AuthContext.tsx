@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useAuthMethods } from '@/hooks/useAuthMethods';
 import LoadingScreen from '@/components/auth/LoadingScreen';
@@ -15,7 +15,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializationComplete,
     setUser,
     setSession,
-    setIsLoading
+    setIsLoading,
+    setInitializationComplete
   } = useAuthState();
 
   const { login, signup, logout } = useAuthMethods({ 
@@ -32,20 +33,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout
   };
 
-  // Evitamos mostrar el indicador de carga indefinidamente agregando un tiempo máximo
-  // Si initializationComplete es false después de 3 segundos, mostramos el contenido de igual manera
-  React.useEffect(() => {
-    if (!initializationComplete) {
-      const timer = setTimeout(() => {
-        console.log('Tiempo de espera excedido, mostrando contenido...');
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [initializationComplete]);
+  // Forzar la carga después de un tiempo límite
+  useEffect(() => {
+    // Si aún estamos cargando después de 5 segundos, forzamos la carga
+    const forceLoadTimer = setTimeout(() => {
+      if (!initializationComplete) {
+        console.log('Forzando carga debido a tiempo límite excedido');
+        setInitializationComplete(true);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(forceLoadTimer);
+  }, [initializationComplete, setInitializationComplete]);
 
   return (
     <AuthContext.Provider value={authContextValue}>
-      {initializationComplete ? children : <LoadingScreen />}
+      {initializationComplete || !isLoading ? children : <LoadingScreen />}
     </AuthContext.Provider>
   );
 };

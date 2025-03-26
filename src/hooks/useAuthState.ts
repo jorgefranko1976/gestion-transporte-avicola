@@ -54,46 +54,77 @@ export function useAuthState() {
     console.log('Configurando listener de estado de autenticación');
     let mounted = true;
     
+    // Inicializar con temporizador de seguridad
+    const safetyTimer = setTimeout(() => {
+      if (mounted && isLoading) {
+        console.log('Temporizador de seguridad activado: forzando finalización de carga');
+        setIsLoading(false);
+        setInitializationComplete(true);
+      }
+    }, 3000);
+    
     // Configurar el listener de cambio de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         console.log('Estado de autenticación cambiado', event, currentSession?.user?.id);
         
         if (mounted) {
           setSession(currentSession);
-          await updateUserState(currentSession);
-          // Aseguramos que initializationComplete se establezca a true
-          // incluso si hay un error al obtener el perfil
-          if (!initializationComplete) {
+          
+          // Manejar actualización de usuario de manera sincrónica primero
+          if (!currentSession?.user) {
+            setUser(null);
+            setIsLoading(false);
             setInitializationComplete(true);
+          } else {
+            // Y luego async para los datos del perfil
+            setTimeout(async () => {
+              if (mounted) {
+                await updateUserState(currentSession);
+                setInitializationComplete(true);
+              }
+            }, 0);
           }
         }
       }
     );
 
-    // Obtener la sesión actual
-    supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
-      console.log('Sesión actual obtenida', currentSession?.user?.id);
-      
-      if (mounted) {
-        setSession(currentSession);
-        await updateUserState(currentSession);
-        // Aseguramos que initializationComplete se establezca a true
-        // después de intentar obtener la sesión, incluso si falla
-        setInitializationComplete(true);
-      }
-    }).catch(error => {
-      console.error('Error al obtener sesión:', error);
-      if (mounted) {
-        setIsLoading(false);
-        // Es crucial establecer initializationComplete a true incluso cuando hay errores
-        setInitializationComplete(true);
-      }
-    });
+    // Obtener la sesión actual de manera simplificada
+    supabase.auth.getSession()
+      .then(({ data: { session: currentSession } }) => {
+        console.log('Sesión actual obtenida', currentSession?.user?.id);
+        
+        if (mounted) {
+          setSession(currentSession);
+          
+          if (!currentSession) {
+            // No hay sesión actual, terminamos la carga
+            setUser(null);
+            setIsLoading(false);
+            setInitializationComplete(true);
+          } else {
+            // Hay sesión, cargar datos de usuario
+            updateUserState(currentSession)
+              .finally(() => {
+                if (mounted) {
+                  setInitializationComplete(true);
+                }
+              });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error al obtener sesión:', error);
+        if (mounted) {
+          setIsLoading(false);
+          setInitializationComplete(true);
+        }
+      });
 
     return () => {
       console.log('Limpiando listener de estado de autenticación');
       mounted = false;
+      clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
   }, []);

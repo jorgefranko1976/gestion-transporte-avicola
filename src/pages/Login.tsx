@@ -38,21 +38,6 @@ const Login = () => {
     }
   }, [user, isLoading, navigate]);
 
-  // Si estamos en estado de carga, mostramos un spinner
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
-            <p className="mt-4 text-lg">Cargando...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Si estamos redirigiendo después de un inicio de sesión exitoso
   if (redirecting) {
     return (
@@ -68,7 +53,7 @@ const Login = () => {
     );
   }
 
-  // Si no hay usuario autenticado, mostrar el formulario de inicio de sesión
+  // Siempre mostramos el formulario de inicio de sesión, incluso si isLoading es true
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
