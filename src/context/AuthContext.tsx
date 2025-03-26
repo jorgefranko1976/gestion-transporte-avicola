@@ -40,17 +40,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Forzando finalización de carga desde AuthContext');
         setInitializationComplete(true);
       }
-    }, 1500);
+    }, 1000); // Reducido a 1 segundo
     
     return () => clearTimeout(maxLoadingTime);
   }, [initializationComplete, setInitializationComplete]);
 
-  // Max 3 seconds absolute limit for any loading
+  // Max 2 seconds absolute limit for any loading
   useEffect(() => {
     const absoluteMaxTime = setTimeout(() => {
       setIsLoading(false);
       setInitializationComplete(true);
-    }, 3000);
+    }, 2000); // Reducido a 2 segundos
     
     return () => clearTimeout(absoluteMaxTime);
   }, [setIsLoading, setInitializationComplete]);

@@ -30,7 +30,7 @@ export const LoginTab = () => {
         setIsLoggingIn(false);
         setLoginError('La operación ha tardado demasiado. Por favor, inténtelo de nuevo.');
         toast.error('Tiempo de espera agotado al iniciar sesión');
-      }, 10000); // 10 segundos máximo para login
+      }, 8000); // 8 segundos máximo para login
       
       return () => clearTimeout(loginTimeout);
     }

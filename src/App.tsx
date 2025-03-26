@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Drivers from "./pages/Drivers";
 import PESV from "./pages/PESV";
 import Reports from "./pages/Reports";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -25,23 +26,40 @@ const ProtectedRoute = ({
   allowedRole 
 }: { 
   children: JSX.Element, 
-  allowedRole?: 'driver' | 'coordinator' 
+  allowedRole?: 'driver' | 'coordinator' | 'admin' | 'owner'
 }) => {
   const { user, isLoading } = useAuth();
   
+  // Si está cargando, mostrar un spinner
   if (isLoading) {
-    // Could add a loading spinner here
-    return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
+          <p className="mt-4 text-lg">Cargando...</p>
+        </div>
+      </div>
+    );
   }
   
+  // Si no hay usuario autenticado, redirigir al login
   if (!user) {
+    console.log("No hay usuario autenticado, redirigiendo a /login");
     return <Navigate to="/login" replace />;
   }
   
-  if (allowedRole && user.role !== allowedRole) {
-    return <Navigate to={user.role === 'driver' ? '/driver' : '/coordinator'} replace />;
+  // Si se requiere un rol específico y el usuario no lo tiene
+  if (allowedRole && user.role !== allowedRole && allowedRole !== 'admin') {
+    console.log(`Usuario no tiene rol requerido (${allowedRole}), tiene ${user.role}`);
+    // Si es coordinador o admin, puede acceder a todas las rutas
+    if (user.role === 'coordinator' || user.role === 'admin') {
+      return children;
+    }
+    return <Navigate to={user.role === 'driver' ? '/driver' : 
+                         user.role === 'owner' ? '/owner' : '/coordinator'} replace />;
   }
   
+  // Si todo está bien, mostrar el contenido protegido
   return children;
 };
 

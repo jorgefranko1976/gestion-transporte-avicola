@@ -22,75 +22,72 @@ export function useAuthState() {
         setIsLoading(false);
         setInitializationComplete(true);
       }
-    }, 2000);
+    }, 1500); // Reducido a 1.5 segundos
     
-    // Función para actualizar el estado del usuario con datos de perfil
-    const updateUserWithProfile = async (currentSession: Session | null) => {
-      if (!currentSession?.user) {
-        if (mounted) {
-          setUser(null);
-          setIsLoading(false);
-          setInitializationComplete(true);
-        }
-        return;
-      }
-
-      try {
-        const profile = await fetchUserProfile(currentSession.user.id);
-        
-        if (!profile && mounted) {
-          console.warn('No se encontró perfil para el usuario', currentSession.user.id);
-          setUser(null);
-          setIsLoading(false);
-          setInitializationComplete(true);
-          return;
-        }
-        
-        if (mounted) {
-          setUser({
-            id: currentSession.user.id,
-            email: currentSession.user.email,
-            name: profile ? `${profile.first_name} ${profile.last_name}` : 'Usuario',
-            role: (profile?.role || 'driver') as User['role'],
-            profile: profile ? {
-              first_name: profile.first_name,
-              last_name: profile.last_name,
-              phone: profile.phone,
-              identification_type: profile.identification_type,
-              identification_number: profile.identification_number
-            } : undefined
-          });
-          setIsLoading(false);
-          setInitializationComplete(true);
-        }
-      } catch (error) {
-        console.error('Error al establecer estado de usuario:', error);
-        if (mounted) {
-          setUser(null);
-          setIsLoading(false);
-          setInitializationComplete(true);
-        }
-      }
-    };
-
     // Configurar el listener para cambios de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         console.log('Estado de autenticación cambiado', event, currentSession?.user?.id);
         
         if (mounted) {
           setSession(currentSession);
           
-          // Si no hay sesión, simplemente terminamos
-          if (!currentSession) {
+          // Si hay una sesión, intentamos obtener el perfil
+          if (currentSession?.user) {
+            // Para evitar bloqueos, ejecutamos de manera asíncrona
+            setTimeout(async () => {
+              try {
+                const profile = await fetchUserProfile(currentSession.user.id);
+                
+                if (mounted) {
+                  if (profile) {
+                    setUser({
+                      id: currentSession.user.id,
+                      email: currentSession.user.email,
+                      name: `${profile.first_name} ${profile.last_name}`,
+                      role: (profile.role || 'driver') as User['role'],
+                      profile: {
+                        first_name: profile.first_name,
+                        last_name: profile.last_name,
+                        phone: profile.phone,
+                        identification_type: profile.identification_type,
+                        identification_number: profile.identification_number
+                      }
+                    });
+                  } else {
+                    console.warn('No se encontró perfil para el usuario', currentSession.user.id);
+                    // Si no hay perfil, establecemos un usuario con datos básicos
+                    setUser({
+                      id: currentSession.user.id,
+                      email: currentSession.user.email,
+                      name: 'Usuario',
+                      role: 'driver',
+                    });
+                  }
+                  
+                  setIsLoading(false);
+                  setInitializationComplete(true);
+                }
+              } catch (error) {
+                console.error('Error al obtener perfil:', error);
+                if (mounted) {
+                  // En caso de error, configuramos un usuario básico
+                  setUser({
+                    id: currentSession.user.id,
+                    email: currentSession.user.email,
+                    name: 'Usuario',
+                    role: 'driver',
+                  });
+                  setIsLoading(false);
+                  setInitializationComplete(true);
+                }
+              }
+            }, 0);
+          } else {
+            // Si no hay sesión, simplemente establecemos user como null
             setUser(null);
             setIsLoading(false);
             setInitializationComplete(true);
-          } else {
-            // Para evitar bloqueos, ejecutamos la carga del perfil de manera aislada
-            setTimeout(() => {
-              updateUserWithProfile(currentSession);
-            }, 0);
           }
         }
       }
@@ -109,10 +106,8 @@ export function useAuthState() {
             setIsLoading(false);
             setInitializationComplete(true);
           } else {
-            // Ejecutamos la carga del perfil de manera aislada
-            setTimeout(() => {
-              updateUserWithProfile(currentSession);
-            }, 0);
+            // Aquí dejamos que el listener maneje la actualización del usuario
+            // para evitar duplicación de código y posibles condiciones de carrera
           }
         }
       })

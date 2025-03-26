@@ -2,18 +2,20 @@
 import { Navbar } from '@/components/Navbar';
 import { LoginForm } from '@/components/LoginForm';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const Login = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [redirecting, setRedirecting] = useState(false);
 
+  // Manejo de redirección después de iniciar sesión
   useEffect(() => {
-    // Solo intentar redirección si tenemos un usuario autenticado
-    if (user) {
+    // Solo redirigir si hay un usuario autenticado
+    if (user && !redirecting) {
       console.log('Usuario autenticado, redirigiendo al dashboard', user.role);
       setRedirecting(true);
       
@@ -36,7 +38,7 @@ const Login = () => {
       
       return () => clearTimeout(redirectTimer);
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirecting]);
 
   // Si estamos redirigiendo después de un inicio de sesión exitoso
   if (redirecting) {
@@ -53,7 +55,22 @@ const Login = () => {
     );
   }
 
-  // Siempre mostramos el formulario de inicio de sesión
+  // Si está cargando la autenticación pero no estamos redirigiendo
+  if (isLoading && !redirecting) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
+            <p className="mt-4 text-lg">Verificando credenciales...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Siempre mostramos el formulario de inicio de sesión si no estamos redirigiendo ni cargando
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
