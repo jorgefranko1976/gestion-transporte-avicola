@@ -11,85 +11,92 @@ export function useAuthState() {
   const [isLoading, setIsLoading] = useState(true);
   const [initializationComplete, setInitializationComplete] = useState(false);
 
-  // Función para actualizar el estado del usuario basado en la sesión
-  const updateUserState = async (currentSession: Session | null) => {
-    if (!currentSession?.user) {
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const profile = await fetchUserProfile(currentSession.user.id);
-      
-      if (!profile) {
-        console.warn('No se encontró perfil para el usuario', currentSession.user.id);
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
-      
-      setUser({
-        id: currentSession.user.id,
-        email: currentSession.user.email,
-        name: `${profile.first_name} ${profile.last_name}`,
-        role: (profile.role || 'driver') as User['role'],
-        profile: {
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          phone: profile.phone,
-          identification_type: profile.identification_type,
-          identification_number: profile.identification_number
-        }
-      });
-    } catch (error) {
-      console.error('Error al establecer estado de usuario:', error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     console.log('Configurando listener de estado de autenticación');
     let mounted = true;
     
-    // Inicializar con temporizador de seguridad
-    const safetyTimer = setTimeout(() => {
-      if (mounted && isLoading) {
-        console.log('Temporizador de seguridad activado: forzando finalización de carga');
+    // Establecer un temporizador que forzará la finalización de carga
+    const forceTimeout = setTimeout(() => {
+      if (mounted) {
+        console.log('Forzando finalización de carga desde useAuthState');
         setIsLoading(false);
         setInitializationComplete(true);
       }
-    }, 3000);
+    }, 2000);
     
-    // Configurar el listener de cambio de estado de autenticación
+    // Función para actualizar el estado del usuario con datos de perfil
+    const updateUserWithProfile = async (currentSession: Session | null) => {
+      if (!currentSession?.user) {
+        if (mounted) {
+          setUser(null);
+          setIsLoading(false);
+          setInitializationComplete(true);
+        }
+        return;
+      }
+
+      try {
+        const profile = await fetchUserProfile(currentSession.user.id);
+        
+        if (!profile && mounted) {
+          console.warn('No se encontró perfil para el usuario', currentSession.user.id);
+          setUser(null);
+          setIsLoading(false);
+          setInitializationComplete(true);
+          return;
+        }
+        
+        if (mounted) {
+          setUser({
+            id: currentSession.user.id,
+            email: currentSession.user.email,
+            name: profile ? `${profile.first_name} ${profile.last_name}` : 'Usuario',
+            role: (profile?.role || 'driver') as User['role'],
+            profile: profile ? {
+              first_name: profile.first_name,
+              last_name: profile.last_name,
+              phone: profile.phone,
+              identification_type: profile.identification_type,
+              identification_number: profile.identification_number
+            } : undefined
+          });
+          setIsLoading(false);
+          setInitializationComplete(true);
+        }
+      } catch (error) {
+        console.error('Error al establecer estado de usuario:', error);
+        if (mounted) {
+          setUser(null);
+          setIsLoading(false);
+          setInitializationComplete(true);
+        }
+      }
+    };
+
+    // Configurar el listener para cambios de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.log('Estado de autenticación cambiado', event, currentSession?.user?.id);
         
         if (mounted) {
           setSession(currentSession);
           
-          // Manejar actualización de usuario de manera sincrónica primero
-          if (!currentSession?.user) {
+          // Si no hay sesión, simplemente terminamos
+          if (!currentSession) {
             setUser(null);
             setIsLoading(false);
             setInitializationComplete(true);
           } else {
-            // Y luego async para los datos del perfil
-            setTimeout(async () => {
-              if (mounted) {
-                await updateUserState(currentSession);
-                setInitializationComplete(true);
-              }
+            // Para evitar bloqueos, ejecutamos la carga del perfil de manera aislada
+            setTimeout(() => {
+              updateUserWithProfile(currentSession);
             }, 0);
           }
         }
       }
     );
 
-    // Obtener la sesión actual de manera simplificada
+    // Cargar la sesión inicial
     supabase.auth.getSession()
       .then(({ data: { session: currentSession } }) => {
         console.log('Sesión actual obtenida', currentSession?.user?.id);
@@ -98,18 +105,14 @@ export function useAuthState() {
           setSession(currentSession);
           
           if (!currentSession) {
-            // No hay sesión actual, terminamos la carga
             setUser(null);
             setIsLoading(false);
             setInitializationComplete(true);
           } else {
-            // Hay sesión, cargar datos de usuario
-            updateUserState(currentSession)
-              .finally(() => {
-                if (mounted) {
-                  setInitializationComplete(true);
-                }
-              });
+            // Ejecutamos la carga del perfil de manera aislada
+            setTimeout(() => {
+              updateUserWithProfile(currentSession);
+            }, 0);
           }
         }
       })
@@ -121,10 +124,11 @@ export function useAuthState() {
         }
       });
 
+    // Limpiar
     return () => {
       console.log('Limpiando listener de estado de autenticación');
       mounted = false;
-      clearTimeout(safetyTimer);
+      clearTimeout(forceTimeout);
       subscription.unsubscribe();
     };
   }, []);

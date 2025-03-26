@@ -23,6 +23,19 @@ export const LoginTab = () => {
     };
   }, []);
 
+  // Establecer un límite de tiempo para el estado de login
+  useEffect(() => {
+    if (isLoggingIn) {
+      const loginTimeout = setTimeout(() => {
+        setIsLoggingIn(false);
+        setLoginError('La operación ha tardado demasiado. Por favor, inténtelo de nuevo.');
+        toast.error('Tiempo de espera agotado al iniciar sesión');
+      }, 10000); // 10 segundos máximo para login
+      
+      return () => clearTimeout(loginTimeout);
+    }
+  }, [isLoggingIn]);
+
   // Validar formulario de inicio de sesión
   const validateLoginForm = () => {
     if (!email.trim()) {
@@ -41,7 +54,7 @@ export const LoginTab = () => {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isLoggingIn || isLoading) return; // Prevenir múltiples envíos
+    if (isLoggingIn) return; // Prevenir múltiples envíos
     
     setLoginError('');
     
@@ -91,7 +104,7 @@ export const LoginTab = () => {
           className="w-full"
           placeholder="Ingrese su correo electrónico"
           autoComplete="email"
-          disabled={isLoggingIn || isLoading}
+          disabled={isLoggingIn}
         />
       </div>
       
@@ -107,7 +120,7 @@ export const LoginTab = () => {
           className="w-full"
           placeholder="Ingrese su contraseña"
           autoComplete="current-password"
-          disabled={isLoggingIn || isLoading}
+          disabled={isLoggingIn}
         />
       </div>
       
@@ -117,7 +130,7 @@ export const LoginTab = () => {
             id="remember" 
             checked={rememberMe}
             onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-            disabled={isLoggingIn || isLoading}
+            disabled={isLoggingIn}
           />
           <label 
             htmlFor="remember" 
@@ -137,10 +150,10 @@ export const LoginTab = () => {
       
       <Button
         type="submit"
-        disabled={isLoggingIn || isLoading}
+        disabled={isLoggingIn}
         className="w-full"
       >
-        {isLoggingIn || isLoading ? (
+        {isLoggingIn ? (
           <div className="flex items-center justify-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>Iniciando sesión...</span>

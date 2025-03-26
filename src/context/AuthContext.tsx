@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading
   });
   
-  // Crear un objeto con todos los métodos y estado para el contexto
+  // Objeto con todos los métodos y estado para el contexto
   const authContextValue: AuthContextType = {
     user,
     session,
@@ -33,22 +33,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout
   };
 
-  // Forzar la carga después de un tiempo límite
+  // Force loading to end after a specific timeout
   useEffect(() => {
-    // Si aún estamos cargando después de 5 segundos, forzamos la carga
-    const forceLoadTimer = setTimeout(() => {
+    const maxLoadingTime = setTimeout(() => {
       if (!initializationComplete) {
-        console.log('Forzando carga debido a tiempo límite excedido');
+        console.log('Forzando finalización de carga desde AuthContext');
         setInitializationComplete(true);
       }
-    }, 5000);
+    }, 1500);
     
-    return () => clearTimeout(forceLoadTimer);
+    return () => clearTimeout(maxLoadingTime);
   }, [initializationComplete, setInitializationComplete]);
+
+  // Max 3 seconds absolute limit for any loading
+  useEffect(() => {
+    const absoluteMaxTime = setTimeout(() => {
+      setIsLoading(false);
+      setInitializationComplete(true);
+    }, 3000);
+    
+    return () => clearTimeout(absoluteMaxTime);
+  }, [setIsLoading, setInitializationComplete]);
 
   return (
     <AuthContext.Provider value={authContextValue}>
-      {initializationComplete || !isLoading ? children : <LoadingScreen />}
+      {initializationComplete ? children : <LoadingScreen />}
     </AuthContext.Provider>
   );
 };

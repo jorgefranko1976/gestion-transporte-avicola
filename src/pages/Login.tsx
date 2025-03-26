@@ -7,13 +7,13 @@ import { useAuth } from '@/context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const Login = () => {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    // Solo intentar redirección si tenemos un usuario autenticado y no estamos cargando
-    if (user && !isLoading) {
+    // Solo intentar redirección si tenemos un usuario autenticado
+    if (user) {
       console.log('Usuario autenticado, redirigiendo al dashboard', user.role);
       setRedirecting(true);
       
@@ -36,7 +36,7 @@ const Login = () => {
       
       return () => clearTimeout(redirectTimer);
     }
-  }, [user, isLoading, navigate]);
+  }, [user, navigate]);
 
   // Si estamos redirigiendo después de un inicio de sesión exitoso
   if (redirecting) {
@@ -53,7 +53,7 @@ const Login = () => {
     );
   }
 
-  // Siempre mostramos el formulario de inicio de sesión, incluso si isLoading es true
+  // Siempre mostramos el formulario de inicio de sesión
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
