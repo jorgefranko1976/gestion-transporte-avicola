@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types/auth';
+import { fetchUserProfile } from '@/hooks/useUserProfile';
 
 export function useAuthState() {
   const [user, setUser] = useState<User | null>(null);
