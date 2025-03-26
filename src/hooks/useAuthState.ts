@@ -22,7 +22,7 @@ export function useAuthState() {
         setIsLoading(false);
         setInitializationComplete(true);
       }
-    }, 1500); // Reducido a 1.5 segundos
+    }, 800); // Reducido a 800ms
     
     // Configurar el listener para cambios de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -34,16 +34,31 @@ export function useAuthState() {
           
           // Si hay una sesión, intentamos obtener el perfil
           if (currentSession?.user) {
-            // Para evitar bloqueos, ejecutamos de manera asíncrona
-            setTimeout(async () => {
-              try {
-                const profile = await fetchUserProfile(currentSession.user.id);
-                
+            // Ejecutamos de forma asíncrona pero con un tiempo límite
+            const profileTimeout = setTimeout(() => {
+              if (mounted) {
+                console.log('Timeout de obtención de perfil alcanzado');
+                // Configurar un usuario básico si no pudimos obtener el perfil a tiempo
+                setUser({
+                  id: currentSession.user.id,
+                  email: currentSession.user.email || '',
+                  name: 'Usuario',
+                  role: 'driver',
+                });
+                setIsLoading(false);
+                setInitializationComplete(true);
+              }
+            }, 500); // 500ms máximo para obtener el perfil
+            
+            // Intentar obtener el perfil
+            fetchUserProfile(currentSession.user.id)
+              .then(profile => {
+                clearTimeout(profileTimeout);
                 if (mounted) {
                   if (profile) {
                     setUser({
                       id: currentSession.user.id,
-                      email: currentSession.user.email,
+                      email: currentSession.user.email || '',
                       name: `${profile.first_name} ${profile.last_name}`,
                       role: (profile.role || 'driver') as User['role'],
                       profile: {
@@ -59,30 +74,30 @@ export function useAuthState() {
                     // Si no hay perfil, establecemos un usuario con datos básicos
                     setUser({
                       id: currentSession.user.id,
-                      email: currentSession.user.email,
+                      email: currentSession.user.email || '',
                       name: 'Usuario',
                       role: 'driver',
                     });
                   }
-                  
                   setIsLoading(false);
                   setInitializationComplete(true);
                 }
-              } catch (error) {
+              })
+              .catch(error => {
+                clearTimeout(profileTimeout);
                 console.error('Error al obtener perfil:', error);
                 if (mounted) {
                   // En caso de error, configuramos un usuario básico
                   setUser({
                     id: currentSession.user.id,
-                    email: currentSession.user.email,
+                    email: currentSession.user.email || '',
                     name: 'Usuario',
                     role: 'driver',
                   });
                   setIsLoading(false);
                   setInitializationComplete(true);
                 }
-              }
-            }, 0);
+              });
           } else {
             // Si no hay sesión, simplemente establecemos user como null
             setUser(null);
@@ -105,10 +120,8 @@ export function useAuthState() {
             setUser(null);
             setIsLoading(false);
             setInitializationComplete(true);
-          } else {
-            // Aquí dejamos que el listener maneje la actualización del usuario
-            // para evitar duplicación de código y posibles condiciones de carrera
           }
+          // Si hay sesión, dejamos que el listener maneje la actualización del usuario
         }
       })
       .catch(error => {

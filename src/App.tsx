@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import DriverPortal from "./pages/DriverPortal";
@@ -17,6 +17,7 @@ import Drivers from "./pages/Drivers";
 import PESV from "./pages/PESV";
 import Reports from "./pages/Reports";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -63,101 +64,109 @@ const ProtectedRoute = ({
   return children;
 };
 
+// Componente de App con rutas protegidas
+const AppRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
+      
+      {/* Protected routes */}
+      <Route 
+        path="/driver" 
+        element={
+          <ProtectedRoute allowedRole="driver">
+            <DriverPortal />
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/coordinator" 
+        element={
+          <ProtectedRoute allowedRole="coordinator">
+            <CoordinatorPortal />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Vehículos route */}
+      <Route 
+        path="/vehicles" 
+        element={
+          <ProtectedRoute allowedRole="coordinator">
+            <Vehicles />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Granjas route */}
+      <Route 
+        path="/farms" 
+        element={
+          <ProtectedRoute allowedRole="coordinator">
+            <Farms />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Settings route */}
+      <Route 
+        path="/settings" 
+        element={
+          <ProtectedRoute allowedRole="coordinator">
+            <Settings />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Drivers route */}
+      <Route 
+        path="/drivers" 
+        element={
+          <ProtectedRoute allowedRole="coordinator">
+            <Drivers />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Reports route */}
+      <Route 
+        path="/reports" 
+        element={
+          <ProtectedRoute allowedRole="coordinator">
+            <Reports />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* PESV route */}
+      <Route 
+        path="/pesv" 
+        element={
+          <ProtectedRoute allowedRole="coordinator">
+            <PESV />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Catch-all route - must be last */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
+// Componente principal que configura los providers en el orden correcto
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            
-            {/* Protected routes */}
-            <Route 
-              path="/driver" 
-              element={
-                <ProtectedRoute allowedRole="driver">
-                  <DriverPortal />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/coordinator" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <CoordinatorPortal />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Vehículos route */}
-            <Route 
-              path="/vehicles" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Vehicles />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Granjas route */}
-            <Route 
-              path="/farms" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Farms />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Settings route */}
-            <Route 
-              path="/settings" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Settings />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Drivers route */}
-            <Route 
-              path="/drivers" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Drivers />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Reports route */}
-            <Route 
-              path="/reports" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <Reports />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* PESV route */}
-            <Route 
-              path="/pesv" 
-              element={
-                <ProtectedRoute allowedRole="coordinator">
-                  <PESV />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Catch-all route - must be last */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
