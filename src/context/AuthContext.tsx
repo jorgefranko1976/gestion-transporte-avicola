@@ -5,8 +5,15 @@ import { useAuthMethods } from '@/hooks/useAuthMethods';
 import LoadingScreen from '@/components/auth/LoadingScreen';
 import { AuthContextType } from '@/types/auth';
 
-// Crear el contexto con un valor inicial undefined
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Crear el contexto con un valor inicial
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  session: null,
+  isLoading: true,
+  login: async () => false,
+  signup: async () => false,
+  logout: async () => {}
+});
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const {
@@ -36,26 +43,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Force loading to end after a specific timeout
   useEffect(() => {
+    console.log('Configurando timeouts de seguridad en AuthContext');
     const maxLoadingTime = setTimeout(() => {
       if (!initializationComplete) {
-        console.log('Forzando finalización de carga desde AuthContext');
+        console.log('Forzando finalización de carga desde AuthContext (300ms timeout)');
         setInitializationComplete(true);
       }
-    }, 500); // Reducido a 500ms para desarrollo
+    }, 300); // Reducido a 300ms para respuesta más rápida
     
-    return () => clearTimeout(maxLoadingTime);
-  }, [initializationComplete, setInitializationComplete]);
-
-  // Max 1 second absolute limit for any loading
-  useEffect(() => {
+    // Max 700ms absolute limit for any loading
     const absoluteMaxTime = setTimeout(() => {
-      console.log('Timeout final de seguridad alcanzado, terminando carga');
+      console.log('Timeout final de seguridad alcanzado (700ms), terminando carga');
       setIsLoading(false);
       setInitializationComplete(true);
-    }, 1000); // Reducido a 1 segundo para desarrollo
+    }, 700); // Reducido a 700ms para desarrollo
     
-    return () => clearTimeout(absoluteMaxTime);
-  }, [setIsLoading, setInitializationComplete]);
+    return () => {
+      clearTimeout(maxLoadingTime);
+      clearTimeout(absoluteMaxTime);
+    };
+  }, [initializationComplete, setIsLoading, setInitializationComplete]);
 
   console.log('AuthProvider rendering, initializationComplete:', initializationComplete, 'isLoading:', isLoading);
 
@@ -69,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 // Hook personalizado para acceder al contexto de autenticación
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
   return context;
