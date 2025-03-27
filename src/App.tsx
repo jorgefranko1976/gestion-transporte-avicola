@@ -18,6 +18,7 @@ import PESV from "./pages/PESV";
 import Reports from "./pages/Reports";
 import { Loader2 } from "lucide-react";
 import { Suspense, lazy } from "react";
+import { UserRole } from "@/types/auth";
 
 // Crear cliente de query
 const queryClient = new QueryClient();
@@ -38,7 +39,7 @@ const ProtectedRoute = ({
   allowedRole 
 }: { 
   children: JSX.Element, 
-  allowedRole?: 'driver' | 'coordinator' | 'admin' | 'owner'
+  allowedRole?: UserRole
 }) => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -56,14 +57,22 @@ const ProtectedRoute = ({
   }
   
   // Si se requiere un rol específico y el usuario no lo tiene
-  if (allowedRole && user.role !== allowedRole && user.role !== 'admin') {
+  if (allowedRole && user.role !== allowedRole && user.role !== 'admin' && user.role !== 'coordinator') {
     console.log(`Usuario no tiene rol requerido (${allowedRole}), tiene ${user.role}`);
-    // Si es coordinador o admin, puede acceder a todas las rutas
-    if (user.role === 'coordinator' || user.role === 'admin') {
-      return children;
+    
+    // Redirigir al portal correspondiente según el rol del usuario
+    let redirectPath = '/';
+    if (user.role === 'driver') {
+      redirectPath = '/driver';
+    } else if (user.role === 'owner') {
+      redirectPath = '/owner';
+    } else if (user.role === 'coordinator') {
+      redirectPath = '/coordinator';
+    } else if (user.role === 'admin') {
+      redirectPath = '/coordinator'; // Los administradores van al portal de coordinador por defecto
     }
-    return <Navigate to={user.role === 'driver' ? '/driver' : 
-                       user.role === 'owner' ? '/owner' : '/coordinator'} replace />;
+    
+    return <Navigate to={redirectPath} replace />;
   }
   
   // Si todo está bien, mostrar el contenido protegido
