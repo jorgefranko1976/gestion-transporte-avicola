@@ -18,11 +18,11 @@ export function useAuthState() {
     // Establecer un temporizador que forzará la finalización de carga
     const forceTimeout = setTimeout(() => {
       if (mounted) {
-        console.log('Forzando finalización de carga desde useAuthState (250ms timeout)');
+        console.log('Forzando finalización de carga desde useAuthState (200ms timeout)');
         setIsLoading(false);
         setInitializationComplete(true);
       }
-    }, 250); // Reducido a 250ms para respuesta más rápida
+    }, 200); // Reducido a 200ms para respuesta más rápida
     
     // Configurar el listener para cambios de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -42,7 +42,7 @@ export function useAuthState() {
             // Utilizar Promise.race para establecer un límite de tiempo
             const profile = await Promise.race([
               profilePromise,
-              new Promise<null>((resolve) => setTimeout(() => resolve(null), 200))
+              new Promise<null>((resolve) => setTimeout(() => resolve(null), 150))
             ]);
             
             if (!mounted) return;
@@ -63,23 +63,36 @@ export function useAuthState() {
               });
             } else {
               console.warn('No se encontró perfil o timeout alcanzado para el usuario', currentSession.user.id);
-              // Si no hay perfil, establecemos un usuario con datos básicos
+              // Usar los metadatos del usuario de Supabase directamente si están disponibles
+              const metadata = currentSession.user.user_metadata;
               setUser({
                 id: currentSession.user.id,
                 email: currentSession.user.email || '',
-                name: 'Usuario',
-                role: 'driver',
+                name: metadata?.first_name && metadata?.last_name 
+                      ? `${metadata.first_name} ${metadata.last_name}`
+                      : 'Usuario',
+                role: (metadata?.role || 'driver') as User['role'],
+                profile: metadata ? {
+                  first_name: metadata.first_name || '',
+                  last_name: metadata.last_name || '',
+                  phone: metadata.phone,
+                  identification_type: metadata.identification_type,
+                  identification_number: metadata.identification_number
+                } : undefined
               });
             }
           } catch (error) {
             console.error('Error al obtener perfil:', error);
             if (mounted) {
-              // En caso de error, configuramos un usuario básico
+              // En caso de error, usamos los metadatos del usuario
+              const metadata = currentSession.user.user_metadata;
               setUser({
                 id: currentSession.user.id,
                 email: currentSession.user.email || '',
-                name: 'Usuario',
-                role: 'driver',
+                name: metadata?.first_name && metadata?.last_name 
+                      ? `${metadata.first_name} ${metadata.last_name}`
+                      : 'Usuario',
+                role: (metadata?.role || 'driver') as User['role'],
               });
             }
           } finally {
@@ -98,7 +111,7 @@ export function useAuthState() {
     );
 
     // Cargar la sesión inicial con un timeout agresivo
-    const sessionPromise = supabase.auth.getSession()
+    supabase.auth.getSession()
       .then(({ data: { session: currentSession } }) => {
         console.log('Sesión actual obtenida', currentSession?.user?.id);
         
@@ -129,7 +142,7 @@ export function useAuthState() {
         setIsLoading(false);
         setInitializationComplete(true);
       }
-    }, 150);
+    }, 120);
 
     // Limpiar
     return () => {

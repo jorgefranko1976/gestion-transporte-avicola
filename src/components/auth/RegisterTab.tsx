@@ -5,6 +5,8 @@ import { useAuth } from '@/context/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UserRole } from '@/types/auth';
 
 export const RegisterTab = ({ onSuccessfulRegister }: { onSuccessfulRegister: (email: string) => void }) => {
   const [registerEmail, setRegisterEmail] = useState('');
@@ -14,6 +16,7 @@ export const RegisterTab = ({ onSuccessfulRegister }: { onSuccessfulRegister: (e
   const [lastName, setLastName] = useState('');
   const [registerError, setRegisterError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [role, setRole] = useState<UserRole>('driver');
   
   const { signup, isLoading } = useAuth();
 
@@ -78,14 +81,14 @@ export const RegisterTab = ({ onSuccessfulRegister }: { onSuccessfulRegister: (e
     setIsRegistering(true);
     
     try {
-      console.log("Registrando usuario:", registerEmail);
+      console.log("Registrando usuario:", registerEmail, "con rol:", role);
       const success = await signup(
         registerEmail.trim(), 
         registerPassword, 
         {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
-          role: 'driver' // Por defecto, todos los nuevos usuarios son conductores
+          role: role // Usar el rol seleccionado
         }
       );
       
@@ -100,6 +103,7 @@ export const RegisterTab = ({ onSuccessfulRegister }: { onSuccessfulRegister: (e
         setConfirmPassword('');
         setFirstName('');
         setLastName('');
+        setRole('driver');
       } else {
         toast.error('No se pudo completar el registro. Inténtelo nuevamente.');
       }
@@ -111,6 +115,13 @@ export const RegisterTab = ({ onSuccessfulRegister }: { onSuccessfulRegister: (e
       toast.error('Error inesperado durante el registro');
       setIsRegistering(false);
     }
+  };
+
+  const roleLabels = {
+    driver: 'Conductor',
+    coordinator: 'Coordinador',
+    owner: 'Propietario',
+    admin: 'Administrador'
   };
 
   return (
@@ -168,6 +179,26 @@ export const RegisterTab = ({ onSuccessfulRegister }: { onSuccessfulRegister: (e
           autoComplete="email"
           disabled={isRegistering || isLoading}
         />
+      </div>
+      
+      <div className="space-y-2">
+        <label htmlFor="role" className="text-sm font-medium">
+          Rol
+        </label>
+        <Select 
+          value={role} 
+          onValueChange={(value) => setRole(value as UserRole)}
+          disabled={isRegistering || isLoading}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Seleccione un rol" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="driver">{roleLabels.driver}</SelectItem>
+            <SelectItem value="coordinator">{roleLabels.coordinator}</SelectItem>
+            <SelectItem value="owner">{roleLabels.owner}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
       <div className="space-y-2">

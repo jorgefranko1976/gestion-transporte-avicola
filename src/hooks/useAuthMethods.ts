@@ -1,7 +1,7 @@
 
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { UserRole } from '@/lib/types/user-types';
+import { UserRole } from '@/types/auth';
 
 type UseAuthMethodsProps = {
   setIsLoading: (isLoading: boolean) => void;
@@ -91,6 +91,16 @@ export function useAuthMethods({ setIsLoading }: UseAuthMethodsProps) {
     setIsLoading(true);
     try {
       console.log('Intentando cerrar sesión');
+      // Verificar si hay una sesión activa antes de intentar cerrarla
+      const { data } = await supabase.auth.getSession();
+      
+      if (!data.session) {
+        console.log('No hay sesión activa para cerrar');
+        toast.info('No hay sesión activa');
+        setIsLoading(false);
+        return;
+      }
+      
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error al cerrar sesión:', error.message);

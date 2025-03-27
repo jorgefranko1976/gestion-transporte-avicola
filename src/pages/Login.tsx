@@ -21,20 +21,21 @@ const Login = () => {
       
       const redirectTimer = setTimeout(() => {
         try {
+          // Inmediatamente redirigir al usuario según su rol
           if (user.role === 'coordinator' || user.role === 'admin') {
-            navigate('/coordinator');
+            navigate('/coordinator', { replace: true });
           } else if (user.role === 'driver') {
-            navigate('/driver');
+            navigate('/driver', { replace: true });
           } else if (user.role === 'owner') {
-            navigate('/owner');
+            navigate('/owner', { replace: true });
           } else {
-            navigate('/driver'); // Opción predeterminada
+            navigate('/driver', { replace: true }); // Opción predeterminada
           }
         } catch (error) {
           console.error('Error durante la redirección:', error);
           setRedirecting(false);
         }
-      }, 500);
+      }, 100); // Reducir el tiempo de espera a 100ms
       
       return () => clearTimeout(redirectTimer);
     }
