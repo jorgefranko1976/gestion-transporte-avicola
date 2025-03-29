@@ -2,14 +2,13 @@
 import { Navbar } from '@/components/Navbar';
 import { LoginForm } from '@/components/LoginForm';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const Login = () => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [redirecting, setRedirecting] = useState(false);
 
   // Manejo de redirección después de iniciar sesión
@@ -19,25 +18,22 @@ const Login = () => {
       console.log('Usuario autenticado, redirigiendo al dashboard', user.role);
       setRedirecting(true);
       
-      const redirectTimer = setTimeout(() => {
-        try {
-          // Inmediatamente redirigir al usuario según su rol
-          if (user.role === 'coordinator' || user.role === 'admin') {
-            navigate('/coordinator', { replace: true });
-          } else if (user.role === 'driver') {
-            navigate('/driver', { replace: true });
-          } else if (user.role === 'owner') {
-            navigate('/owner', { replace: true });
-          } else {
-            navigate('/driver', { replace: true }); // Opción predeterminada
-          }
-        } catch (error) {
-          console.error('Error durante la redirección:', error);
-          setRedirecting(false);
+      // Realizar redirección inmediata
+      try {
+        // Inmediatamente redirigir al usuario según su rol
+        if (user.role === 'coordinator' || user.role === 'admin') {
+          navigate('/coordinator', { replace: true });
+        } else if (user.role === 'driver') {
+          navigate('/driver', { replace: true });
+        } else if (user.role === 'owner') {
+          navigate('/owner', { replace: true });
+        } else {
+          navigate('/driver', { replace: true }); // Opción predeterminada
         }
-      }, 100); // Reducir el tiempo de espera a 100ms
-      
-      return () => clearTimeout(redirectTimer);
+      } catch (error) {
+        console.error('Error durante la redirección:', error);
+        setRedirecting(false);
+      }
     }
   }, [user, navigate, redirecting]);
 
