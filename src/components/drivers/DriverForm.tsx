@@ -35,6 +35,12 @@ const driverFormSchema = z.object({
     required_error: 'La fecha de contratación es requerida',
   }),
   licenseExpiration: z.date().optional(),
+  email: z.string().email('Correo electrónico inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  confirmPassword: z.string().min(6, 'La confirmación de contraseña debe tener al menos 6 caracteres'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
 });
 
 type DriverFormValues = z.infer<typeof driverFormSchema>;
@@ -63,7 +69,7 @@ const DriverForm = () => {
   });
   const [observations, setObservations] = useState<{ content: string, document: File | null }[]>([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'documents' | 'observations' | 'vehicle'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'documents' | 'observations' | 'vehicle' | 'account'>('basic');
 
   // Inicializar el formulario
   const form = useForm<DriverFormValues>({
@@ -78,6 +84,9 @@ const DriverForm = () => {
       phone: '',
       emergencyContact: '',
       hireDate: new Date(),
+      email: '',
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -97,6 +106,32 @@ const DriverForm = () => {
   const onSubmit = async (values: DriverFormValues) => {
     setIsSubmitting(true);
     try {
+      // Primero, crear el usuario en Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            first_name: values.firstName,
+            last_name: values.lastName,
+            role: 'driver',
+            identification_type: values.identificationType,
+            identification_number: values.identificationNumber,
+            phone: values.phone
+          }
+        }
+      });
+
+      if (authError) {
+        console.error('Error creating user account:', authError);
+        toast.error('Error al crear la cuenta de usuario: ' + authError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log('Usuario creado exitosamente:', authData.user?.id);
+      
+      // Si la creación del usuario fue exitosa, procedemos con la creación del conductor
       // Insertar el conductor en la base de datos
       const { data: driver, error: driverError } = await supabase
         .from('drivers')
@@ -117,7 +152,12 @@ const DriverForm = () => {
         .select()
         .single();
 
-      if (driverError) throw driverError;
+      if (driverError) {
+        console.error('Error registrando conductor:', driverError);
+        toast.error('Error al registrar conductor: ' + driverError.message);
+        setIsSubmitting(false);
+        return;
+      }
 
       // Subir documentos si existen
       for (const [key, file] of Object.entries(documents)) {
@@ -128,7 +168,10 @@ const DriverForm = () => {
             .from('documents')
             .upload(fileName, file);
 
-          if (storageError) throw storageError;
+          if (storageError) {
+            console.error('Error subiendo documento:', storageError);
+            continue;
+          }
 
           // Obtener URL pública
           const { data: { publicUrl } } = supabase.storage
@@ -202,11 +245,11 @@ const DriverForm = () => {
 
   return (
     <div>
-      <div className="flex border-b mb-6">
+      <div className="flex border-b mb-6 overflow-x-auto">
         <button
           onClick={() => setActiveTab('basic')}
           className={cn(
-            "px-4 py-2 font-medium text-sm border-b-2 transition-colors",
+            "px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap",
             activeTab === 'basic' 
               ? "border-primary text-primary" 
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -215,9 +258,20 @@ const DriverForm = () => {
           Información Básica
         </button>
         <button
+          onClick={() => setActiveTab('account')}
+          className={cn(
+            "px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap",
+            activeTab === 'account' 
+              ? "border-primary text-primary" 
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Cuenta de Usuario
+        </button>
+        <button
           onClick={() => setActiveTab('documents')}
           className={cn(
-            "px-4 py-2 font-medium text-sm border-b-2 transition-colors",
+            "px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap",
             activeTab === 'documents' 
               ? "border-primary text-primary" 
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -228,7 +282,7 @@ const DriverForm = () => {
         <button
           onClick={() => setActiveTab('observations')}
           className={cn(
-            "px-4 py-2 font-medium text-sm border-b-2 transition-colors",
+            "px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap",
             activeTab === 'observations' 
               ? "border-primary text-primary" 
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -239,7 +293,7 @@ const DriverForm = () => {
         <button
           onClick={() => setActiveTab('vehicle')}
           className={cn(
-            "px-4 py-2 font-medium text-sm border-b-2 transition-colors",
+            "px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap",
             activeTab === 'vehicle' 
               ? "border-primary text-primary" 
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -508,6 +562,72 @@ const DriverForm = () => {
                     </FormItem>
                   )}
                 />
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'account' && (
+            <div className="bg-white p-6 rounded-lg border space-y-6">
+              <h3 className="text-lg font-medium border-b pb-3">Información de cuenta de usuario</h3>
+              
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Correo Electrónico</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="email" 
+                        placeholder="ejemplo@correo.com" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contraseña</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="Mínimo 6 caracteres" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirmar Contraseña</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="Confirme su contraseña" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-700">
+                <p>Al crear un conductor, se creará automáticamente una cuenta con el rol "Conductor" que le permitirá acceder al sistema con las credenciales indicadas.</p>
               </div>
             </div>
           )}
