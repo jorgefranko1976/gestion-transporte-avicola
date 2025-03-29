@@ -8,6 +8,7 @@ import DriverDocuments from './DriverDocuments';
 import DriverObservations from './DriverObservations';
 import VehicleAssignment from './VehicleAssignment';
 import FormActions from './form-sections/FormActions';
+import { toast } from 'sonner';
 
 const DriverForm = () => {
   const {
@@ -25,12 +26,39 @@ const DriverForm = () => {
     onSubmit
   } = useDriverForm();
 
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const isValid = await form.trigger();
+    if (!isValid) {
+      const errors = form.formState.errors;
+      if (errors.firstName || errors.lastName || errors.identificationType || 
+          errors.identificationNumber || errors.birthDate || errors.address ||
+          errors.phone || errors.emergencyContact || errors.hireDate) {
+        setActiveTab('basic');
+        toast.error('Hay errores en la información básica');
+        return;
+      }
+      
+      if (errors.email || errors.password || errors.confirmPassword) {
+        setActiveTab('account');
+        toast.error('Hay errores en la información de cuenta');
+        return;
+      }
+      
+      toast.error('Por favor, complete todos los campos requeridos correctamente');
+      return;
+    }
+    
+    form.handleSubmit(onSubmit)(e);
+  };
+
   return (
     <div>
       <FormTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6" noValidate>
           {activeTab === 'basic' && (
             <BasicInfoSection form={form} calculateAge={calculateAge} />
           )}

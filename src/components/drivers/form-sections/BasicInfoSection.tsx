@@ -30,7 +30,7 @@ const BasicInfoSection = ({ form, calculateAge }: BasicInfoSectionProps) => {
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre</FormLabel>
+                <FormLabel>Nombre <span className="text-red-500">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="Nombre" {...field} />
                 </FormControl>
@@ -44,7 +44,7 @@ const BasicInfoSection = ({ form, calculateAge }: BasicInfoSectionProps) => {
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Apellidos</FormLabel>
+                <FormLabel>Apellidos <span className="text-red-500">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="Apellidos" {...field} />
                 </FormControl>
@@ -60,7 +60,7 @@ const BasicInfoSection = ({ form, calculateAge }: BasicInfoSectionProps) => {
             name="identificationType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Identificación</FormLabel>
+                <FormLabel>Tipo de Identificación <span className="text-red-500">*</span></FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
                   defaultValue={field.value}
@@ -88,7 +88,7 @@ const BasicInfoSection = ({ form, calculateAge }: BasicInfoSectionProps) => {
             name="identificationNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Número de Identificación</FormLabel>
+                <FormLabel>Número de Identificación <span className="text-red-500">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="Número de identificación" {...field} />
                 </FormControl>
@@ -103,7 +103,7 @@ const BasicInfoSection = ({ form, calculateAge }: BasicInfoSectionProps) => {
           name="birthDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Fecha de Nacimiento</FormLabel>
+              <FormLabel>Fecha de Nacimiento <span className="text-red-500">*</span></FormLabel>
               <div className="flex items-center gap-3">
                 <Popover>
                   <PopoverTrigger asChild>
@@ -151,7 +151,7 @@ const BasicInfoSection = ({ form, calculateAge }: BasicInfoSectionProps) => {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Dirección</FormLabel>
+              <FormLabel>Dirección <span className="text-red-500">*</span></FormLabel>
               <FormControl>
                 <Input placeholder="Dirección completa" {...field} />
               </FormControl>
@@ -166,7 +166,7 @@ const BasicInfoSection = ({ form, calculateAge }: BasicInfoSectionProps) => {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Teléfono</FormLabel>
+                <FormLabel>Teléfono <span className="text-red-500">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="Número de teléfono" {...field} />
                 </FormControl>
@@ -180,7 +180,7 @@ const BasicInfoSection = ({ form, calculateAge }: BasicInfoSectionProps) => {
             name="emergencyContact"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Contacto de Emergencia</FormLabel>
+                <FormLabel>Contacto de Emergencia <span className="text-red-500">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="Número de contacto" {...field} />
                 </FormControl>
@@ -200,7 +200,7 @@ const BasicInfoSection = ({ form, calculateAge }: BasicInfoSectionProps) => {
           name="hireDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Fecha de Contratación</FormLabel>
+              <FormLabel>Fecha de Contratación <span className="text-red-500">*</span></FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>

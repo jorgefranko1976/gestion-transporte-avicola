@@ -18,7 +18,7 @@ const AccountSection = ({ form }: AccountSectionProps) => {
         name="email"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Correo Electrónico</FormLabel>
+            <FormLabel>Correo Electrónico <span className="text-red-500">*</span></FormLabel>
             <FormControl>
               <Input 
                 type="email" 
@@ -37,7 +37,7 @@ const AccountSection = ({ form }: AccountSectionProps) => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Contraseña</FormLabel>
+              <FormLabel>Contraseña <span className="text-red-500">*</span></FormLabel>
               <FormControl>
                 <Input 
                   type="password" 
@@ -55,7 +55,7 @@ const AccountSection = ({ form }: AccountSectionProps) => {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirmar Contraseña</FormLabel>
+              <FormLabel>Confirmar Contraseña <span className="text-red-500">*</span></FormLabel>
               <FormControl>
                 <Input 
                   type="password" 

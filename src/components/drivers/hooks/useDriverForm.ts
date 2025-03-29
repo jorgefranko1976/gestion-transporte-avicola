@@ -48,6 +48,7 @@ export const useDriverForm = () => {
       password: '',
       confirmPassword: '',
     },
+    mode: 'onChange',
   });
 
   // Calcular edad
@@ -83,8 +84,12 @@ export const useDriverForm = () => {
       });
 
       if (authError) {
-        console.error('Error creating user account:', authError);
-        toast.error('Error al crear la cuenta de usuario: ' + authError.message);
+        console.error('Error al crear la cuenta de usuario:', authError);
+        if (authError.message.includes('already') || authError.message.includes('exist')) {
+          toast.error('Error: Este correo electrónico ya está registrado');
+        } else {
+          toast.error('Error al crear la cuenta de usuario: ' + authError.message);
+        }
         setIsSubmitting(false);
         return;
       }
@@ -114,7 +119,11 @@ export const useDriverForm = () => {
 
       if (driverError) {
         console.error('Error registrando conductor:', driverError);
-        toast.error('Error al registrar conductor: ' + driverError.message);
+        if (driverError.message.includes('unique') || driverError.message.includes('duplicate')) {
+          toast.error('Error: Ya existe un conductor con este número de identificación');
+        } else {
+          toast.error('Error al registrar conductor: ' + driverError.message);
+        }
         setIsSubmitting(false);
         return;
       }
@@ -130,6 +139,7 @@ export const useDriverForm = () => {
 
           if (storageError) {
             console.error('Error subiendo documento:', storageError);
+            toast.error(`Error al subir el documento ${key}: ${storageError.message}`);
             continue;
           }
 
@@ -197,7 +207,7 @@ export const useDriverForm = () => {
       
     } catch (error) {
       console.error('Error registrando conductor:', error);
-      toast.error('Error al registrar conductor');
+      toast.error('Error al registrar conductor. Intente nuevamente.');
     } finally {
       setIsSubmitting(false);
     }
