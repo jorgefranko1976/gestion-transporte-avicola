@@ -3,11 +3,12 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { DriverFormValues } from '../schemas/driverFormSchema';
-import { DocumentsState } from './useDriverForm';
+import { DocumentsState, ExpirationDatesState } from './useDriverForm';
 
 interface UseFormSubmissionProps {
   selectedVehicleId: string | null;
   documents: DocumentsState;
+  expirationDates: ExpirationDatesState;
   observations: { content: string, document: File | null }[];
   resetFormState: () => void;
 }
@@ -15,6 +16,7 @@ interface UseFormSubmissionProps {
 export const useFormSubmission = ({
   selectedVehicleId,
   documents,
+  expirationDates,
   observations,
   resetFormState
 }: UseFormSubmissionProps) => {
@@ -66,7 +68,7 @@ export const useFormSubmission = ({
           emergency_contact: values.emergencyContact,
           hire_date: values.hireDate.toISOString(),
           assigned_vehicle_id: selectedVehicleId,
-          license_expiration: values.licenseExpiration?.toISOString() || null,
+          license_expiration: expirationDates.drivingLicense?.toISOString() || null,
           active: true
         })
         .select()

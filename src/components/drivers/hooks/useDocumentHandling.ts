@@ -19,17 +19,21 @@ export interface DocumentFile {
 export type DocumentsState = Record<DocumentType, File | null>;
 export type PreviewsState = Record<DocumentType, string | null>;
 
+export interface ExpirationDatesState {
+  drivingLicense: Date | null;
+}
+
 interface UseDocumentHandlingProps {
   documents: DocumentsState;
   setDocuments: React.Dispatch<React.SetStateAction<DocumentsState>>;
-  setExpirationDates?: React.Dispatch<React.SetStateAction<{
-    drivingLicense: Date | null;
-  }>>;
+  expirationDates?: ExpirationDatesState;
+  setExpirationDates?: React.Dispatch<React.SetStateAction<ExpirationDatesState>>;
 }
 
 export const useDocumentHandling = ({ 
   documents, 
   setDocuments, 
+  expirationDates,
   setExpirationDates 
 }: UseDocumentHandlingProps) => {
   const [previews, setPreviews] = useState<PreviewsState>({

@@ -2,7 +2,7 @@
 import React from "react";
 import { documentFields } from "./config/documentFields";
 import DocumentCard from "./components/DocumentCard";
-import { useDocumentHandling, DocumentType } from "./hooks/useDocumentHandling";
+import { useDocumentHandling, DocumentType, ExpirationDatesState } from "./hooks/useDocumentHandling";
 
 export interface DocumentsState {
   drivingLicense: File | null;
@@ -12,10 +12,6 @@ export interface DocumentsState {
   references: File | null;
   arl: File | null;
   payroll: File | null;
-}
-
-export interface ExpirationDatesState {
-  drivingLicense: Date | null;
 }
 
 interface DriverDocumentsProps {

@@ -1,10 +1,7 @@
 
 import { useState } from 'react';
 import { DocumentsState } from './useDriverForm';
-
-export interface ExpirationDatesState {
-  drivingLicense: Date | null;
-}
+import { ExpirationDatesState } from './useDocumentHandling';
 
 export const useDocuments = () => {
   const [documents, setDocuments] = useState<DocumentsState>({

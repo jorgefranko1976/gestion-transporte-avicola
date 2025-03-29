@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { driverFormSchema, DriverFormValues } from '../schemas/driverFormSchema';
 import { useDocuments } from './useDocuments';
 import { useFormSubmission } from './useFormSubmission';
+import { ExpirationDatesState } from './useDocumentHandling';
 
 export interface DocumentsState {
   drivingLicense: File | null;
@@ -14,10 +15,6 @@ export interface DocumentsState {
   references: File | null;
   arl: File | null;
   payroll: File | null;
-}
-
-export interface ExpirationDatesState {
-  drivingLicense: Date | null;
 }
 
 export const useDriverForm = () => {
