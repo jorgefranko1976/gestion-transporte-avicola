@@ -16,6 +16,18 @@ interface BirthDateSectionProps {
 }
 
 const BirthDateSection = ({ form, calculateAge }: BirthDateSectionProps) => {
+  // Función para generar años para navegación rápida
+  const generateYearsRange = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    const startYear = currentYear - 80; // 80 años atrás desde el año actual
+    
+    for (let year = startYear; year <= currentYear; year++) {
+      years.push(year);
+    }
+    return years;
+  };
+
   return (
     <FormField
       control={form.control}
@@ -35,7 +47,7 @@ const BirthDateSection = ({ form, calculateAge }: BirthDateSectionProps) => {
                     )}
                   >
                     {field.value ? (
-                      format(field.value, "PPP", { locale: es })
+                      format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: es })
                     ) : (
                       <span>Seleccionar fecha</span>
                     )}
@@ -52,6 +64,18 @@ const BirthDateSection = ({ form, calculateAge }: BirthDateSectionProps) => {
                     date > new Date() || date < new Date("1940-01-01")
                   }
                   initialFocus
+                  captionLayout="dropdown-buttons"
+                  fromYear={1940}
+                  toYear={new Date().getFullYear()}
+                  classNames={{
+                    caption_dropdowns: "flex justify-center gap-1",
+                    caption_label: "text-sm font-medium hidden",
+                    dropdown: "p-1",
+                    dropdown_month: "text-sm py-1 px-2 rounded hover:bg-accent",
+                    dropdown_year: "text-sm py-1 px-2 rounded hover:bg-accent",
+                    vhidden: "sr-only",
+                  }}
+                  className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>

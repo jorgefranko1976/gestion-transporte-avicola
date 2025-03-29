@@ -16,6 +16,10 @@ export interface DocumentsState {
   payroll: File | null;
 }
 
+export interface ExpirationDatesState {
+  drivingLicense: Date | null;
+}
+
 export const useDriverForm = () => {
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'basic' | 'account' | 'documents' | 'observations' | 'vehicle'>('basic');
@@ -23,6 +27,8 @@ export const useDriverForm = () => {
   const {
     documents,
     setDocuments,
+    expirationDates,
+    setExpirationDates,
     observations,
     setObservations
   } = useDocuments();
@@ -58,6 +64,9 @@ export const useDriverForm = () => {
       arl: null,
       payroll: null,
     });
+    setExpirationDates({
+      drivingLicense: null
+    });
     setObservations([]);
     setSelectedVehicleId(null);
     setActiveTab('basic');
@@ -69,6 +78,7 @@ export const useDriverForm = () => {
   } = useFormSubmission({
     selectedVehicleId,
     documents,
+    expirationDates,
     observations,
     resetFormState
   });
@@ -90,6 +100,8 @@ export const useDriverForm = () => {
     isSubmitting,
     documents,
     setDocuments,
+    expirationDates,
+    setExpirationDates,
     observations,
     setObservations,
     selectedVehicleId,

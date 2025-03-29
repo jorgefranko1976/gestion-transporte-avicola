@@ -39,6 +39,10 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
   fileInputRef,
   onFileChange,
 }) => {
+  // Cálculo de límites para el calendario de vencimiento
+  const currentYear = new Date().getFullYear();
+  const toYear = currentYear + 10; // Permitir fechas hasta 10 años en el futuro
+  
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">
@@ -106,6 +110,17 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
                       onSelect={onExpirationChange}
                       disabled={(date) => date < new Date()}
                       initialFocus
+                      captionLayout="dropdown-buttons"
+                      fromYear={currentYear}
+                      toYear={toYear}
+                      classNames={{
+                        caption_dropdowns: "flex justify-center gap-1",
+                        caption_label: "text-sm font-medium hidden",
+                        dropdown: "p-1",
+                        dropdown_month: "text-sm py-1 px-2 rounded hover:bg-accent",
+                        dropdown_year: "text-sm py-1 px-2 rounded hover:bg-accent",
+                        vhidden: "sr-only",
+                      }}
                       className={cn("p-3 pointer-events-auto")}
                       locale={es}
                     />

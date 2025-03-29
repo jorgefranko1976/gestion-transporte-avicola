@@ -15,6 +15,11 @@ interface HireDateSectionProps {
 }
 
 const HireDateSection = ({ form }: HireDateSectionProps) => {
+  // Cálculo de límites para el calendario
+  const currentYear = new Date().getFullYear();
+  const fromYear = currentYear - 10; // Permitir fechas desde 10 años atrás
+  const toYear = currentYear + 2; // Permitir fechas hasta 2 años en el futuro
+  
   return (
     <FormField
       control={form.control}
@@ -33,7 +38,7 @@ const HireDateSection = ({ form }: HireDateSectionProps) => {
                   )}
                 >
                   {field.value ? (
-                    format(field.value, "PPP", { locale: es })
+                    format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: es })
                   ) : (
                     <span>Seleccionar fecha</span>
                   )}
@@ -46,10 +51,19 @@ const HireDateSection = ({ form }: HireDateSectionProps) => {
                 mode="single"
                 selected={field.value}
                 onSelect={field.onChange}
-                disabled={(date) =>
-                  date > new Date()
-                }
+                captionLayout="dropdown-buttons"
+                fromYear={fromYear}
+                toYear={toYear}
+                classNames={{
+                  caption_dropdowns: "flex justify-center gap-1",
+                  caption_label: "text-sm font-medium hidden",
+                  dropdown: "p-1",
+                  dropdown_month: "text-sm py-1 px-2 rounded hover:bg-accent",
+                  dropdown_year: "text-sm py-1 px-2 rounded hover:bg-accent",
+                  vhidden: "sr-only",
+                }}
                 initialFocus
+                className={cn("p-3 pointer-events-auto")}
               />
             </PopoverContent>
           </Popover>

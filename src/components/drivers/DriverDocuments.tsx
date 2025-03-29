@@ -14,7 +14,7 @@ export interface DocumentsState {
   payroll: File | null;
 }
 
-interface ExpirationDatesState {
+export interface ExpirationDatesState {
   drivingLicense: Date | null;
 }
 
@@ -40,6 +40,7 @@ const DriverDocuments = ({
   } = useDocumentHandling({
     documents,
     setDocuments,
+    expirationDates,
     setExpirationDates
   });
 

@@ -16,6 +16,8 @@ const DriverForm = () => {
     isSubmitting,
     documents,
     setDocuments,
+    expirationDates,
+    setExpirationDates,
     observations,
     setObservations,
     selectedVehicleId,
@@ -68,7 +70,12 @@ const DriverForm = () => {
           )}
           
           {activeTab === 'documents' && (
-            <DriverDocuments documents={documents} setDocuments={setDocuments} />
+            <DriverDocuments 
+              documents={documents} 
+              setDocuments={setDocuments}
+              expirationDates={expirationDates}
+              setExpirationDates={setExpirationDates}
+            />
           )}
           
           {activeTab === 'observations' && (
