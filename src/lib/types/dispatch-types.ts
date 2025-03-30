@@ -9,7 +9,7 @@ export interface Dispatch {
   destination: string;
   zone: string;
   farm: string;
-  farmId: string; // Cambiamos a no opcional para asegurar que siempre tenga un valor
+  farmId: string;
   packages: number;
   concentrateAmount: number | null; // Cantidad de alimento en toneladas
   status: 'pending' | 'accepted' | 'in_progress' | 'delayed' | 'completed' | 'cancelled';

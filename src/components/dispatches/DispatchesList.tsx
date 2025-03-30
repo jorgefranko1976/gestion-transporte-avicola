@@ -55,7 +55,12 @@ const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
           .order("created_at", { ascending: false });
         
         if (error) {
+          console.error("Error al obtener despachos:", error);
           throw error;
+        }
+        
+        if (!data) {
+          throw new Error("No se pudieron obtener los datos de despachos");
         }
         
         // Transformar datos para ajustarse a la interfaz
@@ -71,7 +76,7 @@ const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
           farmId: d.farm_id || '',
           packages: d.packages,
           concentrateAmount: d.concentrate_amount,
-          status: d.status as any,
+          status: d.status as Dispatch['status'],
           acceptedAt: d.accepted_at ? new Date(d.accepted_at) : null,
           completedAt: d.completed_at ? new Date(d.completed_at) : null,
           eta: d.eta ? new Date(d.eta) : null,
@@ -107,11 +112,11 @@ const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
       case 'accepted':
         return <Badge variant="secondary">Aceptado</Badge>;
       case 'in_progress':
-        return <Badge variant="primary">En progreso</Badge>;
+        return <Badge variant="secondary">En progreso</Badge>;
       case 'delayed':
-        return <Badge variant="warning">Demorado</Badge>;
+        return <Badge variant="destructive">Demorado</Badge>;
       case 'completed':
-        return <Badge variant="success">Completado</Badge>;
+        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200">Completado</Badge>;
       case 'cancelled':
         return <Badge variant="destructive">Cancelado</Badge>;
       default:

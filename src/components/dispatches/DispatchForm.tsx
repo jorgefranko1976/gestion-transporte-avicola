@@ -7,7 +7,6 @@ import { useDispatchCreation } from './hooks/useDispatchCreation';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -51,7 +50,20 @@ const DispatchForm = () => {
   });
 
   const onSubmit = async (values: DispatchFormValues) => {
-    const result = await createDispatch(values);
+    // Asegurarse de que los campos requeridos no son undefined
+    const dispatchData = {
+      orderId: values.orderId,
+      loadingCompany: values.loadingCompany,
+      destination: values.destination,
+      zone: values.zone || '',
+      farm: values.farm,
+      farmId: values.farmId,
+      packages: values.packages,
+      concentrateAmount: values.concentrateAmount,
+      eta: values.eta
+    };
+    
+    const result = await createDispatch(dispatchData);
     if (result) {
       form.reset();
       toast.success('Despacho creado correctamente');

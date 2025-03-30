@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -15,7 +16,9 @@ const mockDispatches: Dispatch[] = [
     destination: 'Medellín, Antioquia',
     zone: 'Zona Norte',
     farm: 'Granja El Amanecer',
+    farmId: 'FARM-001',
     packages: 250,
+    concentrateAmount: 2.5,
     status: 'pending',
     acceptedAt: null,
     completedAt: null,
@@ -32,7 +35,9 @@ const mockDispatches: Dispatch[] = [
     destination: 'Cali, Valle del Cauca',
     zone: 'Zona Occidental',
     farm: 'Granja San Pedro',
+    farmId: 'FARM-002',
     packages: 180,
+    concentrateAmount: 1.8,
     status: 'accepted',
     acceptedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
     completedAt: null,

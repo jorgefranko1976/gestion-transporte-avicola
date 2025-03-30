@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +29,6 @@ export const useDriverForm = () => {
     setObservations
   } = useDocuments();
 
-  // Inicializar el formulario
   const form = useForm<DriverFormValues>({
     resolver: zodResolver(driverFormSchema),
     defaultValues: {
@@ -80,7 +78,6 @@ export const useDriverForm = () => {
     resetFormState
   });
 
-  // Calcular edad
   const calculateAge = (birthDate: Date | undefined) => {
     if (!birthDate) return '';
     const today = new Date();
