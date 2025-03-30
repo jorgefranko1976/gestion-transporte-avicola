@@ -13,50 +13,65 @@ export type Database = {
         Row: {
           accepted_at: string | null
           completed_at: string | null
+          concentrate_amount: number | null
           created_at: string | null
           created_by: string | null
           destination: string
           driver_id: string | null
           eta: string | null
+          farm: string | null
+          farm_id: string | null
           id: string
           loading_company: string | null
           observations: string | null
           order_id: string
+          packages: number | null
           receipt_image_url: string | null
           status: string | null
           vehicle_plate: string | null
+          zone: string | null
         }
         Insert: {
           accepted_at?: string | null
           completed_at?: string | null
+          concentrate_amount?: number | null
           created_at?: string | null
           created_by?: string | null
           destination: string
           driver_id?: string | null
           eta?: string | null
+          farm?: string | null
+          farm_id?: string | null
           id?: string
           loading_company?: string | null
           observations?: string | null
           order_id: string
+          packages?: number | null
           receipt_image_url?: string | null
           status?: string | null
           vehicle_plate?: string | null
+          zone?: string | null
         }
         Update: {
           accepted_at?: string | null
           completed_at?: string | null
+          concentrate_amount?: number | null
           created_at?: string | null
           created_by?: string | null
           destination?: string
           driver_id?: string | null
           eta?: string | null
+          farm?: string | null
+          farm_id?: string | null
           id?: string
           loading_company?: string | null
           observations?: string | null
           order_id?: string
+          packages?: number | null
           receipt_image_url?: string | null
           status?: string | null
           vehicle_plate?: string | null
+          zone?: string | null
         }
         Relationships: [
           {
