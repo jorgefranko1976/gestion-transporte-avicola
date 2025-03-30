@@ -4,17 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { driverFormSchema, DriverFormValues } from '../schemas/driverFormSchema';
 import { useDocuments } from './useDocuments';
 import { useFormSubmission } from './useFormSubmission';
-import { ExpirationDatesState } from './useDocumentHandling';
+import { DocumentType } from './useDocumentHandling';
 
-export interface DocumentsState {
-  drivingLicense: File | null;
-  identification: File | null;
-  resume: File | null;
-  finesClearance: File | null;
-  references: File | null;
-  arl: File | null;
-  payroll: File | null;
-}
+export type DocumentsState = Record<DocumentType, File | null>;
 
 export const useDriverForm = () => {
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);

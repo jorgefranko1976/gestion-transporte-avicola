@@ -3,7 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DriverFormValues } from "../schemas/driverFormSchema";
 import { DocumentsState } from "./useDriverForm";
-import { ExpirationDatesState } from "./useDocumentHandling";
+import { ExpirationDatesState, DocumentType } from "./useDocumentHandling";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 

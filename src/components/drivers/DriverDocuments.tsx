@@ -4,15 +4,7 @@ import { documentFields } from "./config/documentFields";
 import DocumentCard from "./components/DocumentCard";
 import { useDocumentHandling, DocumentType, ExpirationDatesState } from "./hooks/useDocumentHandling";
 
-export interface DocumentsState {
-  drivingLicense: File | null;
-  identification: File | null;
-  resume: File | null;
-  finesClearance: File | null;
-  references: File | null;
-  arl: File | null;
-  payroll: File | null;
-}
+export type DocumentsState = Record<DocumentType, File | null>;
 
 interface DriverDocumentsProps {
   documents: DocumentsState;
