@@ -39,8 +39,8 @@ export const useExcelUpload = (): ExcelHook => {
   } = useExcelActions(stateSetters);
 
   // Wrap the handleUpload to use the current state values
-  const handleUpload = useCallback(async () => {
-    await baseHandleUpload(selectedFile, previewData);
+  const handleUpload = useCallback(() => {
+    return baseHandleUpload(selectedFile, previewData);
   }, [baseHandleUpload, selectedFile, previewData]);
 
   return {
@@ -54,7 +54,6 @@ export const useExcelUpload = (): ExcelHook => {
     handleFileSelect,
     handleUpload,
     handleRemoveFile,
-    // Add the missing properties to fix the TypeScript error
     setExcelData,
     setLastUpdateDate
   };

@@ -125,7 +125,7 @@ const CoordinatorPortal = () => {
           selectedFile={selectedFile}
           isUploading={isUploading}
           onClose={() => setShowUploadModal(false)}
-          onUpload={() => handleUpload(selectedFile, previewData)}
+          onUpload={handleUpload}
           onFileSelect={handleFileSelect}
           onShowDetailedPreview={handleShowDetailedPreview}
         />
@@ -140,7 +140,7 @@ const CoordinatorPortal = () => {
             setShowPreviewModal(false);
             setShowUploadModal(true);
           }}
-          onUpload={() => handleUpload(selectedFile, previewData)}
+          onUpload={handleUpload}
           onRemoveFile={handleRemoveFile}
         />
       )}

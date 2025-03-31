@@ -27,7 +27,7 @@ export interface ExcelStateSetters {
 
 export interface ExcelAction {
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleUpload: (selectedFile: File | null, previewData: ExcelPreviewData) => void;
+  handleUpload: (selectedFile: File | null, previewData: ExcelPreviewData) => Promise<void>;
   handleRemoveFile: () => void;
 }
 
