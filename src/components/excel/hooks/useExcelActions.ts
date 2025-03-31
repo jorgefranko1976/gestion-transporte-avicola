@@ -32,7 +32,15 @@ export const useExcelActions = (state: ExcelStateSetters) => {
   };
 
   const handleUpload = async (selectedFile: File | null, previewData: any) => {
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      toast.error("No se ha seleccionado un archivo");
+      return;
+    }
+    
+    if (!user) {
+      toast.error("Debe iniciar sesión para subir archivos");
+      return;
+    }
     
     setIsUploading(true);
     
@@ -42,12 +50,14 @@ export const useExcelActions = (state: ExcelStateSetters) => {
       
       // Save file info to Supabase
       const fileName = selectedFile.name;
+      console.log('Guardando información del archivo con usuario:', user.id);
+      
       const { data: fileData, error: fileError } = await supabase
         .from('excel_files')
         .insert({
           name: fileName,
           type: 'dispatch_data',
-          uploaded_by: user?.id,
+          uploaded_by: user.id,
           records: previewData.totalRecords,
           repro_count: previewData.reproductora.length,
           engorde_count: previewData.engorde.length,
@@ -58,8 +68,8 @@ export const useExcelActions = (state: ExcelStateSetters) => {
         .single();
 
       if (fileError) {
-        console.error('Error saving file data:', fileError);
-        throw new Error('Error al guardar la información del archivo');
+        console.error('Error al guardar en Supabase:', fileError);
+        throw new Error(`Error al guardar la información del archivo: ${fileError.message}`);
       }
       
       // Store the transformed data in local state
@@ -71,7 +81,7 @@ export const useExcelActions = (state: ExcelStateSetters) => {
         description: `Se procesaron ${previewData.totalRecords} registros de despacho.`,
       });
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Error de carga:', error);
       toast.error("Error al procesar el archivo", {
         description: error instanceof Error ? error.message : "Hubo un problema al procesar el archivo.",
       });

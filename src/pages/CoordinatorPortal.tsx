@@ -40,40 +40,48 @@ const CoordinatorPortal = () => {
   // Load the most recent Excel file data on component mount
   useEffect(() => {
     const fetchLatestExcelData = async () => {
+      if (!user) {
+        console.log('No hay usuario autenticado para cargar datos de Excel');
+        return;
+      }
+      
       try {
+        console.log('Buscando el archivo Excel más reciente...');
         // Get the most recent Excel file
         const { data: latestFile, error: fileError } = await supabase
           .from('excel_files')
           .select('*')
           .order('uploaded_at', { ascending: false })
-          .limit(1)
-          .single();
+          .limit(1);
 
         if (fileError) {
-          if (fileError.code !== 'PGRST116') { // No rows returned
-            console.error('Error fetching latest file:', fileError);
-          }
+          console.error('Error al buscar el archivo más reciente:', fileError);
           return;
         }
 
-        if (latestFile) {
+        if (latestFile && latestFile.length > 0) {
           // Set the last update date
-          setLastUpdateDate(new Date(latestFile.uploaded_at).toLocaleString());
+          const lastFile = latestFile[0];
+          setLastUpdateDate(new Date(lastFile.uploaded_at).toLocaleString());
+          
+          console.log('Archivo Excel encontrado:', lastFile);
           
           // TODO: In a real implementation, we would fetch the actual excel data
           // For now, we're just acknowledging there was a previous upload
           
           toast.info("Datos Excel cargados", {
-            description: `Se encontró un archivo subido previamente con ${latestFile.records} registros.`,
+            description: `Se encontró un archivo subido previamente con ${lastFile.records} registros.`,
           });
+        } else {
+          console.log('No se encontraron archivos Excel previos');
         }
       } catch (error) {
-        console.error('Error loading Excel data:', error);
+        console.error('Error al cargar datos Excel:', error);
       }
     };
 
     fetchLatestExcelData();
-  }, [setLastUpdateDate]);
+  }, [user, setLastUpdateDate]);
 
   const handleShowDetailedPreview = () => {
     setShowUploadModal(false);
