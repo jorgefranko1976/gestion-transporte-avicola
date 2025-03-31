@@ -1,6 +1,8 @@
 
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 import DashboardContent from '@/components/dashboard/dashboard-content';
 import DispatchesContent from '@/components/dispatches/dispatches-content';
@@ -30,8 +32,48 @@ const CoordinatorPortal = () => {
     lastUpdateDate,
     handleFileSelect,
     handleUpload,
-    handleRemoveFile
+    handleRemoveFile,
+    setExcelData,
+    setLastUpdateDate
   } = useExcelUpload();
+
+  // Load the most recent Excel file data on component mount
+  useEffect(() => {
+    const fetchLatestExcelData = async () => {
+      try {
+        // Get the most recent Excel file
+        const { data: latestFile, error: fileError } = await supabase
+          .from('excel_files')
+          .select('*')
+          .order('uploaded_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (fileError) {
+          if (fileError.code !== 'PGRST116') { // No rows returned
+            console.error('Error fetching latest file:', fileError);
+          }
+          return;
+        }
+
+        if (latestFile) {
+          // Set the last update date
+          setLastUpdateDate(new Date(latestFile.uploaded_at).toLocaleString());
+          
+          // TODO: In a real implementation, we would fetch the actual excel data
+          // For now, we're just acknowledging there was a previous upload
+          
+          toast.info("Datos Excel cargados", {
+            description: `Se encontró un archivo subido previamente con ${latestFile.records} registros.`,
+          });
+        }
+      } catch (error) {
+        console.error('Error loading Excel data:', error);
+      }
+    };
+
+    fetchLatestExcelData();
+  }, []);
 
   const handleShowDetailedPreview = () => {
     setShowUploadModal(false);

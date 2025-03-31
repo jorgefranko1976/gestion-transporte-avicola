@@ -16,7 +16,7 @@ export const useExcelState = (): ExcelState => {
     totalRecords: 0
   });
   const [excelData, setExcelData] = useState<any[]>([]);
-  const [lastUpdateDate, setLastUpdateDate] = useState('11/03/2025, 09:40 p. m.');
+  const [lastUpdateDate, setLastUpdateDate] = useState<string>('');
 
   return {
     showUploadModal,

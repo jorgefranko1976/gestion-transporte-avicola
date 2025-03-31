@@ -40,6 +40,8 @@ export type ExcelHook = {
   excelData: any[];
   lastUpdateDate: string;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleUpload: () => void;
+  handleUpload: () => Promise<void>;
   handleRemoveFile: () => void;
+  setExcelData: (data: any[]) => void;
+  setLastUpdateDate: (date: string) => void;
 };

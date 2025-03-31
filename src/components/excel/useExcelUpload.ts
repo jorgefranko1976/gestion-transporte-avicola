@@ -2,6 +2,7 @@
 import { ExcelHook } from './types/excelTypes';
 import { useExcelState } from './hooks/useExcelState';
 import { useExcelActions } from './hooks/useExcelActions';
+import { useState, useCallback } from 'react';
 
 /**
  * Hook for managing Excel file uploads and processing
@@ -38,9 +39,9 @@ export const useExcelUpload = (): ExcelHook => {
   } = useExcelActions(stateSetters);
 
   // Wrap the handleUpload to use the current state values
-  const handleUpload = () => {
-    baseHandleUpload(selectedFile, previewData);
-  };
+  const handleUpload = useCallback(async () => {
+    await baseHandleUpload(selectedFile, previewData);
+  }, [baseHandleUpload, selectedFile, previewData]);
 
   return {
     showUploadModal,
