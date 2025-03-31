@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -124,7 +125,7 @@ const CoordinatorPortal = () => {
           selectedFile={selectedFile}
           isUploading={isUploading}
           onClose={() => setShowUploadModal(false)}
-          onUpload={() => selectedFile && handleUpload(selectedFile, previewData)}
+          onUpload={() => handleUpload(selectedFile, previewData)}
           onFileSelect={handleFileSelect}
           onShowDetailedPreview={handleShowDetailedPreview}
         />

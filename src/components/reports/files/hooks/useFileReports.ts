@@ -46,20 +46,32 @@ export const useFileReports = () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
+      // Modified query - we need to get each part separately to avoid the join error
       const { data, error } = await supabase
         .from('excel_files')
-        .select('*, user_profiles(first_name, last_name)')
+        .select('*')
         .gte('uploaded_at', startDate.toISOString())
         .lte('uploaded_at', new Date(endDate.setHours(23, 59, 59)).toISOString())
         .order('uploaded_at', { ascending: false });
         
       if (error) throw error;
       
-      // Transformar los datos para adaptarlos a nuestro formato
-      const formattedFiles = data.map(file => {
-        const userName = file.user_profiles 
-          ? `${file.user_profiles.first_name} ${file.user_profiles.last_name}` 
-          : 'Sistema';
+      // Process files and fetch user profiles separately when needed
+      const formattedFiles = await Promise.all(data.map(async (file) => {
+        let userName = 'Sistema';
+        
+        // If there's an uploaded_by ID, try to fetch the user profile
+        if (file.uploaded_by) {
+          const { data: profileData, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('first_name, last_name')
+            .eq('id', file.uploaded_by)
+            .single();
+            
+          if (!profileError && profileData) {
+            userName = `${profileData.first_name} ${profileData.last_name}`;
+          }
+        }
           
         return {
           id: file.id,
@@ -73,7 +85,7 @@ export const useFileReports = () => {
           reproCount: file.repro_count,
           engordeCount: file.engorde_count
         };
-      });
+      }));
       
       setState({
         files: formattedFiles,
