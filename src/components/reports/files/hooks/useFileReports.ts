@@ -1,80 +1,105 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { FileReport } from '../types';
+import { FileReport, FileReportState } from '../types';
+import { useAuth } from '@/context/AuthContext';
 
 export const useFileReports = () => {
+  const { user } = useAuth();
   const [startDate, setStartDate] = useState<Date | undefined>(
     new Date(new Date().setDate(new Date().getDate() - 30))
   );
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [searchTerm, setSearchTerm] = useState('');
-  const [files, setFiles] = useState<FileReport[]>([]);
-  const [filteredFiles, setFilteredFiles] = useState<FileReport[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, setState] = useState<FileReportState>({
+    files: [],
+    filteredFiles: [],
+    isLoading: false,
+    error: null
+  });
+
+  // Filtrar resultados por término de búsqueda
+  useEffect(() => {
+    if (searchTerm) {
+      const lowercaseSearch = searchTerm.toLowerCase();
+      const filtered = state.files.filter(f => 
+        f.name.toLowerCase().includes(lowercaseSearch) || 
+        f.type.toLowerCase().includes(lowercaseSearch) ||
+        f.uploadedBy.toLowerCase().includes(lowercaseSearch)
+      );
+      setState(prev => ({ ...prev, filteredFiles: filtered }));
+    } else {
+      setState(prev => ({ ...prev, filteredFiles: prev.files }));
+    }
+  }, [searchTerm, state.files]);
 
   // Buscar archivos
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     if (!startDate || !endDate) {
       toast.error('Debes seleccionar un rango de fechas');
       return;
     }
     
-    setIsLoading(true);
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    
     try {
       const { data, error } = await supabase
         .from('excel_files')
-        .select('*')
+        .select('*, user_profiles(first_name, last_name)')
         .gte('uploaded_at', startDate.toISOString())
         .lte('uploaded_at', new Date(endDate.setHours(23, 59, 59)).toISOString())
         .order('uploaded_at', { ascending: false });
         
       if (error) throw error;
       
-      const formattedFiles = data.map(file => ({
-        id: file.id,
-        name: file.name,
-        type: file.type,
-        uploadedAt: new Date(file.uploaded_at),
-        uploadedBy: file.uploaded_by || 'Sistema',
-        records: file.records,
-        status: file.status,
-        reproCount: file.repro_count,
-        engordeCount: file.engorde_count
-      }));
+      // Transformar los datos para adaptarlos a nuestro formato
+      const formattedFiles = data.map(file => {
+        const userName = file.user_profiles 
+          ? `${file.user_profiles.first_name} ${file.user_profiles.last_name}` 
+          : 'Sistema';
+          
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          uploadedAt: new Date(file.uploaded_at),
+          uploadedBy: userName,
+          uploadedById: file.uploaded_by,
+          records: file.records,
+          status: file.status,
+          reproCount: file.repro_count,
+          engordeCount: file.engorde_count
+        };
+      });
       
-      setFiles(formattedFiles);
-      setFilteredFiles(formattedFiles);
+      setState({
+        files: formattedFiles,
+        filteredFiles: formattedFiles,
+        isLoading: false,
+        error: null
+      });
       
-    } catch (error) {
+      toast.success(`Se encontraron ${formattedFiles.length} archivos`);
+      
+    } catch (error: any) {
       console.error('Error fetching files:', error);
-      toast.error('Error al buscar archivos');
-    } finally {
-      setIsLoading(false);
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: error.message || 'Error al buscar archivos' 
+      }));
+      toast.error('Error al buscar archivos', {
+        description: error.message
+      });
     }
-  };
-
-  // Filtrar resultados por término de búsqueda
-  useEffect(() => {
-    if (searchTerm) {
-      const lowercaseSearch = searchTerm.toLowerCase();
-      const filtered = files.filter(f => 
-        f.name.toLowerCase().includes(lowercaseSearch) || 
-        f.type.toLowerCase().includes(lowercaseSearch) ||
-        f.uploadedBy.toLowerCase().includes(lowercaseSearch)
-      );
-      setFilteredFiles(filtered);
-    } else {
-      setFilteredFiles(files);
-    }
-  }, [searchTerm, files]);
+  }, [startDate, endDate]);
 
   // Exportar a CSV
-  const exportToCSV = () => {
-    if (filteredFiles.length === 0) {
+  const exportToCSV = useCallback(() => {
+    if (state.filteredFiles.length === 0) {
       toast.error('No hay datos para exportar');
       return;
     }
@@ -91,7 +116,7 @@ export const useFileReports = () => {
       'Registros ENGORDE'
     ].join(',');
     
-    const csvRows = filteredFiles.map(f => [
+    const csvRows = state.filteredFiles.map(f => [
       f.name,
       f.type,
       format(f.uploadedAt, 'dd/MM/yyyy HH:mm', { locale: es }),
@@ -114,7 +139,16 @@ export const useFileReports = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+    
+    toast.success(`${state.filteredFiles.length} registros exportados a CSV`);
+  }, [state.filteredFiles]);
+
+  // Cargar automáticamente al iniciar
+  useEffect(() => {
+    if (startDate && endDate) {
+      handleSearch();
+    }
+  }, []);
 
   return {
     startDate,
@@ -123,9 +157,10 @@ export const useFileReports = () => {
     setEndDate,
     searchTerm,
     setSearchTerm,
-    files,
-    filteredFiles,
-    isLoading,
+    files: state.files,
+    filteredFiles: state.filteredFiles,
+    isLoading: state.isLoading,
+    error: state.error,
     handleSearch,
     exportToCSV
   };

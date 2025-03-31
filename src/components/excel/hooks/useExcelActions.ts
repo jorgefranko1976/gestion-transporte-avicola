@@ -37,7 +37,7 @@ export const useExcelActions = (state: ExcelStateSetters) => {
       return;
     }
     
-    if (!user) {
+    if (!user || !user.id) {
       toast.error("Debe iniciar sesión para subir archivos");
       return;
     }
@@ -58,9 +58,9 @@ export const useExcelActions = (state: ExcelStateSetters) => {
           name: fileName,
           type: 'dispatch_data',
           uploaded_by: user.id,
-          records: previewData.totalRecords,
-          repro_count: previewData.reproductora.length,
-          engorde_count: previewData.engorde.length,
+          records: previewData.totalRecords || 0,
+          repro_count: previewData.reproductora?.length || 0,
+          engorde_count: previewData.engorde?.length || 0,
           file_url: 'processed_directly', // No file URL since we're processing directly
           status: 'completed'
         })
@@ -80,7 +80,7 @@ export const useExcelActions = (state: ExcelStateSetters) => {
       toast.success("Archivo subido con éxito", {
         description: `Se procesaron ${previewData.totalRecords} registros de despacho.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error de carga:', error);
       toast.error("Error al procesar el archivo", {
         description: error instanceof Error ? error.message : "Hubo un problema al procesar el archivo.",

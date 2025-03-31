@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,7 +36,6 @@ const CoordinatorPortal = () => {
     setLastUpdateDate
   } = useExcelUpload();
 
-  // Load the most recent Excel file data on component mount
   useEffect(() => {
     const fetchLatestExcelData = async () => {
       if (!user) {
@@ -47,7 +45,6 @@ const CoordinatorPortal = () => {
       
       try {
         console.log('Buscando el archivo Excel más reciente...');
-        // Get the most recent Excel file
         const { data: latestFile, error: fileError } = await supabase
           .from('excel_files')
           .select('*')
@@ -60,23 +57,20 @@ const CoordinatorPortal = () => {
         }
 
         if (latestFile && latestFile.length > 0) {
-          // Set the last update date
           const lastFile = latestFile[0];
           setLastUpdateDate(new Date(lastFile.uploaded_at).toLocaleString());
           
           console.log('Archivo Excel encontrado:', lastFile);
           
-          // TODO: In a real implementation, we would fetch the actual excel data
-          // For now, we're just acknowledging there was a previous upload
-          
-          toast.info("Datos Excel cargados", {
-            description: `Se encontró un archivo subido previamente con ${lastFile.records} registros.`,
+          toast.info("Datos Excel disponibles", {
+            description: `Se encontró un archivo subido previamente con ${lastFile.records || 0} registros.`,
           });
         } else {
           console.log('No se encontraron archivos Excel previos');
         }
       } catch (error) {
         console.error('Error al cargar datos Excel:', error);
+        toast.error('Error al cargar datos Excel previos');
       }
     };
 
@@ -125,19 +119,17 @@ const CoordinatorPortal = () => {
         )}
       </div>
       
-      {/* Upload Modal */}
       {showUploadModal && (
         <ExcelUploadModal
           selectedFile={selectedFile}
           isUploading={isUploading}
           onClose={() => setShowUploadModal(false)}
-          onUpload={handleUpload}
+          onUpload={() => selectedFile && handleUpload(selectedFile, previewData)}
           onFileSelect={handleFileSelect}
           onShowDetailedPreview={handleShowDetailedPreview}
         />
       )}
       
-      {/* Detailed Excel Preview Modal */}
       {showPreviewModal && selectedFile && (
         <ExcelPreviewModal
           selectedFile={selectedFile}
@@ -147,7 +139,7 @@ const CoordinatorPortal = () => {
             setShowPreviewModal(false);
             setShowUploadModal(true);
           }}
-          onUpload={handleUpload}
+          onUpload={() => handleUpload(selectedFile, previewData)}
           onRemoveFile={handleRemoveFile}
         />
       )}
