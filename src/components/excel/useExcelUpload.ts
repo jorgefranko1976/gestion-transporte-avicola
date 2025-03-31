@@ -53,6 +53,9 @@ export const useExcelUpload = (): ExcelHook => {
     lastUpdateDate,
     handleFileSelect,
     handleUpload,
-    handleRemoveFile
+    handleRemoveFile,
+    // Add the missing properties to fix the TypeScript error
+    setExcelData,
+    setLastUpdateDate
   };
 };

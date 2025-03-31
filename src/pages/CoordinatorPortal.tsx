@@ -73,7 +73,7 @@ const CoordinatorPortal = () => {
     };
 
     fetchLatestExcelData();
-  }, []);
+  }, [setLastUpdateDate]);
 
   const handleShowDetailedPreview = () => {
     setShowUploadModal(false);
