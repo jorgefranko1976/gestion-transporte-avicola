@@ -18,6 +18,7 @@ export interface Dispatch {
   eta: Date | null;
   receiptImageUrl: string | null;
   createdAt: Date;
+  source?: 'database' | 'excel';  // Added source property
 }
 
 // Tipo para solicitud de creación de despacho
