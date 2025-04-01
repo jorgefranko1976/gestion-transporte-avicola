@@ -8,7 +8,7 @@ export interface ExcelDispatchEntry {
   orderId: string;
   vehiclePlate?: string;
   driver?: string;
-  driverId?: string; // Added this property to fix the TypeScript error
+  driverId?: string;
   destination: string;
   farm?: string;
   packages: number;
@@ -112,6 +112,7 @@ export function useDispatchData({ searchTerm, excelData }: UseDispatchDataProps)
       orderId: item.orden,
       vehiclePlate: item.placa || '',
       driver: item.conductor || '',
+      driverId: item.conductorId || '', // Make sure driverId is also mapped from excel data
       destination: item.planta || item.destino || '',
       farm: item.granja || '',
       packages: parseInt(item.cantidad) || 0,
