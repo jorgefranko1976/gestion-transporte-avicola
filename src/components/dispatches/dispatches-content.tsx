@@ -1,16 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Filter, Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DispatchesList from "./DispatchesList";
 import DispatchForm from "./DispatchForm";
 
 interface DispatchesContentProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  excelData: any[]; // Agregar datos de Excel
+  excelData: any[]; // Datos de Excel
 }
 
 export const DispatchesContent = ({ 
@@ -19,6 +18,10 @@ export const DispatchesContent = ({
   excelData
 }: DispatchesContentProps) => {
   const [activeTab, setActiveTab] = useState<"list" | "create">("list");
+  
+  useEffect(() => {
+    console.log("DispatchesContent received Excel data:", excelData);
+  }, [excelData]);
 
   return (
     <div className="p-6">
@@ -26,7 +29,7 @@ export const DispatchesContent = ({
         <div>
           <h2 className="text-xl font-semibold">Gestión de Despachos</h2>
           <p className="text-sm text-muted-foreground">
-            Monitoreo y control de despachos en tiempo real
+            Monitoreo y control de despachos en tiempo real {excelData.length > 0 ? `(${excelData.length} registros desde Excel)` : ''}
           </p>
         </div>
         

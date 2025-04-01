@@ -106,13 +106,15 @@ export function useDispatchData({ searchTerm, excelData }: UseDispatchDataProps)
   
   // Combine database and Excel data
   useEffect(() => {
+    console.log("Excel data received:", excelData);
+    
     // Convert Excel data to the appropriate format
     const excelDispatches: ExcelDispatchEntry[] = excelData.map(item => ({
       id: item.id || `excel-${item.orden}`,
       orderId: item.orden,
       vehiclePlate: item.placa || '',
       driver: item.conductor || '',
-      driverId: item.conductorId || '', // Make sure driverId is also mapped from excel data
+      driverId: item.conductorId || '',
       destination: item.planta || item.destino || '',
       farm: item.granja || '',
       packages: parseInt(item.cantidad) || 0,
@@ -123,6 +125,8 @@ export function useDispatchData({ searchTerm, excelData }: UseDispatchDataProps)
       loadingCompany: item.ubicacion || '',
       source: 'excel'
     }));
+    
+    console.log("Formatted excel dispatches:", excelDispatches);
     
     // Combine both data sources
     const combined = [...dispatches, ...excelDispatches];
@@ -136,7 +140,10 @@ export function useDispatchData({ searchTerm, excelData }: UseDispatchDataProps)
       }
     });
     
-    setCombinedData(Array.from(uniqueMap.values()));
+    const uniqueData = Array.from(uniqueMap.values());
+    console.log("Combined unique data:", uniqueData);
+    
+    setCombinedData(uniqueData);
   }, [dispatches, excelData]);
   
   // Filter dispatches based on search term

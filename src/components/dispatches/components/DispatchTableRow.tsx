@@ -21,9 +21,9 @@ export const DispatchTableRow = ({ dispatch }: DispatchTableRowProps) => {
       <TableCell>
         {dispatch.createdAt && format(new Date(dispatch.createdAt), 'dd MMM yyyy', { locale: es })}
       </TableCell>
-      <TableCell>{dispatch.loadingCompany}</TableCell>
+      <TableCell>{dispatch.loadingCompany || 'No especificado'}</TableCell>
       <TableCell>{dispatch.destination}</TableCell>
-      <TableCell>{dispatch.farm}</TableCell>
+      <TableCell>{dispatch.farm || 'No especificado'}</TableCell>
       <TableCell>{dispatch.vehiclePlate || 'No asignado'}</TableCell>
       <TableCell>
         {'driver' in dispatch 
