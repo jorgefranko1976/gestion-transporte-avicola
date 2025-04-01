@@ -8,6 +8,7 @@ export interface ExcelDispatchEntry {
   orderId: string;
   vehiclePlate?: string;
   driver?: string;
+  driverId?: string; // Added this property to fix the TypeScript error
   destination: string;
   farm?: string;
   packages: number;
