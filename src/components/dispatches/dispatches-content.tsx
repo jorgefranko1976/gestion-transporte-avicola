@@ -10,11 +10,13 @@ import DispatchForm from "./DispatchForm";
 interface DispatchesContentProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+  excelData: any[]; // Agregar datos de Excel
 }
 
 export const DispatchesContent = ({ 
   searchTerm, 
-  setSearchTerm 
+  setSearchTerm,
+  excelData
 }: DispatchesContentProps) => {
   const [activeTab, setActiveTab] = useState<"list" | "create">("list");
 
@@ -58,7 +60,7 @@ export const DispatchesContent = ({
       
       <div className="mt-6">
         {activeTab === "list" ? (
-          <DispatchesList searchTerm={searchTerm} />
+          <DispatchesList searchTerm={searchTerm} excelData={excelData} />
         ) : (
           <DispatchForm />
         )}

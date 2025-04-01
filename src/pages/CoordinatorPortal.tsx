@@ -101,7 +101,8 @@ const CoordinatorPortal = () => {
         {activeTab === 'despachos' && (
           <DispatchesContent 
             searchTerm={searchTerm} 
-            setSearchTerm={setSearchTerm} 
+            setSearchTerm={setSearchTerm}
+            excelData={excelData}
           />
         )}
 

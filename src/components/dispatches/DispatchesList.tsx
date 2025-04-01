@@ -15,15 +15,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Package, Truck } from "lucide-react";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface DispatchesListProps {
   searchTerm: string;
+  excelData: any[]; // Agregar datos de Excel
 }
 
-const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
+const DispatchesList = ({ searchTerm, excelData }: DispatchesListProps) => {
   const [dispatches, setDispatches] = useState<Dispatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [combinedData, setCombinedData] = useState<any[]>([]);
   
   useEffect(() => {
     const fetchDispatches = async () => {
@@ -81,7 +84,8 @@ const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
           completedAt: d.completed_at ? new Date(d.completed_at) : null,
           eta: d.eta ? new Date(d.eta) : null,
           receiptImageUrl: d.receipt_image_url,
-          createdAt: new Date(d.created_at)
+          createdAt: new Date(d.created_at),
+          source: 'database'
         }));
         
         setDispatches(formattedDispatches);
@@ -96,35 +100,84 @@ const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
     fetchDispatches();
   }, []);
   
+  // Combinar datos de Excel y de la base de datos
+  useEffect(() => {
+    // Convertir datos de Excel al formato adecuado
+    const excelDispatches = excelData.map(item => ({
+      id: item.id || `excel-${item.orden}`,
+      orderId: item.orden,
+      vehiclePlate: item.placa || '',
+      driver: item.conductor || '',
+      destination: item.planta || item.destino || '',
+      farm: item.granja || '',
+      packages: parseInt(item.cantidad) || 0,
+      status: item.estado || 'pendiente',
+      eta: item.horaEstimada || null,
+      createdAt: new Date(),
+      concentrateAmount: item.ton || item.toneladas || 0,
+      loadingCompany: item.ubicacion || '',
+      source: 'excel'
+    }));
+    
+    // Combinar ambas fuentes de datos
+    const combined = [...dispatches, ...excelDispatches];
+    
+    // Eliminar duplicados basados en orderId
+    const uniqueMap = new Map();
+    combined.forEach(item => {
+      // Si existe un registro de base de datos, priorizar ese sobre el de Excel
+      if (!uniqueMap.has(item.orderId) || item.source === 'database') {
+        uniqueMap.set(item.orderId, item);
+      }
+    });
+    
+    setCombinedData(Array.from(uniqueMap.values()));
+  }, [dispatches, excelData]);
+  
   // Filtrar despachos según término de búsqueda
-  const filteredDispatches = dispatches.filter(dispatch => 
-    dispatch.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    dispatch.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    dispatch.farm.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    dispatch.vehiclePlate.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDispatches = combinedData.filter(dispatch => 
+    dispatch.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    dispatch.destination?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    dispatch.farm?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    dispatch.vehiclePlate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    dispatch.driver?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    dispatch.loadingCompany?.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   // Generar badge de estado
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
+      case 'pendiente':
         return <Badge variant="outline">Pendiente</Badge>;
       case 'accepted':
+      case 'aceptado':
         return <Badge variant="secondary">Aceptado</Badge>;
       case 'in_progress':
+      case 'en ruta':
+      case 'en_ruta':
         return <Badge variant="secondary">En progreso</Badge>;
       case 'delayed':
+      case 'demorado':
         return <Badge variant="destructive">Demorado</Badge>;
       case 'completed':
+      case 'completado':
         return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200">Completado</Badge>;
       case 'cancelled':
+      case 'cancelado':
         return <Badge variant="destructive">Cancelado</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <StatusBadge status={status} />;
     }
   };
   
-  if (isLoading) {
+  const getDataSourceBadge = (source: string) => {
+    return source === 'excel' 
+      ? <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Excel</Badge>
+      : <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Sistema</Badge>;
+  };
+  
+  if (isLoading && excelData.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-pulse flex flex-col items-center">
@@ -135,7 +188,7 @@ const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
     );
   }
   
-  if (error) {
+  if (error && excelData.length === 0) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
@@ -147,13 +200,13 @@ const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
     );
   }
   
-  if (dispatches.length === 0) {
+  if (combinedData.length === 0) {
     return (
       <div className="text-center py-10 border rounded-md">
         <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
         <h3 className="text-lg font-medium">No hay despachos</h3>
         <p className="text-muted-foreground">
-          Aún no se han creado despachos en el sistema
+          Aún no se han creado despachos en el sistema ni se han cargado datos de Excel
         </p>
       </div>
     );
@@ -164,13 +217,15 @@ const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Origen</TableHead>
             <TableHead>Orden</TableHead>
             <TableHead>Fecha</TableHead>
             <TableHead>Origen</TableHead>
             <TableHead>Destino</TableHead>
             <TableHead>Granja</TableHead>
             <TableHead>Vehículo</TableHead>
-            <TableHead>Paquetes</TableHead>
+            <TableHead>Conductor</TableHead>
+            <TableHead>Cantidad</TableHead>
             <TableHead>Estado</TableHead>
           </TableRow>
         </TableHeader>
@@ -178,19 +233,23 @@ const DispatchesList = ({ searchTerm }: DispatchesListProps) => {
           {filteredDispatches.length > 0 ? (
             filteredDispatches.map(dispatch => (
               <TableRow key={dispatch.id} className="cursor-pointer hover:bg-muted/50">
+                <TableCell>{getDataSourceBadge(dispatch.source)}</TableCell>
                 <TableCell className="font-medium">{dispatch.orderId}</TableCell>
-                <TableCell>{format(dispatch.createdAt, 'dd MMM yyyy', { locale: es })}</TableCell>
+                <TableCell>
+                  {dispatch.createdAt && format(new Date(dispatch.createdAt), 'dd MMM yyyy', { locale: es })}
+                </TableCell>
                 <TableCell>{dispatch.loadingCompany}</TableCell>
                 <TableCell>{dispatch.destination}</TableCell>
                 <TableCell>{dispatch.farm}</TableCell>
                 <TableCell>{dispatch.vehiclePlate || 'No asignado'}</TableCell>
-                <TableCell>{dispatch.packages}</TableCell>
+                <TableCell>{dispatch.driver || dispatch.driverId || 'No asignado'}</TableCell>
+                <TableCell>{dispatch.packages || dispatch.concentrateAmount || 0}</TableCell>
                 <TableCell>{getStatusBadge(dispatch.status)}</TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+              <TableCell colSpan={10} className="text-center py-6 text-muted-foreground">
                 No se encontraron resultados para "{searchTerm}"
               </TableCell>
             </TableRow>
