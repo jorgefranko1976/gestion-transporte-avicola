@@ -1,7 +1,6 @@
 
-import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { LogOut, Menu, Truck, User, X, Wheat, Settings, AlertTriangle } from 'lucide-react';
+import { Menu, Truck, User, X, Wheat, Settings, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -10,7 +9,6 @@ interface NavbarProps {
 }
 
 export const Navbar = ({ className }: NavbarProps) => {
-  const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -80,46 +78,13 @@ export const Navbar = ({ className }: NavbarProps) => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
-          {user ? (
-            <>
-              {user.role === 'driver' && (
-                <NavLink to="/driver" icon={<User className="w-4 h-4" />}>Panel de Conductor</NavLink>
-              )}
-              
-              {user.role === 'coordinator' && (
-                <>
-                  <NavLink to="/coordinator" icon={<User className="w-4 h-4" />}>Panel de Coordinador</NavLink>
-                  <NavLink to="/vehicles" icon={<Truck className="w-4 h-4" />}>Vehículos</NavLink>
-                  <NavLink to="/farms" icon={<Wheat className="w-4 h-4" />}>Granjas</NavLink>
-                  <NavLink to="/drivers" icon={<User className="w-4 h-4" />}>Conductores</NavLink>
-                  <NavLink to="/pesv" icon={<AlertTriangle className="w-4 h-4" />}>PESV</NavLink>
-                  <NavLink to="/settings" icon={<Settings className="w-4 h-4" />}>Configuración</NavLink>
-                </>
-              )}
-              
-              <button
-                onClick={logout}
-                className="ml-2 px-3 py-2 text-sm rounded-lg text-muted-foreground transition-all duration-300 ease-apple hover:bg-muted flex items-center gap-1.5"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Salir</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <NavLink to="/login">Iniciar Sesión</NavLink>
-              <Link 
-                to="/login" 
-                className="ml-2 px-4 py-2 text-sm bg-primary text-white rounded-lg transition-all duration-300 ease-apple hover:bg-primary/90 btn-hover focus-ring"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/login');
-                }}
-              >
-                Comenzar
-              </Link>
-            </>
-          )}
+          <NavLink to="/driver" icon={<User className="w-4 h-4" />}>Panel de Conductor</NavLink>
+          <NavLink to="/coordinator" icon={<User className="w-4 h-4" />}>Panel de Coordinador</NavLink>
+          <NavLink to="/vehicles" icon={<Truck className="w-4 h-4" />}>Vehículos</NavLink>
+          <NavLink to="/farms" icon={<Wheat className="w-4 h-4" />}>Granjas</NavLink>
+          <NavLink to="/drivers" icon={<User className="w-4 h-4" />}>Conductores</NavLink>
+          <NavLink to="/pesv" icon={<AlertTriangle className="w-4 h-4" />}>PESV</NavLink>
+          <NavLink to="/settings" icon={<Settings className="w-4 h-4" />}>Configuración</NavLink>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -168,149 +133,96 @@ export const Navbar = ({ className }: NavbarProps) => {
             </div>
 
             <nav className="flex flex-col space-y-4">
-              {user ? (
-                <>
-                  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg mb-2">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <User className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {user.role === 'coordinator' ? 'Coordinador' : 'Conductor'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {user.role === 'driver' && (
-                    <Link 
-                      to="/driver" 
-                      className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate('/driver');
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      <User className="w-4 h-4" />
-                      <span>Panel de Conductor</span>
-                    </Link>
-                  )}
-                  
-                  {user.role === 'coordinator' && (
-                    <>
-                      <Link 
-                        to="/coordinator" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate('/coordinator');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <User className="w-4 h-4" />
-                        <span>Panel de Coordinador</span>
-                      </Link>
-                      <Link 
-                        to="/vehicles" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate('/vehicles');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <Truck className="w-4 h-4" />
-                        <span>Vehículos</span>
-                      </Link>
-                      <Link 
-                        to="/farms" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate('/farms');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <Wheat className="w-4 h-4" />
-                        <span>Granjas</span>
-                      </Link>
-                      <Link 
-                        to="/drivers" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate('/drivers');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <User className="w-4 h-4" />
-                        <span>Conductores</span>
-                      </Link>
-                      <Link 
-                        to="/pesv" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate('/pesv');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>PESV</span>
-                      </Link>
-                      <Link 
-                        to="/settings" 
-                        className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate('/settings');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <Settings className="w-4 h-4" />
-                        <span>Configuración</span>
-                      </Link>
-                    </>
-                  )}
-                  
-                  <button
-                    onClick={() => {
-                      logout();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="mt-2 px-3 py-2.5 text-sm rounded-lg text-muted-foreground hover:bg-muted transition-colors flex items-center gap-2"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Cerrar Sesión</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link 
-                    to="/login" 
-                    className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate('/login');
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    Iniciar Sesión
-                  </Link>
-                  <Link 
-                    to="/login" 
-                    className="px-3 py-2.5 text-sm bg-primary text-white rounded-lg transition-colors hover:bg-primary/90"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate('/login');
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    Comenzar
-                  </Link>
-                </>
-              )}
+              <Link 
+                to="/driver" 
+                className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/driver');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <User className="w-4 h-4" />
+                <span>Panel de Conductor</span>
+              </Link>
+              
+              <Link 
+                to="/coordinator" 
+                className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/coordinator');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <User className="w-4 h-4" />
+                <span>Panel de Coordinador</span>
+              </Link>
+              
+              <Link 
+                to="/vehicles" 
+                className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/vehicles');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Truck className="w-4 h-4" />
+                <span>Vehículos</span>
+              </Link>
+              
+              <Link 
+                to="/farms" 
+                className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/farms');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Wheat className="w-4 h-4" />
+                <span>Granjas</span>
+              </Link>
+              
+              <Link 
+                to="/drivers" 
+                className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/drivers');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <User className="w-4 h-4" />
+                <span>Conductores</span>
+              </Link>
+              
+              <Link 
+                to="/pesv" 
+                className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/pesv');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <AlertTriangle className="w-4 h-4" />
+                <span>PESV</span>
+              </Link>
+              
+              <Link 
+                to="/settings" 
+                className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/settings');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Settings className="w-4 h-4" />
+                <span>Configuración</span>
+              </Link>
             </nav>
           </div>
         </div>

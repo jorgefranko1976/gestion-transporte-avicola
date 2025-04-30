@@ -4,8 +4,11 @@ import { Hero } from '@/components/Hero';
 import { FeatureCard } from '@/components/FeatureCard';
 import { Navbar } from '@/components/Navbar';
 import PageTransition from '@/components/transitions/PageTransition';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -75,12 +78,12 @@ const Index = () => {
                 <p className="text-muted-foreground mb-8">
                   Diseñado específicamente para empresas de transporte en Colombia, nuestra aplicación agiliza la comunicación entre coordinadores y conductores.
                 </p>
-                <a 
-                  href="/login" 
+                <button 
+                  onClick={() => navigate('/coordinator')}
                   className="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ease-apple hover:-translate-y-0.5 active:translate-y-0 btn-hover focus-ring"
                 >
                   Comenzar ahora
-                </a>
+                </button>
               </div>
             </PageTransition>
           </div>
