@@ -1,9 +1,9 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GeneralSettings } from "@/components/settings/GeneralSettings";
-import { UsersSettings } from "@/components/settings/user-management/UsersSettings";
-import { BreedsSettings } from "@/components/settings/BreedsSettings";
-import { GrowthProfilesSettings } from "@/components/settings/GrowthProfilesSettings";
+import GeneralSettings from "@/components/settings/GeneralSettings";
+import UsersSettings from "@/components/settings/user-management/UsersSettings";
+import BreedsSettings from "@/components/settings/BreedsSettings";
+import GrowthProfilesSettings from "@/components/settings/GrowthProfilesSettings";
 import { DatabaseConnectionCheck } from "@/components/ui/database-connection-check";
 
 const Settings = () => {
