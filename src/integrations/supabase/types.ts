@@ -9,114 +9,271 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bird_entries: {
+        Row: {
+          breed: string
+          created_at: string
+          created_by: string
+          cycle_id: string
+          entry_date: string
+          farm_id: string
+          id: string
+          notes: string | null
+          quantity: number
+          shed_number: number
+        }
+        Insert: {
+          breed: string
+          created_at?: string
+          created_by: string
+          cycle_id: string
+          entry_date: string
+          farm_id: string
+          id?: string
+          notes?: string | null
+          quantity: number
+          shed_number: number
+        }
+        Update: {
+          breed?: string
+          created_at?: string
+          created_by?: string
+          cycle_id?: string
+          entry_date?: string
+          farm_id?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          shed_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bird_entries_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "production_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bird_entries_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_consumption: {
+        Row: {
+          amount_per_bird: number
+          created_at: string
+          day: number
+          expected_weight: number | null
+          id: string
+          profile_id: string
+          updated_at: string
+          water_per_bird: number | null
+        }
+        Insert: {
+          amount_per_bird: number
+          created_at?: string
+          day: number
+          expected_weight?: number | null
+          id?: string
+          profile_id: string
+          updated_at?: string
+          water_per_bird?: number | null
+        }
+        Update: {
+          amount_per_bird?: number
+          created_at?: string
+          day?: number
+          expected_weight?: number | null
+          id?: string
+          profile_id?: string
+          updated_at?: string
+          water_per_bird?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_consumption_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "growth_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_records: {
+        Row: {
+          actual_consumption: number
+          actual_water_consumption: number | null
+          bird_count: number
+          bird_weight: number | null
+          concentrate_received: number
+          created_at: string
+          cycle_id: string
+          date: string
+          day: number
+          expected_consumption: number
+          expected_water_consumption: number | null
+          id: string
+          mortality: number
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_consumption: number
+          actual_water_consumption?: number | null
+          bird_count: number
+          bird_weight?: number | null
+          concentrate_received?: number
+          created_at?: string
+          cycle_id: string
+          date: string
+          day: number
+          expected_consumption: number
+          expected_water_consumption?: number | null
+          id?: string
+          mortality: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_consumption?: number
+          actual_water_consumption?: number | null
+          bird_count?: number
+          bird_weight?: number | null
+          concentrate_received?: number
+          created_at?: string
+          cycle_id?: string
+          date?: string
+          day?: number
+          expected_consumption?: number
+          expected_water_consumption?: number | null
+          id?: string
+          mortality?: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_records_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "production_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dispatches: {
         Row: {
           accepted_at: string | null
+          bird_count: number | null
           completed_at: string | null
           concentrate_amount: number | null
-          created_at: string | null
-          created_by: string | null
+          concentrate_type: string | null
+          created_at: string
+          days_delayed: number | null
           destination: string
+          dispatch_type: string
           driver_id: string | null
           eta: string | null
-          farm: string | null
           farm_id: string | null
+          farm_name: string | null
+          feed_type: string | null
           id: string
-          loading_company: string | null
-          observations: string | null
+          loading_company: string
+          modified_by: string | null
+          modified_reason: string | null
           order_id: string
-          packages: number | null
+          packages: number
           receipt_image_url: string | null
-          status: string | null
+          status: string
+          updated_at: string
           vehicle_plate: string | null
           zone: string | null
         }
         Insert: {
           accepted_at?: string | null
+          bird_count?: number | null
           completed_at?: string | null
           concentrate_amount?: number | null
-          created_at?: string | null
-          created_by?: string | null
+          concentrate_type?: string | null
+          created_at?: string
+          days_delayed?: number | null
           destination: string
+          dispatch_type: string
           driver_id?: string | null
           eta?: string | null
-          farm?: string | null
           farm_id?: string | null
+          farm_name?: string | null
+          feed_type?: string | null
           id?: string
-          loading_company?: string | null
-          observations?: string | null
+          loading_company: string
+          modified_by?: string | null
+          modified_reason?: string | null
           order_id: string
-          packages?: number | null
+          packages: number
           receipt_image_url?: string | null
-          status?: string | null
+          status: string
+          updated_at?: string
           vehicle_plate?: string | null
           zone?: string | null
         }
         Update: {
           accepted_at?: string | null
+          bird_count?: number | null
           completed_at?: string | null
           concentrate_amount?: number | null
-          created_at?: string | null
-          created_by?: string | null
+          concentrate_type?: string | null
+          created_at?: string
+          days_delayed?: number | null
           destination?: string
+          dispatch_type?: string
           driver_id?: string | null
           eta?: string | null
-          farm?: string | null
           farm_id?: string | null
+          farm_name?: string | null
+          feed_type?: string | null
           id?: string
-          loading_company?: string | null
-          observations?: string | null
+          loading_company?: string
+          modified_by?: string | null
+          modified_reason?: string | null
           order_id?: string
-          packages?: number | null
+          packages?: number
           receipt_image_url?: string | null
-          status?: string | null
+          status?: string
+          updated_at?: string
           vehicle_plate?: string | null
           zone?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "dispatches_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dispatches_vehicle_plate_fkey"
-            columns: ["vehicle_plate"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["plate"]
-          },
-        ]
+        Relationships: []
       }
       driver_documents: {
         Row: {
-          created_at: string | null
+          created_at: string
           document_type: string
           document_url: string
-          driver_id: string | null
-          expiry_date: string | null
+          driver_id: string
           id: string
-          issue_date: string | null
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           document_type: string
           document_url: string
-          driver_id?: string | null
-          expiry_date?: string | null
+          driver_id: string
           id?: string
-          issue_date?: string | null
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           document_type?: string
           document_url?: string
-          driver_id?: string | null
-          expiry_date?: string | null
+          driver_id?: string
           id?: string
-          issue_date?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -131,27 +288,30 @@ export type Database = {
       driver_observations: {
         Row: {
           content: string
-          created_at: string | null
-          created_by: string | null
+          created_at: string
+          date: string
           document_url: string | null
-          driver_id: string | null
+          driver_id: string
           id: string
+          updated_at: string
         }
         Insert: {
           content: string
-          created_at?: string | null
-          created_by?: string | null
+          created_at?: string
+          date?: string
           document_url?: string | null
-          driver_id?: string | null
+          driver_id: string
           id?: string
+          updated_at?: string
         }
         Update: {
           content?: string
-          created_at?: string | null
-          created_by?: string | null
+          created_at?: string
+          date?: string
           document_url?: string | null
-          driver_id?: string | null
+          driver_id?: string
           id?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -165,12 +325,12 @@ export type Database = {
       }
       drivers: {
         Row: {
-          active: boolean | null
-          address: string | null
+          active: boolean
+          address: string
           assigned_vehicle_id: string | null
-          birth_date: string | null
-          created_at: string | null
-          emergency_contact: string | null
+          birth_date: string
+          created_at: string
+          emergency_contact: string
           first_name: string
           hire_date: string
           id: string
@@ -178,33 +338,35 @@ export type Database = {
           identification_type: string
           last_name: string
           license_expiration: string | null
-          phone: string | null
+          phone: string
           termination_date: string | null
+          updated_at: string
         }
         Insert: {
-          active?: boolean | null
-          address?: string | null
+          active?: boolean
+          address: string
           assigned_vehicle_id?: string | null
-          birth_date?: string | null
-          created_at?: string | null
-          emergency_contact?: string | null
+          birth_date: string
+          created_at?: string
+          emergency_contact: string
           first_name: string
-          hire_date: string
+          hire_date?: string
           id?: string
           identification_number: string
           identification_type: string
           last_name: string
           license_expiration?: string | null
-          phone?: string | null
+          phone: string
           termination_date?: string | null
+          updated_at?: string
         }
         Update: {
-          active?: boolean | null
-          address?: string | null
+          active?: boolean
+          address?: string
           assigned_vehicle_id?: string | null
-          birth_date?: string | null
-          created_at?: string | null
-          emergency_contact?: string | null
+          birth_date?: string
+          created_at?: string
+          emergency_contact?: string
           first_name?: string
           hire_date?: string
           id?: string
@@ -212,8 +374,9 @@ export type Database = {
           identification_type?: string
           last_name?: string
           license_expiration?: string | null
-          phone?: string | null
+          phone?: string
           termination_date?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -225,132 +388,150 @@ export type Database = {
           },
         ]
       }
-      excel_files: {
+      farms: {
         Row: {
-          engorde_count: number | null
-          file_url: string
+          active: boolean
+          chicken_capacity: number
+          concentrate_capacity: number
+          contact_person: string
+          contact_phone: string
+          created_at: string
+          department: string
           id: string
+          internal_id: string
+          min_concentrate_reserve: number | null
           name: string
-          records: number | null
-          repro_count: number | null
-          status: string | null
-          type: string
-          uploaded_at: string | null
-          uploaded_by: string | null
+          sheds_count: number
+          updated_at: string
+          water_source: string
+          zone: string
         }
         Insert: {
-          engorde_count?: number | null
-          file_url: string
+          active?: boolean
+          chicken_capacity: number
+          concentrate_capacity: number
+          contact_person: string
+          contact_phone: string
+          created_at?: string
+          department: string
           id?: string
+          internal_id: string
+          min_concentrate_reserve?: number | null
           name: string
-          records?: number | null
-          repro_count?: number | null
-          status?: string | null
-          type: string
-          uploaded_at?: string | null
-          uploaded_by?: string | null
+          sheds_count: number
+          updated_at?: string
+          water_source: string
+          zone: string
         }
         Update: {
-          engorde_count?: number | null
-          file_url?: string
+          active?: boolean
+          chicken_capacity?: number
+          concentrate_capacity?: number
+          contact_person?: string
+          contact_phone?: string
+          created_at?: string
+          department?: string
           id?: string
+          internal_id?: string
+          min_concentrate_reserve?: number | null
           name?: string
-          records?: number | null
-          repro_count?: number | null
-          status?: string | null
-          type?: string
-          uploaded_at?: string | null
-          uploaded_by?: string | null
+          sheds_count?: number
+          updated_at?: string
+          water_source?: string
+          zone?: string
         }
         Relationships: []
       }
-      farms: {
+      growth_profiles: {
         Row: {
-          address: string | null
-          capacity: number | null
-          city: string | null
-          contact_name: string | null
-          contact_phone: string | null
-          created_at: string | null
-          created_by: string | null
-          department: string | null
+          active: boolean
+          breed: string
+          created_at: string
           id: string
+          is_default: boolean
           name: string
-          status: string | null
+          sex: string
+          updated_at: string
         }
         Insert: {
-          address?: string | null
-          capacity?: number | null
-          city?: string | null
-          contact_name?: string | null
-          contact_phone?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          department?: string | null
+          active?: boolean
+          breed: string
+          created_at?: string
           id?: string
+          is_default?: boolean
           name: string
-          status?: string | null
+          sex: string
+          updated_at?: string
         }
         Update: {
-          address?: string | null
-          capacity?: number | null
-          city?: string | null
-          contact_name?: string | null
-          contact_phone?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          department?: string | null
+          active?: boolean
+          breed?: string
+          created_at?: string
           id?: string
+          is_default?: boolean
           name?: string
-          status?: string | null
+          sex?: string
+          updated_at?: string
         }
         Relationships: []
       }
       production_cycles: {
         Row: {
-          bird_sex: string | null
-          bird_type: string
-          created_at: string | null
-          created_by: string | null
-          current_bird_count: number | null
+          breed: string
+          concentrate_reserve: number
+          created_at: string
+          current_bird_count: number
           end_date: string | null
-          farm_id: string | null
-          growth_profile_id: string | null
+          estimated_end_date: string
+          farm_id: string
+          growth_profile_id: string
           id: string
           initial_bird_count: number
           notes: string | null
+          sex: string
           start_date: string
-          status: string | null
+          status: string
+          total_concentrate_consumed: number
+          total_concentrate_received: number
+          updated_at: string
         }
         Insert: {
-          bird_sex?: string | null
-          bird_type: string
-          created_at?: string | null
-          created_by?: string | null
-          current_bird_count?: number | null
+          breed: string
+          concentrate_reserve?: number
+          created_at?: string
+          current_bird_count: number
           end_date?: string | null
-          farm_id?: string | null
-          growth_profile_id?: string | null
+          estimated_end_date: string
+          farm_id: string
+          growth_profile_id: string
           id?: string
           initial_bird_count: number
           notes?: string | null
+          sex: string
           start_date: string
-          status?: string | null
+          status: string
+          total_concentrate_consumed?: number
+          total_concentrate_received?: number
+          updated_at?: string
         }
         Update: {
-          bird_sex?: string | null
-          bird_type?: string
-          created_at?: string | null
-          created_by?: string | null
-          current_bird_count?: number | null
+          breed?: string
+          concentrate_reserve?: number
+          created_at?: string
+          current_bird_count?: number
           end_date?: string | null
-          farm_id?: string | null
-          growth_profile_id?: string | null
+          estimated_end_date?: string
+          farm_id?: string
+          growth_profile_id?: string
           id?: string
           initial_bird_count?: number
           notes?: string | null
+          sex?: string
           start_date?: string
-          status?: string | null
+          status?: string
+          total_concentrate_consumed?: number
+          total_concentrate_received?: number
+          updated_at?: string
         }
         Relationships: [
           {
@@ -362,72 +543,117 @@ export type Database = {
           },
         ]
       }
+      uploaded_files: {
+        Row: {
+          engorde_count: number | null
+          file_url: string | null
+          id: string
+          name: string
+          preview_url: string | null
+          records: number | null
+          repro_count: number | null
+          status: string
+          type: string
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          engorde_count?: number | null
+          file_url?: string | null
+          id?: string
+          name: string
+          preview_url?: string | null
+          records?: number | null
+          repro_count?: number | null
+          status: string
+          type: string
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          engorde_count?: number | null
+          file_url?: string | null
+          id?: string
+          name?: string
+          preview_url?: string | null
+          records?: number | null
+          repro_count?: number | null
+          status?: string
+          type?: string
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
-          active: boolean | null
-          created_at: string | null
+          active: boolean
+          created_at: string
           email: string | null
           first_name: string
           id: string
-          identification_number: string | null
-          identification_type: string | null
+          identification_number: string
+          identification_type: string
           last_name: string
           phone: string | null
           role: string
+          updated_at: string
         }
         Insert: {
-          active?: boolean | null
-          created_at?: string | null
+          active?: boolean
+          created_at?: string
           email?: string | null
           first_name: string
           id: string
-          identification_number?: string | null
-          identification_type?: string | null
+          identification_number: string
+          identification_type: string
           last_name: string
           phone?: string | null
-          role?: string
+          role: string
+          updated_at?: string
         }
         Update: {
-          active?: boolean | null
-          created_at?: string | null
+          active?: boolean
+          created_at?: string
           email?: string | null
           first_name?: string
           id?: string
-          identification_number?: string | null
-          identification_type?: string | null
+          identification_number?: string
+          identification_type?: string
           last_name?: string
           phone?: string | null
           role?: string
+          updated_at?: string
         }
         Relationships: []
       }
       vehicle_documents: {
         Row: {
-          created_at: string | null
+          created_at: string
           document_type: string
           document_url: string
-          expiry_date: string | null
+          expiration_date: string | null
           id: string
-          issue_date: string | null
-          vehicle_id: string | null
+          updated_at: string
+          vehicle_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           document_type: string
           document_url: string
-          expiry_date?: string | null
+          expiration_date?: string | null
           id?: string
-          issue_date?: string | null
-          vehicle_id?: string | null
+          updated_at?: string
+          vehicle_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           document_type?: string
           document_url?: string
-          expiry_date?: string | null
+          expiration_date?: string | null
           id?: string
-          issue_date?: string | null
-          vehicle_id?: string | null
+          updated_at?: string
+          vehicle_id?: string
         }
         Relationships: [
           {
@@ -441,58 +667,55 @@ export type Database = {
       }
       vehicle_inspections: {
         Row: {
-          brakes_ok: boolean | null
-          created_at: string | null
-          created_by: string | null
-          driver_id: string | null
+          brakes_ok: boolean
+          created_at: string
+          driver_id: string
           id: string
-          inspection_date: string | null
-          kit_ok: boolean | null
+          inspection_date: string
+          kit_ok: boolean
           kit_photo_url: string | null
-          lights_ok: boolean | null
-          mirrors_ok: boolean | null
+          lights_ok: boolean
+          mirrors_ok: boolean
           observations: string | null
-          oil_ok: boolean | null
+          oil_ok: boolean
           tire_photo_url: string | null
-          tires_ok: boolean | null
-          vehicle_id: string | null
-          water_ok: boolean | null
+          tires_ok: boolean
+          vehicle_id: string
+          water_ok: boolean
         }
         Insert: {
-          brakes_ok?: boolean | null
-          created_at?: string | null
-          created_by?: string | null
-          driver_id?: string | null
+          brakes_ok: boolean
+          created_at?: string
+          driver_id: string
           id?: string
-          inspection_date?: string | null
-          kit_ok?: boolean | null
+          inspection_date?: string
+          kit_ok: boolean
           kit_photo_url?: string | null
-          lights_ok?: boolean | null
-          mirrors_ok?: boolean | null
+          lights_ok: boolean
+          mirrors_ok: boolean
           observations?: string | null
-          oil_ok?: boolean | null
+          oil_ok: boolean
           tire_photo_url?: string | null
-          tires_ok?: boolean | null
-          vehicle_id?: string | null
-          water_ok?: boolean | null
+          tires_ok: boolean
+          vehicle_id: string
+          water_ok: boolean
         }
         Update: {
-          brakes_ok?: boolean | null
-          created_at?: string | null
-          created_by?: string | null
-          driver_id?: string | null
+          brakes_ok?: boolean
+          created_at?: string
+          driver_id?: string
           id?: string
-          inspection_date?: string | null
-          kit_ok?: boolean | null
+          inspection_date?: string
+          kit_ok?: boolean
           kit_photo_url?: string | null
-          lights_ok?: boolean | null
-          mirrors_ok?: boolean | null
+          lights_ok?: boolean
+          mirrors_ok?: boolean
           observations?: string | null
-          oil_ok?: boolean | null
+          oil_ok?: boolean
           tire_photo_url?: string | null
-          tires_ok?: boolean | null
-          vehicle_id?: string | null
-          water_ok?: boolean | null
+          tires_ok?: boolean
+          vehicle_id?: string
+          water_ok?: boolean
         }
         Relationships: [
           {
@@ -513,126 +736,145 @@ export type Database = {
       }
       vehicle_owners: {
         Row: {
-          active: boolean | null
           address: string | null
           city: string | null
-          created_at: string | null
+          created_at: string
           credit_amount: number | null
+          credit_end_date: string | null
           credit_term: number | null
+          email: string | null
+          first_name: string | null
           has_credit: boolean | null
           id: string
           identification_number: string
           identification_type: string
-          name: string
+          is_company: boolean
+          last_name: string | null
+          name: string | null
           phone: string | null
+          updated_at: string
         }
         Insert: {
-          active?: boolean | null
           address?: string | null
           city?: string | null
-          created_at?: string | null
+          created_at?: string
           credit_amount?: number | null
+          credit_end_date?: string | null
           credit_term?: number | null
+          email?: string | null
+          first_name?: string | null
           has_credit?: boolean | null
           id?: string
           identification_number: string
           identification_type: string
-          name: string
+          is_company?: boolean
+          last_name?: string | null
+          name?: string | null
           phone?: string | null
+          updated_at?: string
         }
         Update: {
-          active?: boolean | null
           address?: string | null
           city?: string | null
-          created_at?: string | null
+          created_at?: string
           credit_amount?: number | null
+          credit_end_date?: string | null
           credit_term?: number | null
+          email?: string | null
+          first_name?: string | null
           has_credit?: boolean | null
           id?: string
           identification_number?: string
           identification_type?: string
-          name?: string
+          is_company?: boolean
+          last_name?: string | null
+          name?: string | null
           phone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
       vehicles: {
         Row: {
-          active: boolean | null
+          active: boolean
           brand: string
-          chassis_number: string | null
-          color: string | null
-          created_at: string | null
-          engine_number: string | null
+          cargo_length: string
+          chassis_number: string
+          color: string
+          created_at: string
+          empty_weight: string
+          engine_number: string
           id: string
-          line: string | null
+          line: string
           model: string
           owner_id: string | null
+          pbv_runt: string
           plate: string
+          power: string
+          rc_policy_expiration: string | null
           soat_expiration: string | null
           status: string | null
           technical_inspection_expiration: string | null
+          updated_at: string
           vehicle_type: string
-          year: number | null
         }
         Insert: {
-          active?: boolean | null
+          active?: boolean
           brand: string
-          chassis_number?: string | null
-          color?: string | null
-          created_at?: string | null
-          engine_number?: string | null
+          cargo_length: string
+          chassis_number: string
+          color: string
+          created_at?: string
+          empty_weight: string
+          engine_number: string
           id?: string
-          line?: string | null
+          line: string
           model: string
           owner_id?: string | null
+          pbv_runt: string
           plate: string
+          power: string
+          rc_policy_expiration?: string | null
           soat_expiration?: string | null
           status?: string | null
           technical_inspection_expiration?: string | null
+          updated_at?: string
           vehicle_type: string
-          year?: number | null
         }
         Update: {
-          active?: boolean | null
+          active?: boolean
           brand?: string
-          chassis_number?: string | null
-          color?: string | null
-          created_at?: string | null
-          engine_number?: string | null
+          cargo_length?: string
+          chassis_number?: string
+          color?: string
+          created_at?: string
+          empty_weight?: string
+          engine_number?: string
           id?: string
-          line?: string | null
+          line?: string
           model?: string
           owner_id?: string | null
+          pbv_runt?: string
           plate?: string
+          power?: string
+          rc_policy_expiration?: string | null
           soat_expiration?: string | null
           status?: string | null
           technical_inspection_expiration?: string | null
+          updated_at?: string
           vehicle_type?: string
-          year?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "vehicles_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "vehicle_owners"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "coordinator" | "driver" | "owner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -640,27 +882,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -668,20 +912,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -689,20 +935,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -710,21 +958,23 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -733,6 +983,14 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      user_role: ["admin", "coordinator", "driver", "owner"],
+    },
+  },
+} as const
