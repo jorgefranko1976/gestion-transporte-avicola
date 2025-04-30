@@ -1,151 +1,76 @@
 
-import { useAuth } from '@/context/AuthContext';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { Outlet } from 'react-router-dom';
+import { CoordinatorHeader } from '@/components/coordinator/CoordinatorHeader';
+import { CoordinatorTabs } from '@/components/coordinator/CoordinatorTabs';
+import { PageTransition } from '@/components/transitions/PageTransition';
+import { useAuth } from '@/context/AuthContext';
 
-import DashboardContent from '@/components/dashboard/dashboard-content';
-import DispatchesContent from '@/components/dispatches/dispatches-content';
-import ExcelContent from '@/components/excel/excel-content';
-import ExcelPreviewModal from '@/components/excel/ExcelPreviewModal';
-import ExcelUploadModal from '@/components/excel/ExcelUploadModal';
-import CoordinatorHeader from '@/components/coordinator/CoordinatorHeader';
-import CoordinatorTabs from '@/components/coordinator/CoordinatorTabs';
-import { useExcelUpload } from '@/components/excel/useExcelUpload';
-import { PortalLayout } from '@/components/layout/PortalLayout';
+type Stats = {
+  totalDispatches: number;
+  pendingDispatches: number;
+  completedDispatches: number;
+  totalFiles: number;
+  activeDrivers: number;
+  activeVehicles: number;
+};
 
 const CoordinatorPortal = () => {
+  const [stats, setStats] = useState<Stats>({
+    totalDispatches: 0,
+    pendingDispatches: 0,
+    completedDispatches: 0,
+    totalFiles: 0,
+    activeDrivers: 0,
+    activeVehicles: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'despachos' | 'excel'>('dashboard');
-  const [activeDataType, setActiveDataType] = useState<'reproductora' | 'engorde'>('reproductora');
-  const [activeDispatchStatus, setActiveDispatchStatus] = useState<'todos' | 'pendiente' | 'en ruta' | 'completado' | 'demorado'>('todos');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-  
-  const {
-    showUploadModal,
-    setShowUploadModal,
-    selectedFile,
-    isUploading,
-    previewData,
-    excelData,
-    lastUpdateDate,
-    handleFileSelect,
-    handleUpload,
-    handleRemoveFile,
-    setExcelData,
-    setLastUpdateDate
-  } = useExcelUpload();
 
   useEffect(() => {
-    const fetchLatestExcelData = async () => {
-      if (!user) {
-        console.log('No hay usuario autenticado para cargar datos de Excel');
-        return;
-      }
-      
+    const fetchStats = async () => {
       try {
-        console.log('Buscando el archivo Excel más reciente...');
-        const { data: latestFile, error: fileError } = await supabase
-          .from('excel_files')
-          .select('*')
-          .order('uploaded_at', { ascending: false })
-          .limit(1);
+        const [dispatchesResult, pendingResult, completedResult, filesResult, driversResult, vehiclesResult] = 
+          await Promise.all([
+            supabase.from('dispatches').select('*', { count: 'exact', head: true }),
+            supabase.from('dispatches').select('*', { count: 'exact', head: true }).eq('status', 'pendiente'),
+            supabase.from('dispatches').select('*', { count: 'exact', head: true }).eq('status', 'completado'),
+            supabase.from('uploaded_files').select('*', { count: 'exact', head: true }),
+            supabase.from('drivers').select('*', { count: 'exact', head: true }).eq('active', true),
+            supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('active', true)
+          ]);
 
-        if (fileError) {
-          console.error('Error al buscar el archivo más reciente:', fileError);
-          return;
-        }
-
-        if (latestFile && latestFile.length > 0) {
-          const lastFile = latestFile[0];
-          setLastUpdateDate(new Date(lastFile.uploaded_at).toLocaleString());
-          
-          console.log('Archivo Excel encontrado:', lastFile);
-          
-          toast.info("Datos Excel disponibles", {
-            description: `Se encontró un archivo subido previamente con ${lastFile.records || 0} registros.`,
-          });
-        } else {
-          console.log('No se encontraron archivos Excel previos');
-        }
+        setStats({
+          totalDispatches: dispatchesResult.count || 0,
+          pendingDispatches: pendingResult.count || 0,
+          completedDispatches: completedResult.count || 0,
+          totalFiles: filesResult.count || 0,
+          activeDrivers: driversResult.count || 0,
+          activeVehicles: vehiclesResult.count || 0
+        });
       } catch (error) {
-        console.error('Error al cargar datos Excel:', error);
-        toast.error('Error al cargar datos Excel previos');
+        console.error('Error fetching stats:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchLatestExcelData();
-  }, [user, setLastUpdateDate]);
-
-  const handleShowDetailedPreview = () => {
-    setShowUploadModal(false);
-    setShowPreviewModal(true);
-  };
+    fetchStats();
+  }, []);
 
   return (
-    <PortalLayout title="Panel de Coordinador">
-      <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">
-        <CoordinatorTabs
-          activeTab={activeTab}
-          onChangeTab={setActiveTab}
-        />
-        
-        {activeTab === 'dashboard' && (
-          <DashboardContent 
-            setActiveTab={setActiveTab} 
-            setActiveDispatchStatus={setActiveDispatchStatus} 
-          />
-        )}
-        
-        {activeTab === 'despachos' && (
-          <DispatchesContent 
-            searchTerm={searchTerm} 
-            setSearchTerm={setSearchTerm}
-            excelData={excelData}
-          />
-        )}
-
-        {activeTab === 'excel' && (
-          <ExcelContent 
-            excelData={excelData}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            activeDataType={activeDataType}
-            setActiveDataType={setActiveDataType}
-            activeDispatchStatus={activeDispatchStatus}
-            setActiveDispatchStatus={setActiveDispatchStatus}
-            lastUpdateDate={lastUpdateDate}
-            onUploadClick={() => setShowUploadModal(true)}
-          />
-        )}
+    <PageTransition>
+      <div className="flex flex-col min-h-screen">
+        <CoordinatorHeader stats={stats} isLoading={isLoading} />
+        <div className="container mx-auto p-4 pb-16">
+          <CoordinatorTabs />
+          <div className="mt-4">
+            <Outlet />
+          </div>
+        </div>
       </div>
-      
-      {showUploadModal && (
-        <ExcelUploadModal
-          selectedFile={selectedFile}
-          isUploading={isUploading}
-          onClose={() => setShowUploadModal(false)}
-          onUpload={handleUpload}
-          onFileSelect={handleFileSelect}
-          onShowDetailedPreview={handleShowDetailedPreview}
-        />
-      )}
-      
-      {showPreviewModal && selectedFile && (
-        <ExcelPreviewModal
-          selectedFile={selectedFile}
-          previewData={previewData}
-          isUploading={isUploading}
-          onClose={() => {
-            setShowPreviewModal(false);
-            setShowUploadModal(true);
-          }}
-          onUpload={handleUpload}
-          onRemoveFile={handleRemoveFile}
-        />
-      )}
-    </PortalLayout>
+    </PageTransition>
   );
 };
 

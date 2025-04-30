@@ -48,7 +48,7 @@ export const useFileReports = () => {
     try {
       // Modified query - we need to get each part separately to avoid the join error
       const { data, error } = await supabase
-        .from('excel_files')
+        .from('uploaded_files')
         .select('*')
         .gte('uploaded_at', startDate.toISOString())
         .lte('uploaded_at', new Date(endDate.setHours(23, 59, 59)).toISOString())
