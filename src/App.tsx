@@ -16,6 +16,7 @@ import PESV from "./pages/PESV";
 import Reports from "./pages/Reports";
 import { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
+import DatabaseSetup from "./pages/database/DatabaseSetup";
 
 // Crear cliente de query
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/pesv" element={<PESV />} />
+            <Route path="/database-setup" element={<DatabaseSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

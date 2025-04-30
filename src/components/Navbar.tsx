@@ -1,6 +1,5 @@
-
 import { cn } from '@/lib/utils';
-import { Menu, Truck, User, X, Wheat, Settings, AlertTriangle } from 'lucide-react';
+import { Menu, Truck, User, X, Wheat, Settings, AlertTriangle, Database } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -85,6 +84,7 @@ export const Navbar = ({ className }: NavbarProps) => {
           <NavLink to="/drivers" icon={<User className="w-4 h-4" />}>Conductores</NavLink>
           <NavLink to="/pesv" icon={<AlertTriangle className="w-4 h-4" />}>PESV</NavLink>
           <NavLink to="/settings" icon={<Settings className="w-4 h-4" />}>Configuración</NavLink>
+          <NavLink to="/database-setup" icon={<Database className="w-4 h-4" />}>Base de Datos</NavLink>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -222,6 +222,19 @@ export const Navbar = ({ className }: NavbarProps) => {
               >
                 <Settings className="w-4 h-4" />
                 <span>Configuración</span>
+              </Link>
+              
+              <Link 
+                to="/database-setup" 
+                className="px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/database-setup');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Database className="w-4 h-4" />
+                <span>Base de Datos</span>
               </Link>
             </nav>
           </div>
