@@ -48,7 +48,7 @@ export function useDispatchData({ searchTerm, excelData }: UseDispatchDataProps)
             loading_company,
             destination,
             zone,
-            farm,
+            farm_name as farm,
             farm_id,
             packages,
             concentrate_amount,

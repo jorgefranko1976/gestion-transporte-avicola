@@ -22,7 +22,8 @@ export const useDispatchCreation = () => {
         packages: dispatch.packages,
         concentrate_amount: dispatch.concentrateAmount || null,
         eta: dispatch.eta ? dispatch.eta.toISOString() : null,
-        status: 'pending'
+        status: 'pending',
+        dispatch_type: 'concentrate' // Añadido campo requerido
       };
       
       // Insertar en Supabase
