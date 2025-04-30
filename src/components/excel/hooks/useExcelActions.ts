@@ -53,7 +53,7 @@ export const useExcelActions = (state: ExcelStateSetters) => {
       console.log('Guardando información del archivo con usuario:', user.id);
       
       const { data: fileData, error: fileError } = await supabase
-        .from('excel_files')
+        .from('uploaded_files')
         .insert({
           name: fileName,
           type: 'dispatch_data',

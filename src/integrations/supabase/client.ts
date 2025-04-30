@@ -11,6 +11,8 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Hostname: buoyantly-shipshape-sleeper.data-1.use1.tembo.io 
 // Puerto: 5432
 // Usuario: Postgres
+// Contraseña: Cx5a3MSqolfm7Oz3
+// Base de datos: SOFT_TRANSPORTE
 // Estas credenciales deben ser utilizadas para configurar una conexión directa a PostgreSQL
 // en una aplicación de administración de bases de datos como DBeaver, pgAdmin, etc.
 
