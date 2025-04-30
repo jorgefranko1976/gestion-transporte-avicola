@@ -2,8 +2,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Outlet } from 'react-router-dom';
-import { CoordinatorHeader } from '@/components/coordinator/CoordinatorHeader';
-import { CoordinatorTabs } from '@/components/coordinator/CoordinatorTabs';
+import CoordinatorHeader from '@/components/coordinator/CoordinatorHeader';
+import CoordinatorTabs from '@/components/coordinator/CoordinatorTabs';
 import { PageTransition } from '@/components/transitions/PageTransition';
 import { useAuth } from '@/context/AuthContext';
 
